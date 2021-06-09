@@ -16,20 +16,6 @@ conda env update --file environment.yml
 pip install --user -U mne-bids[full]
 ```
 
-## Download Example Dataset
-```
-cd /home/neuro
-mkdir lemon
-cd lemon
-curl --remote-name https://fcp-indi.s3.amazonaws.com/data/Projects/INDI/MPI-LEMON/Compressed_tar/EEG_MPILMBB_LEMON/EEG_Raw_BIDS_ID/sub-032301.tar.gz
-
-curl --remote-name https://fcp-indi.s3.amazonaws.com/data/Projects/INDI/MPI-LEMON/Compressed_tar/EEG_MPILMBB_LEMON/EEG_Raw_BIDS_ID/sub-032302.tar.gz
-
-curl --remote-name https://fcp-indi.s3.amazonaws.com/data/Projects/INDI/MPI-LEMON/Compressed_tar/EEG_MPILMBB_LEMON/EEG_Raw_BIDS_ID/sub-032303.tar.gz
-
-curl --remote-name https://fcp-indi.s3.amazonaws.com/data/Projects/INDI/MPI-LEMON/name_match.csv
-```
-
 ## Clone Repository
 ```bash
 git clone https://github.com/yjmantilla/sovabids.git
@@ -38,7 +24,7 @@ cd sovabids
 
 ## Prepare Example
 
-Decompresses the dataset and fixes a filename inconsistency (without this correction the file won't be able to be opened in mne)
+Downloads and decompresses the dataset,also fixes a filename inconsistency (without this correction the file won't be able to be opened in mne)
 
 Run lemon_prepare.py
 

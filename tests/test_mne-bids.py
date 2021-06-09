@@ -7,9 +7,12 @@ import json
 import yaml
 from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
 
-source_path = '/home/neuro/lemon'
-bids_root= '/home/neuro/lemon_bids'
+this_dir = os.path.dirname(__file__)
+data_dir = os.path.join(this_dir,'..','_data')
 
+source_path = os.path.abspath(os.path.join(data_dir,'lemon'))
+
+bids_root= os.path.abspath(os.path.join(data_dir,'lemon_bids'))
 
 # Generate all files
 def get_files(root_path):

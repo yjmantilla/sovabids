@@ -33,7 +33,7 @@ for f in filepaths:
 
     # Should we try to infer the line frequency automatically from the psd?
     raw.info['line_freq'] = 50  # specify power line frequency as required by BIDS
-
+    
     sub_id = os.path.splitext(ntpath.basename(f))[0].replace('sub-','') #this would be a rule
     bids_path = BIDSPath(subject=sub_id,task='resting',root=bids_root)
     write_raw_bids(raw, bids_path=bids_path,overwrite=True)

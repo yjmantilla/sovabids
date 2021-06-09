@@ -1,0 +1,5 @@
+{
+    "line_freq":50,
+    "retype_channel":{"VEOG":"EOG"},
+    "execute":["raw.set_channel_mapping({\"VEOG\":\"EOG\"})"]
+}

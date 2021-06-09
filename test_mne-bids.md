@@ -40,7 +40,7 @@ cd sovabids
 
 Decompresses the dataset and fixes a filename inconsistency (without this correction the file won't be able to be opened in mne)
 
-Run lemon_prepary.py
+Run lemon_prepare.py
 
 ## Perform Conversion
 

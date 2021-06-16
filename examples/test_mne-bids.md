@@ -346,6 +346,10 @@ The following dictionaries are not yet supported:
 
 This is because our priority is to have first the REQUIRED fields of BIDS. They will be done in the future.
 
+## The whole yaml file
+
+The whole yaml file can be found in examples\test_mne-bids_rules.yml
+
 ## Validation
 
 You should now be able to upload the dataset to assert if it is a valid bids dataset:

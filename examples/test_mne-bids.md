@@ -318,9 +318,13 @@ non-bids :
   code_execution : code
 ```
 
-eeg_extension just defines the extension of the eeg files we want to read, it could also not be in the dictionary, in which case the eeg files will be any from the following extensions: ['.set' ,'.cnt' ,'.vhdr' ,'.bdf' ,'.fif']. Notice it is preferable that you put the dot before the extension; the code should add it if you dont though.
+#### eeg_extension
 
-path_pattern is used to infer information from the path. Any of the fields from the previous dictionaries are supported as long they consist of a single simple value (anything that is a single number or string). The pattern is applied to every file that has the eeg_extension mentioned before.
+Just defines the extension of the eeg files we want to read, it could also not be in the dictionary, in which case the eeg files will be any from the following extensions: ['.set' ,'.cnt' ,'.vhdr' ,'.bdf' ,'.fif']. Notice it is preferable that you put the dot before the extension; the code should add it if you dont though.
+
+#### path_pattern
+
+Is used to infer information from the path. Any of the fields from the previous dictionaries are supported as long they consist of a single simple value (anything that is a single number or string). The pattern is applied to every file that has the eeg_extension mentioned before.
 
 How it works? You put the pattern you know beforehand of the filepath. The "pattern" is just writing the path of any eeg file on the source path and replacing the part which holds information with ``%dictionary.field%``. The name of the field are the ones on this schema; that is, to set the dataset name you could use ``%dataset_description.Name%``. Notice the dot notation is used to get inside the dictionaries.
 
@@ -335,11 +339,17 @@ bad: %entities.subject%%entities.task%
 
 Notice that here we are depending on the extension being the same, what if the extension varied?. For cases like this you can use a special field "ignore" (``%ignore%``). The algorithm will throw away that information. Remember though that we need the fields to be separated by at least a character; luckily the extension is always preceded by a dot. So you could do ``sub-%entities.subject%.%ignore%``.
 
-splitter is used to set up symbol for the path pattern, defaults to % so you dont need to set it up.
+#### splitter
 
-code_execution is used to hold a list of commands you want to run for additional flexibility but at the cost of knowing a bit about the backend of this package. Mainly that eeg object is called "raw" and is from mne; that is, you can manipulate it if you know how to use mne.
+Is used to set up symbol for the path pattern, defaults to % so you dont need to set it up.
+
+#### code_execution
+
+Is used to hold a list of commands you want to run for additional flexibility but at the cost of knowing a bit about the backend of this package. Mainly that eeg object is called "raw" and is from mne; that is, you can manipulate it if you know how to use mne.
 
 In this example we will just call ``print(raw.info)``, this doesnt do anything interesting besides printing stuff on the console.
+
+#### Final non-bids section
 
 Wow, this part was intense but in the end we just have:
 

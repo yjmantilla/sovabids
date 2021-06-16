@@ -11,7 +11,8 @@ chmod +x the_miniconda_installer.sh
 close and reopen terminal
 
 assure conda is on path
-```
+
+```bash
 $HOME/miniconda3/bin/conda init
 ```
 
@@ -40,16 +41,17 @@ We have to download and decompress the dataset. We also need to fix a filename i
 
 Run examples/lemon_prepare.py
 
-```
+```bash
 python ./examples/lemon_prepare.py
 ```
+
 ## Perform Conversion
 
 As of now is just a basic conversion. Not much metadata added, besides what is already inferred by mne.
 
 Run /examples/test_mne-bids.py
 
-```
+```bash
 python ./examples/test_mne-bids.py
 ```
 
@@ -361,7 +363,100 @@ This is because our priority is to have first the REQUIRED fields of BIDS. They 
 
 ## The whole yaml file
 
-The whole yaml file can be found in examples\test_mne-bids_rules.yml
+The whole yaml file can be found in examples\test_mne-bids_rules.yml , but here is it anyway:
+
+```yaml
+entities:
+  task : resting
+dataset_description:
+  Name : Lemon
+  Authors:
+    - Anahit Babayan
+    - Miray Erbey
+    - Deniz Kumral
+    - Janis D. Reinelt
+    - Andrea M. F. Reiter
+    - Josefin Röbbig
+    - H. Lina Schaare
+    - Marie Uhlig
+    - Alfred Anwander
+    - Pierre-Louis Bazin
+    - Annette Horstmann
+    - Leonie Lampe
+    - Vadim V. Nikulin
+    - Hadas Okon-Singer
+    - Sven Preusser
+    - André Pampel
+    - Christiane S. Rohr
+    - Julia Sacher1
+    - Angelika Thöne-Otto
+    - Sabrina Trapp
+    - Till Nierhaus
+    - Denise Altmann
+    - Katrin Arelin
+    - Maria Blöchl
+    - Edith Bongartz
+    - Patric Breig
+    - Elena Cesnaite
+    - Sufang Chen
+    - Roberto Cozatl
+    - Saskia Czerwonatis
+    - Gabriele Dambrauskaite
+    - Maria Dreyer
+    - Jessica Enders
+    - Melina Engelhardt
+    - Marie Michele Fischer
+    - Norman Forschack
+    - Johannes Golchert
+    - Laura Golz
+    - C. Alexandrina Guran
+    - Susanna Hedrich
+    - Nicole Hentschel
+    - Daria I. Hoffmann
+    - Julia M. Huntenburg
+    - Rebecca Jost
+    - Anna Kosatschek
+    - Stella Kunzendorf
+    - Hannah Lammers
+    - Mark E. Lauckner
+    - Keyvan Mahjoory
+    - Natacha Mendes
+    - Ramona Menger
+    - Enzo Morino
+    - Karina Näthe
+    - Jennifer Neubauer
+    - Handan Noyan
+    - Sabine Oligschläger
+    - Patricia Panczyszyn-Trzewik
+    - Dorothee Poehlchen
+    - Nadine Putzke
+    - Sabrina Roski
+    - Marie-Catherine Schaller
+    - Anja Schieferbein
+    - Benito Schlaak
+    - Hanna Maria Schmidt
+    - Robert Schmidt
+    - Anne Schrimpf
+    - Sylvia Stasch
+    - Maria Voss
+    - Anett Wiedemann
+    - Daniel S. Margulies
+    - Michael Gaebler
+    - Arno Villringer
+sidecar:
+  PowerLineFrequency : 50
+  EEGReference : FCz #https://www.nature.com/articles/sdata2018308
+
+channels:
+  type : # To overwrite channel types inferred by MNE
+    VEOG : eog #white-space separating key and value is important
+
+non-bids:
+  eeg_extension : .vhdr
+  path_pattern : sub-%entities.subject%.vhdr
+  code_execution: # To manipulate the raw mne object for further changes
+    - print(raw.info)
+```
 
 ## Validation
 

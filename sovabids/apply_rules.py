@@ -2,7 +2,7 @@ import os
 import mne_bids
 import json
 import yaml
-
+import argparse
 from sovabids.utils import get_files,macro, run_command,split_by_n,parse_string_from_template,mne_open
 from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
 
@@ -109,3 +109,19 @@ def apply_rules(source_path,bids_root,rules):
 
         mne_bids.make_dataset_description(bids_root,**dataset_description,overwrite=True)
         # Problem: Authors with strange characters are written incorrectly.
+
+def main():
+    """Console script usage"""
+    # see https://github.com/Donders-Institute/bidscoin/blob/master/bidscoin/bidsmapper.py for example of how to make this
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers()
+
+    parser = subparsers.add_parser('apply_rules')
+    parser.add_argument('source_path')  # add the name argument
+    parser.add_argument('bids_root')  # add the name argument
+    parser.add_argument('rules')  # add the name argument
+    args = parser.parse_args()
+    apply_rules(args.source_path,args.bids_root,args.rules)
+
+if __name__ == "__main__":
+    main()

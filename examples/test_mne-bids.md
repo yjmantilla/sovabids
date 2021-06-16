@@ -482,6 +482,14 @@ You should now be able to upload the dataset to assert if it is a valid bids dat
 
 ![validation](2021-06-16-04-44-27.png)
 
+## CLI USAGE
+
+If your terminal is at the root of the repository then you can use something of this sort (by changing the path accordingly):
+
+```bash
+python sovabids\apply_rules.py y:\code\sovabids\_data\lemon y:\code\sovabids\_data\lemon_bids y:\code\sovabids\examples\test_mne-bids_rules.yml
+```
+
 ## Future Work
 
 The overall blueprint of the Rules File is in sovabids\rules_schema.yml .

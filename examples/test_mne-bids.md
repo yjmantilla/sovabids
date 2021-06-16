@@ -32,13 +32,13 @@ For this example we will be using a few files from the following [dataset](http:
 
 We have to download and decompress the dataset. We also need to fix a filename inconsistency (without this correction the file won't be able to be opened in mne). Luckily all of that is done by the lemon_prepare.py script.
 
-Run lemon_prepare.py
+Run examples\lemon_prepare.py
 
 ## Perform Conversion
 
 As of now is just a basic conversion. Not much metadata added, besides what is already inferred by mne.
 
-Run test_mne-bids.py
+Run examples\test_mne-bids.py
 
 ## Understanding the code
 

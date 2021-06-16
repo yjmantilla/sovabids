@@ -1,0 +1,117 @@
+# # eeg bids fields collection
+# # Unsupported files are commented
+entities : #see https://github.com/bids-standard/bids-specification/blob/66d8532065bdae6a7275efd8bbe05a8e00dc1031/src/schema/datatypes/eeg.yaml#L13-L18
+  subject : REQUIRED
+  session : OPTIONAL
+  task : REQUIRED
+  acquisition : OPTIONAL
+  run : OPTIONAL
+
+dataset_description : #https://bids-specification.readthedocs.io/en/latest/03-modality-agnostic-files.html
+# we for now will support only what mne_bids.make_dataset_description supports
+  Name : REQUIRED
+#   BIDSVersion : REQUIRED
+#   HEDVersion : RECOMMENDED
+#   DatasetType : RECOMMENDED
+#   License : RECOMMENDED
+  Authors : OPTIONAL
+#   Acknowledgements : OPTIONAL
+#   HowToAcknowledge : OPTIONAL
+#   Funding : OPTIONAL
+#   EthicsApprovals : OPTIONAL
+#   ReferencesAndLinks : OPTIONAL
+#   DatasetDOI : OPTIONAL
+
+# #https://bids-specification.readthedocs.io/en/latest/04-modality-specific-files/03-electroencephalography.html
+sidecar : 
+#   TaskName : REQUIRED
+#   InstitutionName : RECOMMENDED
+#   InstitutionAddress : RECOMMENDED
+#   Manufacturer : RECOMMENDED
+#   ManufacturersModelName : RECOMMENDED
+#   SoftwareVersions : RECOMMENDED
+#   TaskDescription : RECOMMENDED
+#   Instructions : RECOMMENDED
+#   CogAtlasID : RECOMMENDED
+#   CogPOID : RECOMMENDED
+#   DeviceSerialNumber : RECOMMENDED
+  EEGReference : REQUIRED
+#   SamplingFrequency : REQUIRED
+  PowerLineFrequency : REQUIRED
+#   SoftwareFilters : REQUIRED
+#   CapManufacturer : RECOMMENDED
+#   CapManufacturersModelName : RECOMMENDED
+#   EEGChannelCount : RECOMMENDED
+#   ECGChannelCount : RECOMMENDED
+#   EMGChannelCount : RECOMMENDED
+#   EOGChannelCount : RECOMMENDED
+#   MiscChannelCount : RECOMMENDED
+#   TriggerChannelCount : RECOMMENDED
+#   RecordingDuration : RECOMMENDED
+#   RecordingType : RECOMMENDED
+#   EpochLength : RECOMMENDED
+#   EEGGround : RECOMMENDED
+#   HeadCircumference : RECOMMENDED
+#   EEGPlacementScheme : RECOMMENDED
+#   HardwareFilters : RECOMMENDED
+#   SubjectArtefactDescription : RECOMMENDED
+
+channels :
+#   name : REQUIRED
+  type : REQUIRED
+#   units : REQUIRED
+#   description : OPTIONAL
+#   sampling_frequency : OPTIONAL
+#   reference : OPTIONAL
+#   low_cutoff : OPTIONAL
+#   high_cutoff : OPTIONAL
+#   notch : OPTIONAL
+#   status : OPTIONAL
+#   status_description : OPTIONAL
+
+# electrodes :
+#   name : REQUIRED
+#   x : REQUIRED
+#   y : REQUIRED
+#   z : REQUIRED
+#   type : RECOMMENDED
+#   material : RECOMMENDED
+#   impedance : RECOMMENDED
+
+# coordsystem : # this has special logic for the requirements but the default is implemented
+#               # https://bids-specification.readthedocs.io/en/latest/04-modality-specific-files/03-electroencephalography.html
+#   IntendedFor : OPTIONAL
+#   EEGCoordinateSystem : REQUIRED
+#   EEGCoordinateUnits : REQUIRED
+#   EEGCoordinateSystemDescription : RECOMMENDED
+#   FiducialsDescription : OPTIONAL
+#   FiducialsCoordinates : RECOMMENDED
+#   FiducialsCoordinateSystem : RECOMMENDED
+#   FiducialsCoordinateUnits : RECOMMENDED
+#   FiducialsCoordinateSystemDescription : RECOMMENDED
+#   AnatomicalLandmarkCoordinates : RECOMMENDED
+#   AnatomicalLandmarkCoordinateSystem : RECOMMENDED
+#   AnatomicalLandmarkCoordinateUnits : RECOMMENDED
+#   AnatomicalLandmarkCoordinateSystemDescription : RECOMMENDED
+
+# events:
+#   onset : REQUIRED
+#   duration : REQUIRED
+#   sample : OPTIONAL
+#   trial_type : OPTIONAL
+#   response_time : OPTIONAL
+#   value : OPTIONAL
+#   HED : OPTIONAL
+#   stim_file : OPTIONAL
+#   StimulusPresentation : RECOMMENDED
+#   OperatingSystem : RECOMMENDED
+#   SoftwareName : RECOMMENDED
+#   SoftwareRRID : RECOMMENDED
+#   SoftwareVersion : RECOMMENDED
+#   Code : RECOMMENDED
+
+non-bids :
+  eeg_extension : OPTIONAL # to say which files to take into account when reading a directory, can be a list of extensions or a single one
+  path_pattern : OPTIONAL # should be written in the path style of the machine, DONT include escape characters, seems the parser takes care of that
+  splitter : OPTIONAL # the split symbol for the path pattern, defaults to %
+  code_execution : OPTIONAL # if the code itself needs ie quotes, escape characters may be nedeed

@@ -20,6 +20,7 @@ pip install --user -U mne-bids[full]
 ```bash
 git clone https://github.com/yjmantilla/sovabids.git
 cd sovabids
+pip install .
 ```
 
 ## Prepare Example

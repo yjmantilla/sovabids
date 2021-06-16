@@ -1,5 +1,13 @@
 import os
 import mne
+
+macro = """try:
+    exec(command)
+except:
+    print("WARNING, there was a problem with the following command:")
+    print(command)
+"""
+
 def get_files(root_path):
     filepaths = []
     for root, dirs, files  in os.walk(root_path, topdown=False):
@@ -7,16 +15,16 @@ def get_files(root_path):
             filepaths.append(os.path.join(root, name))
     return filepaths
 
-def run_command(command):
+def run_command(raw,command):
     # Maybe we should actually stop the whole process instead of trying it
     # After all it means ther is a problem with the rules, which is fundamental
     try:
         exec(command)
-        return True
+        return raw
     except:
         print("WARNING, there was a problem with the following command:")
         print(command)
-        return False
+        return raw
 
 def split_by_n(lst,n):
     return [lst[i:i + n] for i in range(0, len(lst), n)]

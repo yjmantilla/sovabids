@@ -115,3 +115,4 @@ non-bids :
   path_pattern : OPTIONAL # should be written in the path style of the machine, DONT include escape characters, seems the parser takes care of that
   splitter : OPTIONAL # the split symbol for the path pattern, defaults to %
   code_execution : OPTIONAL # if the code itself needs ie quotes, escape characters may be nedeed
+                            # example: raw.set_channel_mapping({\"VEOG\":\"eog\"})" # this is an example, this line of code actually doesnt work

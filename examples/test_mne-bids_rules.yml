@@ -84,7 +84,7 @@ channels:
     VEOG : eog #white-space separating key and value is important
 
 non-bids:
-  eeg_extension : '.vhdr'
-  path_pattern : 'sub-%entities.subject%.vhdr'
+  eeg_extension : .vhdr
+  path_pattern : sub-%entities.subject%.vhdr
   code_execution: # To manipulate the raw mne object for further changes
-    - "raw.set_channel_mapping({\"VEOG\":\"eog\"})" # this is an example, this line of code actually doesnt work
+    - print(raw.info)

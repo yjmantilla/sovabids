@@ -3,7 +3,7 @@ import mne_bids
 import json
 import yaml
 
-from sovabids.utils import get_files,split_by_n,parse_string_from_template,run_command,mne_open
+from sovabids.utils import get_files,macro, run_command,split_by_n,parse_string_from_template,mne_open
 from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
 
 def apply_rules(source_path,bids_root,rules):
@@ -75,10 +75,11 @@ def apply_rules(source_path,bids_root,rules):
             non_bids = rules['non-bids']
             if "code_execution" in non_bids:
                 if isinstance(non_bids["code_execution"],str):
-                    run_command(non_bids["code_execution"])
+                    non_bids["code_execution"] = [non_bids["code_execution"]]
                 if isinstance(non_bids["code_execution"],list):
                     for command in non_bids["code_execution"]:
-                        run_command(command)
+                        exec(macro)
+                        #raw = run_command(raw,command) #another way...
                         # maybe log errors here?
 
 
@@ -94,6 +95,7 @@ def apply_rules(source_path,bids_root,rules):
                 dummy_dict = json.load(f)
                 sidecar = rules['sidecar']
                 dummy_dict.update(sidecar)
+                # maybe include an overwrite rule
                 mne_bids.utils._write_json(sidecar_path.fpath,dummy_dict,overwrite=True)
 
     # Grab the info from the last file to make the dataset description

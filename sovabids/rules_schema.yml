@@ -1,7 +1,7 @@
 # # eeg bids fields collection
 # # Unsupported files are commented
 entities : #see https://github.com/bids-standard/bids-specification/blob/66d8532065bdae6a7275efd8bbe05a8e00dc1031/src/schema/datatypes/eeg.yaml#L13-L18
-  subject : REQUIRED
+  subject : REQUIRED # this is mostly used if you are doing a single user, better to do it from the path
   session : OPTIONAL
   task : REQUIRED
   acquisition : OPTIONAL

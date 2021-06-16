@@ -8,7 +8,7 @@ data_dir = os.path.abspath(data_dir)
 
 source_path = os.path.abspath(os.path.join(data_dir,'lemon'))
 bids_root= os.path.abspath(os.path.join(data_dir,'lemon_bids'))
-rules_path = 'rules.yml'
+rules_path = 'examples\\test_mne-bids_rules.yml'
 
 #CLEAN BIDS PATH
 try:

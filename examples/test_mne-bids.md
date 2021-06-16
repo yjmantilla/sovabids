@@ -1,4 +1,4 @@
-# MNE-BIDS TEST
+# MNE-BIDS EXAMPLE
 
 ## Install miniconda
 ```bash

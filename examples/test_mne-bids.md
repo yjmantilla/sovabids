@@ -72,7 +72,7 @@ data_dir = os.path.abspath(data_dir)
 
 source_path = os.path.abspath(os.path.join(data_dir,'lemon'))
 bids_root= os.path.abspath(os.path.join(data_dir,'lemon_bids'))
-rules_path = 'examples\\test_mne-bids_rules.yml'
+rules_path = os.path.join('examples','test_mne-bids_rules.yml')
 ```
 
 We will clean the output path as a safety measure from previous conversions.

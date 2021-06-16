@@ -481,3 +481,7 @@ non-bids:
 You should now be able to upload the dataset to assert if it is a valid bids dataset:
 
 ![validation](2021-06-16-04-44-27.png)
+
+## Future Work
+
+The overall blueprint of the Rules File is in sovabids\rules_schema.yml .

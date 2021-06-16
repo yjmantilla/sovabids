@@ -487,6 +487,12 @@ You should now be able to upload the dataset to assert if it is a valid bids dat
 If your terminal is at the root of the repository then you can use something of this sort (by changing the path accordingly):
 
 ```bash
+python sovabids\apply_rules.py sourcefolder outputfolder rulesfile
+```
+
+So in my particular case it is:
+
+```bash
 python sovabids\apply_rules.py y:\code\sovabids\_data\lemon y:\code\sovabids\_data\lemon_bids y:\code\sovabids\examples\test_mne-bids_rules.yml
 ```
 

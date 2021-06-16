@@ -65,7 +65,15 @@ import shutil
 from sovabids.apply_rules import apply_rules
 ```
 
-We will know define the variables needed for the ``apply_rules`` function. Because this example is intended to run relative to the repository directory we use relative path but for real use-cases it is easier to just input the absolute-path.
+We will now define the variables needed for the ``apply_rules`` function. Because this example is intended to run relative to the repository directory we use relative path but for real use-cases it is easier to just input the absolute-path.
+
+In the end:
+
+- source_path=_data\lemon
+- bids_root=_data\lemon_bids
+- rules_path=examples\test_mne-bids_rules.yml
+
+Doing this with the ``os.path.join function`` allows us to not worry about the particular OS one is testing the code in.
 
 ```python
 this_dir = os.path.dirname(__file__)

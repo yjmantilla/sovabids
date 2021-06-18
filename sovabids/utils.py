@@ -1,5 +1,6 @@
 import os
 import mne
+import re
 
 macro = """try:
     exec(command)
@@ -69,6 +70,47 @@ def deep_merge(a, b):
             key: deep_merge(a.get(key), b.get(key))
             for key in keys
         }
+
+import collections
+
+def flatten(d, parent_key='', sep='.'):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
+def unescape(text):
+    regex = re.compile(b'\\\\(\\\\|[0-7]{1,3}|x.[0-9a-f]?|[\'"abfnrt]|.|$)')
+    def replace(m):
+        b = m.group(1)
+        if len(b) == 0:
+            raise ValueError("Invalid character escape: '\\'.")
+        i = b[0]
+        if i == 120:
+            v = int(b[1:], 16)
+        elif 48 <= i <= 55:
+            v = int(b, 8)
+        elif i == 34: return b'"'
+        elif i == 39: return b"'"
+        elif i == 92: return b'\\'
+        elif i == 97: return b'\a'
+        elif i == 98: return b'\b'
+        elif i == 102: return b'\f'
+        elif i == 110: return b'\n'
+        elif i == 114: return b'\r'
+        elif i == 116: return b'\t'
+        else:
+            s = b.decode('ascii')
+            raise UnicodeDecodeError(
+                'stringescape', text, m.start(), m.end(), "Invalid escape: %r" % s
+            )
+        return bytes((v, ))
+    result = regex.sub(replace, text)
+
 def parse_string_from_template(string,pattern,splitter='%'):
     """
     params:
@@ -90,6 +132,8 @@ def parse_string_from_template(string,pattern,splitter='%'):
     Possible problems:
     fields with numeric values, they should be converted, the problem is which to convert?
     """
+    string = string.replace('\\','/') # USE POSIX PLEASE
+    pattern = pattern.replace('\\','/')
     borders = pattern.split(splitter)[::2]
     fields = pattern.split(splitter)[1::2]
     last_end = 0

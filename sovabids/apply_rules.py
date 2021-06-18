@@ -6,10 +6,32 @@ import argparse
 from sovabids.utils import deep_merge_N,get_supported_extensions,get_files,macro, run_command,split_by_n,parse_string_from_template,mne_open
 from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
 from copy import deepcopy
-def apply_rules(source_path,bids_root,rules_):
+
+
+def get_info_from_path(path,rules_):
+    rules = deepcopy(rules_)
+    patterns_extracted = {}
+    if 'splitter' in rules.get('non-bids',{}):
+        splitter = rules['non-bids']['splitter']
+    else:
+        splitter = '%'
+
+    if "path_pattern" in rules.get('non-bids',{}):
+        patterns_extracted = parse_string_from_template(path,rules['non-bids']['path_pattern'],splitter)
+    if 'ignore' in patterns_extracted:
+        del patterns_extracted['ignore']
+    # this what needed because using rules.update(patterns_extracted) replaced it all
+    rules = deep_merge_N([rules,patterns_extracted])
+    return rules
+
+def load_rules(rules_):
     if not isinstance(rules_,dict):
         with open(rules_,encoding="utf-8") as f:
-            rules_ = yaml.load(f,yaml.FullLoader)
+            return yaml.load(f,yaml.FullLoader)
+    return rules_
+def apply_rules(source_path,bids_root,rules_):
+
+    rules_ = load_rules(rules_)
     # Generate all files
     try:
         extensions = rules_['non-bids']['eeg_extension']
@@ -35,19 +57,7 @@ def apply_rules(source_path,bids_root,rules_):
 
         # First get info from path
 
-        patterns_extracted = {}
-        if 'splitter' in rules['non-bids']:
-            splitter = rules['non-bids']['splitter']
-        else:
-            splitter = '%'
-
-        if "path_pattern" in rules['non-bids']:
-            patterns_extracted = parse_string_from_template(f,rules['non-bids']['path_pattern'],splitter)
-        if 'ignore' in patterns_extracted:
-            del patterns_extracted['ignore']
-        # this what needed because using rules.update(patterns_extracted) replaced it all
-        rules = deep_merge_N([rules,patterns_extracted])
-
+        rules = get_info_from_path(f,rules)
 
         # Apply Rules
         assert 'entities' in rules

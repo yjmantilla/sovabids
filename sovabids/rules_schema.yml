@@ -112,7 +112,7 @@ channels :
 
 non-bids :
   eeg_extension : OPTIONAL # to say which files to take into account when reading a directory, can be a list of extensions or a single one
-  path_pattern : OPTIONAL # should be written in the path style of the machine, DONT include escape characters, seems the parser takes care of that
+  path_pattern : OPTIONAL #USE POSIX REQUIRED
   splitter : OPTIONAL # the split symbol for the path pattern, defaults to %
   code_execution : OPTIONAL # if the code itself needs ie quotes, escape characters may be nedeed
                             # example: raw.set_channel_mapping({\"VEOG\":\"eog\"})" # this is an example, this line of code actually doesnt work

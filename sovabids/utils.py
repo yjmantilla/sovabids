@@ -36,6 +36,8 @@ def split_by_n(lst,n):
 def deep_merge_N(l):
     d = {}
     while True:
+        if len(l) == 0:
+            return {}
         if len(l) == 1:
             return l[0]
         d1 = l.pop()
@@ -83,39 +85,12 @@ def flatten(d, parent_key='', sep='.'):
             items.append((new_key, v))
     return dict(items)
 
-def unescape(text):
-    regex = re.compile(b'\\\\(\\\\|[0-7]{1,3}|x.[0-9a-f]?|[\'"abfnrt]|.|$)')
-    def replace(m):
-        b = m.group(1)
-        if len(b) == 0:
-            raise ValueError("Invalid character escape: '\\'.")
-        i = b[0]
-        if i == 120:
-            v = int(b[1:], 16)
-        elif 48 <= i <= 55:
-            v = int(b, 8)
-        elif i == 34: return b'"'
-        elif i == 39: return b"'"
-        elif i == 92: return b'\\'
-        elif i == 97: return b'\a'
-        elif i == 98: return b'\b'
-        elif i == 102: return b'\f'
-        elif i == 110: return b'\n'
-        elif i == 114: return b'\r'
-        elif i == 116: return b'\t'
-        else:
-            s = b.decode('ascii')
-            raise UnicodeDecodeError(
-                'stringescape', text, m.start(), m.end(), "Invalid escape: %r" % s
-            )
-        return bytes((v, ))
-    result = regex.sub(replace, text)
-
 def parse_string_from_template(string,pattern,splitter='%'):
     """
+    USE POSIX
     params:
-    string : string to be parsed ie 'y:\\code\\sovabids\\_data\\lemon\\sub-010002.vhdr'
-    pattern : string with the temmplate ie 'y:\\code\\sovabids\\_data\\%dataset_description.name%\\sub-%entities.subject%.vhdr'
+    string : string to be parsed ie 'y:/code/sovabids/_data/lemon/sub-010002.vhdr'
+    pattern : string with the temmplate ie 'y:/code/sovabids/_data/%dataset_description.name%/sub-%entities.subject%.vhdr'
     splitter : open and close symbol for the fields ie '%'
     
     WARNING: This function assumes that the string fields are separated by at least 1 char
@@ -134,30 +109,32 @@ def parse_string_from_template(string,pattern,splitter='%'):
     """
     string = string.replace('\\','/') # USE POSIX PLEASE
     pattern = pattern.replace('\\','/')
-    borders = pattern.split(splitter)[::2]
-    fields = pattern.split(splitter)[1::2]
-    last_end = 0
-    l = []
-    for i,field in enumerate(fields):
-        start = last_end+len(borders[i])+string[last_end:].find(borders[i])
-        if field == fields[-1] and borders[-1] == '':
-            end = -1
-            value = string[start:]
-        else:
-            end = len(string[:start])+string[start:].find(borders[i+1])
-            last_end=end
-            value = string[start:end]
+    if pattern.count('%') == 0 or pattern.count('%') % 2 != 0:
+        return {}
+    else:
+        borders = pattern.split(splitter)[::2]
+        fields = pattern.split(splitter)[1::2]
+        last_end = 0
+        l = []
+        for i,field in enumerate(fields):
+            start = last_end+len(borders[i])+string[last_end:].find(borders[i])
+            if field == fields[-1] and borders[-1] == '':
+                end = -1
+                value = string[start:]
+            else:
+                end = len(string[:start])+string[start:].find(borders[i+1])
+                last_end=end
+                value = string[start:end]
 
-        if '.' in field:
-            tree_list = field.split('.')
-            tree_dict = value
-            for key in reversed(tree_list):
-                tree_dict = {key: tree_dict}
-            l.append(tree_dict)
-        else:
-            l.append({field:value})
-
-    return deep_merge_N(l)
+            if '.' in field:
+                tree_list = field.split('.')
+                tree_dict = value
+                for key in reversed(tree_list):
+                    tree_dict = {key: tree_dict}
+                l.append(tree_dict)
+            else:
+                l.append({field:value})
+        return deep_merge_N(l)
 
 
 def mne_open(filename,verbose='CRITICAL',preload=False):

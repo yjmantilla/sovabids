@@ -8,6 +8,9 @@ except:
     print(command)
 """
 
+def get_supported_extensions():
+    return ['.set' ,'.cnt' ,'.vhdr' ,'.bdf','.edf' ,'.fif'] 
+
 def get_files(root_path):
     filepaths = []
     for root, dirs, files  in os.walk(root_path, topdown=False):
@@ -29,7 +32,44 @@ def run_command(raw,command):
 def split_by_n(lst,n):
     return [lst[i:i + n] for i in range(0, len(lst), n)]
 
-def parse_string_from_template(string,pattern,splitter):
+def deep_merge_N(l):
+    d = {}
+    while True:
+        if len(l) == 1:
+            return l[0]
+        d1 = l.pop()
+        d2 = l.pop()
+        d = deep_merge(d1,d2)
+        l.append(d)
+
+def deep_merge(a, b):
+    """
+    Merge two values, with `b` taking precedence over `a`.
+
+    Semantics:
+    - If either `a` or `b` is not a dictionary, `a` will be returned only if
+      `b` is `None`. Otherwise `b` will be returned.
+    - If both values are dictionaries, they are merged as follows:
+        * Each key that is found only in `a` or only in `b` will be included in
+          the output collection with its value intact.
+        * For any key in common between `a` and `b`, the corresponding values
+          will be merged with the same semantics.
+    """
+    if not isinstance(a, dict) or not isinstance(b, dict):
+        return a if b is None else b
+    else:
+        # If we're here, both a and b must be dictionaries or subtypes thereof.
+
+        # Compute set of all keys in both dictionaries.
+        keys = set(a.keys()) | set(b.keys())
+
+        # Build output dictionary, merging recursively values with common keys,
+        # where `None` is used to mean the absence of a value.
+        return {
+            key: deep_merge(a.get(key), b.get(key))
+            for key in keys
+        }
+def parse_string_from_template(string,pattern,splitter='%'):
     """
     params:
     string : string to be parsed ie 'y:\\code\\sovabids\\_data\\lemon\\sub-010002.vhdr'
@@ -50,10 +90,10 @@ def parse_string_from_template(string,pattern,splitter):
     Possible problems:
     fields with numeric values, they should be converted, the problem is which to convert?
     """
-    patterns_extracted = {}
     borders = pattern.split(splitter)[::2]
     fields = pattern.split(splitter)[1::2]
     last_end = 0
+    l = []
     for i,field in enumerate(fields):
         start = last_end+len(borders[i])+string[last_end:].find(borders[i])
         if field == fields[-1] and borders[-1] == '':
@@ -69,11 +109,12 @@ def parse_string_from_template(string,pattern,splitter):
             tree_dict = value
             for key in reversed(tree_list):
                 tree_dict = {key: tree_dict}
-            patterns_extracted.update(tree_dict)
+            l.append(tree_dict)
         else:
-            patterns_extracted.update({field:value})
-        #pattern = string[:value_end] + pattern[end+1:]
-    return patterns_extracted
+            l.append({field:value})
+
+    return deep_merge_N(l)
+
 
 def mne_open(filename,verbose='CRITICAL',preload=False):
     """

@@ -3,19 +3,18 @@ import mne_bids
 import json
 import yaml
 import argparse
-from sovabids.utils import get_files,macro, run_command,split_by_n,parse_string_from_template,mne_open
+from sovabids.utils import deep_merge_N,get_supported_extensions,get_files,macro, run_command,split_by_n,parse_string_from_template,mne_open
 from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
-
-def apply_rules(source_path,bids_root,rules):
-    if not isinstance(rules,dict):
-        with open(rules,encoding="utf-8") as f:
-            rules = yaml.load(f,yaml.FullLoader)
-
+from copy import deepcopy
+def apply_rules(source_path,bids_root,rules_):
+    if not isinstance(rules_,dict):
+        with open(rules_,encoding="utf-8") as f:
+            rules_ = yaml.load(f,yaml.FullLoader)
     # Generate all files
     try:
-        extensions = rules['non-bids']['eeg_extension']
+        extensions = rules_['non-bids']['eeg_extension']
     except:
-        extensions = ['.set' ,'.cnt' ,'.vhdr' ,'.bdf' ,'.fif'] 
+        extensions = get_supported_extensions()
 
     if isinstance(extensions,str):
         extensions = [extensions]
@@ -29,7 +28,8 @@ def apply_rules(source_path,bids_root,rules):
     #%% BIDS CONVERSION
 
     for f in filepaths:
-        
+        rules = deepcopy(rules_) #otherwise the deepmerge wont update the values for a new file
+
         # Upon reading RAW MNE makes the assumptions
         raw = mne_open(f)
 
@@ -46,14 +46,7 @@ def apply_rules(source_path,bids_root,rules):
         if 'ignore' in patterns_extracted:
             del patterns_extracted['ignore']
         # this what needed because using rules.update(patterns_extracted) replaced it all
-
-        for key in ['entities','channels','dataset_description','sidecar','channels','electrodes','coordsystem','events','non-bids']:
-            if key in patterns_extracted:
-                if key in rules:
-                    rules[key].update(patterns_extracted[key])
-                else:
-                    rules[key] = patterns_extracted[key]
-            #it wont work for nested dicts :/
+        rules = deep_merge_N([rules,patterns_extracted])
 
 
         # Apply Rules

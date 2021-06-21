@@ -18,10 +18,25 @@ $HOME/miniconda3/bin/conda init
 
 ## Install MNE
 
+Linux:
+
 ```bash
 curl --remote-name https://raw.githubusercontent.com/mne-tools/mne-python/main/environment.yml
 conda env update --file environment.yml
 pip install --user -U mne-bids[full]
+```
+
+Windows via pip:
+
+```bash
+pip install --user -U mne-bids[full]
+pip install --user -U mne
+```
+
+windows via Conda:
+
+```bash
+conda install --channel conda-forge --no-deps mne-bids
 ```
 
 ## Clone Repository and install

@@ -535,3 +535,108 @@ NB: Files in Y:\code\sovabids\_data\lemon_bidscoin_output\code\bidscoin may cont
 Once finished you can go to the output folder (_data\lemon_bidscoin_output) for the converted data.
 
 ![](2021-06-21-16-03-11.png)
+
+
+## Understanding the integration
+
+### The BIDSMAP
+
+BIDSCOIN works with a template file bidsmap file which says how the mapping is done (examples\bidscoin_example_bidsmap.yml). We generate this file on run-time to avoid path errors (so that this example runs anywhere).
+
+The most important parts of the file are:
+
+```yaml
+sova2coin:            #module add sovabids #
+    rules_file : y:\code\sovabids\examples\bidscoin_example_rules.yml
+    non-bids:
+    path_pattern : /%ignore%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr #USE POSIX
+```
+
+This part configures the sovabids plugin on bidscoin side. Here we are passing the path for our "rules" file. We can also directly pass dictionaries directly from our rules file. For example in this case we are passing the "non-bids" dictionary which has a path pattern to infer the subject,session and task properties.
+
+We then have a big EEG tree:
+
+```yaml
+EEG:
+# --------------------------------------------------------------------------------
+# Physio key-value heuristics (phys2bids -info data) that are mapped to the BIDS labels)
+# --------------------------------------------------------------------------------
+  subject: <<entities.subject>> 
+  session: <<entities.session>> 
+  eeg:        
+  - provenance:                   # The fullpath name of the source file from which the attributes are read. Serves also as a look-up key to find a run in the bidsmap
+    filesystem:                   # This is what sovabids is using now (well, part of it)
+      path:                       # File folder, e.g. ".*Parkinson.*" or ".*(phantom|bottle).*"
+      name:         "(.*)"        # File name, e.g. ".*fmap.*" or ".*(fmap|field.?map|B0.?map).*"
+      size:                       # File size, e.g. "2[4-6]\d MB" for matching files between 240-269 MB
+      nrfiles:                    # Number of files in the folder that match the above criteria, e.g. "5/d/d" for matching a number between 500-599
+    attributes:                   # The matching (regexp) criteria for the sovabids -info data go in here
+      sidecar.SamplingFrequency:
+      sidecar.PowerLineFrequency:
+      sidecar.RecordingDuration:
+      entities.subject:
+      entities.task:
+      entities.session:
+    bids:
+      task: <<entities.task>> # Note Dynamic values are not previewed in the bids editor but they do work, this should be fixed anyway
+      acq: 
+      recording:
+      run: <<1>>                  # This will be updated during bidscoiner runtime (as it depends on the already existing files)
+      suffix: eeg
+    meta:                         # This is an optional entry for meta-data dictionary that will be appended to the json sidecar files produced by mne-bids
+
+```
+
+The EEG:eeg hierarchy just says that there is an 'EEG' dataformat which a general 'eeg' datatype. This is a bit redundant but it happens because bidscoin was originally thought for DICOM (dataformat) which holds many datatypes (anat,perf,etc). In eeg this doesnt happens.
+
+```yaml
+EEG:
+  eeg:
+```
+
+
+Provenance defines the kind of files that are going to be matching this 'eeg' datatype. With ``name:"(.*)"`` we are saying it should match anything.
+
+The files matched by the provenance are passed to the sovabids to infer some attributes from that file. The attributes follow the notation of sovabids here. We say what attributes are those through these lines.
+
+```yaml
+    attributes:
+      sidecar.SamplingFrequency:
+      sidecar.PowerLineFrequency:
+      sidecar.RecordingDuration:
+      entities.subject:
+      entities.task:
+      entities.session:
+```
+
+We can now use the attributes we got from sovabids to populate the bids information, that is done through the bids dictionary:
+
+```yaml
+    bids:
+      task: <<entities.task>> # Note Dynamic values are not previewed in the bids editor but they do work, this should be fixed anyway
+      acq: 
+      recording:
+      run: <<1>>                  # This will be updated during bidscoiner runtime (as it depends on the already existing files)
+      suffix: eeg
+```
+
+We use two ways to grab those attributes:
+
+- Single <> --> Fixed, that is, it is the same value for the whole conversion.
+- Double <<>> --> Value changes file by file.
+- <<1>>, special value to say the number increases (used mainly for runs).
+
+We can also put fixed values like ``suffix:eeg``
+
+Apart from that bids dictionary we also grab the subject and session information from sovabids:
+
+```yaml
+  subject: <<entities.subject>>
+  session: <<entities.session>>
+```
+
+Meta just puts additional info on the sidecard. We don't need it so we leave it empty:
+
+```yaml
+    meta:                         # This is an optional entry for meta-data dictionary that will be appended to the json sidecar files produced by mne-bids
+```

@@ -1,6 +1,8 @@
 import os
 import mne
 import re
+import requests
+
 
 macro = """try:
     exec(command)
@@ -159,3 +161,32 @@ def mne_open(filename,verbose='CRITICAL',preload=False):
         return mne.io.read_raw_fif(filename,preload=preload,verbose=verbose)
     else:
         return None
+
+
+def create_dir(data_dir):
+    if not os.path.isdir(data_dir):
+        #os.makedirs(data_dir, exist_ok=True)
+        os.mkdir(data_dir)
+
+def download(url,path):
+    get_response = requests.get(url,stream=True)
+    file_name  = url.split("/")[-1]
+    p = os.path.abspath(os.path.join(path))
+    create_dir(p)
+    print('Downloading',file_name,'at',p)
+    if not os.path.isfile(os.path.join(p,file_name)):
+        with open(os.path.join(p,file_name), 'wb') as f:
+            for chunk in get_response.iter_content(chunk_size=1024):
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+            print('100')
+    else:
+        print("WARNING: File already existed. Skipping...")
+
+
+def get_files(root_path):
+    filepaths = []
+    for root, dirs, files  in os.walk(root_path, topdown=False):
+        for name in files:
+            filepaths.append(os.path.join(root, name))
+    return filepaths

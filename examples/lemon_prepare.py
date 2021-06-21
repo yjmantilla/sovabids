@@ -2,33 +2,15 @@ import os, sys
 import mne
 import pandas as pd 
 import shutil
-import requests
-
+from sovabids.utils import create_dir,download,get_files
 this_dir = os.path.dirname(__file__)
 data_dir = os.path.join(this_dir,'..','_data')
-def create_dir(data_dir):
-    if not os.path.isdir(data_dir):
-        os.mkdir(data_dir)
 
 create_dir(data_dir)
 #shutil.unpack_archive("sub-032301.tar.gz")
 
 #%% Donwnload lemon Database
 
-def download(url,path):
-    get_response = requests.get(url,stream=True)
-    file_name  = url.split("/")[-1]
-    p = os.path.abspath(os.path.join(path))
-    create_dir(p)
-    print('Downloading',file_name,'at',p)
-    if not os.path.isfile(os.path.join(p,file_name)):
-        with open(os.path.join(p,file_name), 'wb') as f:
-            for chunk in get_response.iter_content(chunk_size=1024):
-                if chunk: # filter out keep-alive new chunks
-                    f.write(chunk)
-            print('100')
-    else:
-        print("WARNING: File already existed. Skipping...")
 urls = ['https://fcp-indi.s3.amazonaws.com/data/Projects/INDI/MPI-LEMON/Compressed_tar/EEG_MPILMBB_LEMON/EEG_Raw_BIDS_ID/sub-032301.tar.gz',
 'https://fcp-indi.s3.amazonaws.com/data/Projects/INDI/MPI-LEMON/Compressed_tar/EEG_MPILMBB_LEMON/EEG_Raw_BIDS_ID/sub-032302.tar.gz',
 'https://fcp-indi.s3.amazonaws.com/data/Projects/INDI/MPI-LEMON/Compressed_tar/EEG_MPILMBB_LEMON/EEG_Raw_BIDS_ID/sub-032303.tar.gz',
@@ -40,12 +22,6 @@ for url in urls:
 root_path = os.path.abspath(os.path.join(data_dir,'lemon'))
 
 # Generate all files
-def get_files(root_path):
-    filepaths = []
-    for root, dirs, files  in os.walk(root_path, topdown=False):
-        for name in files:
-            filepaths.append(os.path.join(root, name))
-    return filepaths
 
 filepaths = get_files(root_path)
 

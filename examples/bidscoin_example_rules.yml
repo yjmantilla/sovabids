@@ -1,0 +1,17 @@
+entities:
+  task : resting
+dataset_description:
+  Name : Lemon
+sidecar:
+  PowerLineFrequency : 50
+  EEGReference : FCz #https://www.nature.com/articles/sdata2018308
+
+channels:
+  type : # To overwrite channel types inferred by MNE
+    VEOG : eog #white-space separating key and value is important
+
+non-bids:
+  eeg_extension : .vhdr
+  #path_pattern : /%ignore%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr #USE POSIX
+  code_execution: # To manipulate the raw mne object for further changes
+    - print(raw.info)

@@ -1,52 +1,8 @@
-# MNE-BIDS EXAMPLE
+# Using SOVABIDS
 
-## Install miniconda
+## Install sovabids
 
-```bash
-curl -o the_miniconda_installer.sh https://repo.anaconda.com/miniconda/Miniconda3-py39_4.9.2-Linux-x86_64.sh
-chmod +x the_miniconda_installer.sh
-./the_miniconda_installer.sh
-```
-
-close and reopen terminal
-
-assure conda is on path
-
-```bash
-$HOME/miniconda3/bin/conda init
-```
-
-## Install MNE
-
-Linux:
-
-```bash
-curl --remote-name https://raw.githubusercontent.com/mne-tools/mne-python/main/environment.yml
-conda env update --file environment.yml
-pip install --user -U mne-bids[full]
-```
-
-Windows via pip:
-
-```bash
-pip install --user -U mne-bids[full]
-pip install --user -U mne
-```
-
-windows via Conda:
-
-```bash
-conda install --channel conda-forge --no-deps mne-bids
-```
-
-## Clone Repository and install
-
-```bash
-git clone https://github.com/yjmantilla/sovabids.git
-conda activate mne
-cd sovabids
-pip install .
-```
+See the corresponding doc example (docs\installing_sovabids.md)
 
 ## Prepare Example
 
@@ -64,10 +20,10 @@ python ./examples/lemon_prepare.py
 
 As of now is just a basic conversion. Not much metadata added, besides what is already inferred by mne.
 
-Run /examples/test_mne-bids.py
+Run /examples/sovabids_example.py
 
 ```bash
-python ./examples/test_mne-bids.py
+python ./examples/sovabids_example.py
 ```
 
 ## Understanding the code
@@ -86,7 +42,7 @@ In the end:
 
 - source_path=_data\lemon
 - bids_root=_data\lemon_bids
-- rules_path=examples\test_mne-bids_rules.yml
+- rules_path=examples\sovabids_example_rules.yml
 
 Doing this with the ``os.path.join function`` allows us to not worry about the particular OS one is testing the code in.
 
@@ -97,7 +53,7 @@ data_dir = os.path.abspath(data_dir)
 
 source_path = os.path.abspath(os.path.join(data_dir,'lemon'))
 bids_root= os.path.abspath(os.path.join(data_dir,'lemon_bids'))
-rules_path = os.path.join('examples','test_mne-bids_rules.yml')
+rules_path = os.path.join('examples','sovabids_examples_rules.yml')
 ```
 
 We will clean the output path as a safety measure from previous conversions.
@@ -351,7 +307,7 @@ Is used to infer information from the path. Any of the fields from the previous 
 
 How it works? You put the pattern you know beforehand of the filepath. The "pattern" is just writing the path of any eeg file on the source path and replacing the part which holds information with ``%dictionary.field%``. The name of the field are the ones on this schema; that is, to set the dataset name you could use ``%dataset_description.Name%``. Notice the dot notation is used to get inside the dictionaries.
 
-You don't need to put the whole absolute path if you are just interested in the filename which is the case in this example. You could see the ``tests\test_path_parser.py`` for examples with absolute paths.
+You don't need to put the whole absolute path if you are just interested in the filename which is the case in this example. You could see the ``tests/test_path_parser.py`` for examples with absolute paths. The folders of the path pattern should be separated by thr forward slash (``/``). With backward slash it should work but errors could arise.
 
 Every file on our source dataset has this name: sub-XXXXXX.vhdr, where XXXXXX is the subject label. So we will set up our pattern_path to: ``sub-%entities.subject%.vhdr``. You can also infer many fields at once but the fields are required to be separated by at least a character:
 
@@ -396,7 +352,7 @@ This is because our priority is to have first the REQUIRED fields of BIDS. They 
 
 ## The whole yaml file
 
-The whole yaml file can be found in examples\test_mne-bids_rules.yml , but here is it anyway:
+The whole yaml file can be found in examples\sovabids_example_rules.yml , but here is it anyway:
 
 ```yaml
 entities:
@@ -508,7 +464,7 @@ python sovabids\apply_rules.py sourcefolder outputfolder rulesfile
 So in my particular case it is:
 
 ```bash
-python sovabids\apply_rules.py y:\code\sovabids\_data\lemon y:\code\sovabids\_data\lemon_bids y:\code\sovabids\examples\test_mne-bids_rules.yml
+python sovabids\apply_rules.py y:\code\sovabids\_data\lemon y:\code\sovabids\_data\lemon_bids y:\code\sovabids\examples\sovabids_example_rules.yml
 ```
 
 ## Future Work

@@ -87,7 +87,7 @@ EEG:
     bids:
       task: <<entities.task>> # Note Dynamic values are not previewed in the bids editor but they do work, this should be fixed anyway
       acq: 
-      recording:
+      #recording:
       run: <<1>>                  # This will be updated during bidscoiner runtime (as it depends on the already existing files)
       suffix: eeg
     meta:                         # This is an optional entry for meta-data dictionary that will be appended to the json sidecar files produced by mne-bids

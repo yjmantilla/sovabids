@@ -1,3 +1,6 @@
+![Codecov](https://img.shields.io/codecov/c/github/yjmantilla/sovabids)
+
+
 # SOVABIDS
 
 A python package for the automatic conversion of MEG/EEG datasets to the BIDS standard, with a focus on making the most out of metadata

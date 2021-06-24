@@ -1,6 +1,6 @@
-![Codecov](https://img.shields.io/codecov/c/github/yjmantilla/sovabids)
+[<img src="https://img.shields.io/codecov/c/github/yjmantilla/sovabids">](https://app.codecov.io/gh/yjmantilla/sovabids)
+[<img src="https://img.shields.io/github/workflow/status/yjmantilla/sovabids/python-tests/main?label=tests">](https://github.com/yjmantilla/sovabids/actions?query=workflow%3Apython-tests)
 
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/yjmantilla/sovabids/python-tests/main?label=tests)
 
 # SOVABIDS
 

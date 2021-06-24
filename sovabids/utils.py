@@ -109,6 +109,7 @@ def parse_string_from_template(string,pattern,splitter='%'):
     Possible problems:
     fields with numeric values, they should be converted, the problem is which to convert?
     """
+    #TODO: Change the name of the function for something more appropiate
     string = string.replace('\\','/') # USE POSIX PLEASE
     pattern = pattern.replace('\\','/')
     if pattern.count('%') == 0 or pattern.count('%') % 2 != 0:
@@ -128,7 +129,7 @@ def parse_string_from_template(string,pattern,splitter='%'):
                 last_end=end
                 value = string[start:end]
 
-            if '.' in field:
+            if '.' in field: #TODO: Make this an argument
                 tree_list = field.split('.')
                 tree_dict = value
                 for key in reversed(tree_list):

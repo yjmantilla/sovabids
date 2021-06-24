@@ -1,1 +1,1 @@
-EOG = [nombres tipicos de canales oculares]
+#EOG = [nombres tipicos de canales oculares]

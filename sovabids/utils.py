@@ -202,7 +202,7 @@ import os
 
 
 
-def make_dummy_dataset(PATTERN = '%dataset%/%task%/%session%/sub%subject%_%run%',
+def make_dummy_dataset(PATTERN = '%dataset%/T%task%/S%session%/sub%subject%_%run%',
     DATASET = 'DUMMY',
     NSUBS = 11,
     NTASKS = 2,
@@ -226,13 +226,13 @@ def make_dummy_dataset(PATTERN = '%dataset%/%task%/%session%/sub%subject%_%run%'
     subs = [str(x).zfill(sub_zeros+1) for x in range(NSUBS)]
 
     task_zeros = get_num_leading_zeros(NTASKS)
-    tasks = [ 'T'+str(x).zfill(task_zeros+1) for x in range(NTASKS)]
+    tasks = [ str(x).zfill(task_zeros+1) for x in range(NTASKS)]
 
     run_zeros = get_num_leading_zeros(NRUNS)
     runs = [ str(x).zfill(run_zeros+1) for x in range(NRUNS)]
 
     ses_zeros = get_num_leading_zeros(NSESSIONS)
-    sessions = [ 'S'+str(x).zfill(ses_zeros+1) for x in range(NSESSIONS)]
+    sessions = [ str(x).zfill(ses_zeros+1) for x in range(NSESSIONS)]
 
 
     # Create some dummy metadata

@@ -166,8 +166,8 @@ def mne_open(filename,verbose='CRITICAL',preload=False):
 
 def create_dir(data_dir):
     if not os.path.isdir(data_dir):
-        #os.makedirs(data_dir, exist_ok=True)
-        os.mkdir(data_dir)
+        os.makedirs(data_dir, exist_ok=True)
+        #os.mkdir(data_dir)
 
 def download(url,path):
     get_response = requests.get(url,stream=True)

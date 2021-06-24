@@ -32,7 +32,7 @@ jobs:
         pip install -e .
     - name: Test with pytest
       run: |
-        pytest tests/ --cov=pyprep/ --cov-report=xml --verbose -s
+        pytest tests/ --cov=sovabids/ --cov-report=xml --verbose -s
     - name: Upload coverage report
       if: "matrix.platform == 'ubuntu-latest'"
       uses: codecov/codecov-action@v1

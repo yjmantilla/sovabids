@@ -34,7 +34,6 @@ jobs:
       run: |
         pytest tests/ --cov=sovabids/ --cov-report=xml --verbose -s
     - name: Upload coverage report
-      if: "matrix.platform == 'ubuntu-latest'"
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml    

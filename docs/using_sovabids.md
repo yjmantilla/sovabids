@@ -467,6 +467,18 @@ So in my particular case it is:
 python sovabids\apply_rules.py y:\code\sovabids\_data\lemon y:\code\sovabids\_data\lemon_bids y:\code\sovabids\examples\sovabids_example_rules.yml
 ```
 
+SOVABIDS also has command line entry points so you can also do:
+
+```bash
+sovapply sourcefolder outputfolder rulesfile
+```
+
+Or in our case:
+
+```bash
+sovapply y:\code\sovabids\_data\lemon y:\code\sovabids\_data\lemon_bids y:\code\sovabids\examples\sovabids_example_rules.yml
+```
+
 ## Future Work
 
 The overall blueprint of the Rules File is in sovabids\rules_schema.yml .

@@ -2,6 +2,8 @@ import os
 import mne
 import re
 import requests
+import numpy as np
+from mne_bids.write import _write_raw_brainvision
 
 
 macro = """try:
@@ -11,6 +13,8 @@ except:
     print(command)
 """
 
+def get_nulls():
+    return ['',None,{},[]]
 def get_supported_extensions():
     return ['.set' ,'.cnt' ,'.vhdr' ,'.bdf','.edf' ,'.fif'] 
 
@@ -193,29 +197,24 @@ def get_files(root_path):
     return filepaths
 
 
-
-import mne
-import numpy as np
-from mne_bids.write import _write_raw_brainvision
-from sovabids.utils import create_dir
-import os
-
-
-
-def make_dummy_dataset(PATTERN = '%dataset%/T%task%/S%session%/sub%subject%_%run%',
+def make_dummy_dataset(PATTERN = '%dataset_description.Name%/T%entities.task%/S%entities.session%/sub%entities.subject%_%entities.run%',
     DATASET = 'DUMMY',
     NSUBS = 11,
     NTASKS = 2,
+    NACQS = 2,
     NRUNS = 2,
     NSESSIONS = 4,
     NCHANNELS = 32,
     SFREQ = 200,
     STOP = 10,
-    NUMEVENTS = 10):
+    NUMEVENTS = 10,
+    ROOT=None):
 
-
-    this_dir = os.path.dirname(__file__)
-    data_dir = os.path.abspath(os.path.join(this_dir,'..','_data'))
+    if ROOT is None:
+        this_dir = os.path.dirname(__file__)
+        data_dir = os.path.abspath(os.path.join(this_dir,'..','_data'))
+    else:
+        data_dir = ROOT
     create_dir(data_dir)
 
 
@@ -234,6 +233,8 @@ def make_dummy_dataset(PATTERN = '%dataset%/T%task%/S%session%/sub%subject%_%run
     ses_zeros = get_num_leading_zeros(NSESSIONS)
     sessions = [ str(x).zfill(ses_zeros+1) for x in range(NSESSIONS)]
 
+    acq_zeros = get_num_leading_zeros(NACQS)
+    acquisitions = [ str(x).zfill(acq_zeros+1) for x in range(NACQS)]
 
     # Create some dummy metadata
     n_channels = NCHANNELS
@@ -244,18 +245,20 @@ def make_dummy_dataset(PATTERN = '%dataset%/T%task%/S%session%/sub%subject%_%run
     data = np.zeros((NCHANNELS,times.shape[0]))
 
     raw = mne.io.RawArray(data, info)
-
+    raw.set_channel_types({x:'eeg' for x in raw.ch_names})
     new_events = mne.make_fixed_length_events(raw, duration=STOP//NUMEVENTS)
 
     for task in tasks:
         for session in sessions:
             for run in runs:
                 for sub in subs:
-                    dummy = PATTERN.replace('%dataset%',DATASET)
-                    dummy = dummy.replace('%task%',task)
-                    dummy = dummy.replace('%session%',session)
-                    dummy = dummy.replace('%subject%',sub)
-                    dummy = dummy.replace('%run%',run)
-                    path = [data_dir] +dummy.split('/')
-                    fpath = os.path.join(*path)
-                    _write_raw_brainvision(raw,fpath,new_events)
+                    for acq in acquisitions:
+                        dummy = PATTERN.replace('%dataset%',DATASET)
+                        dummy = dummy.replace('%task%',task)
+                        dummy = dummy.replace('%session%',session)
+                        dummy = dummy.replace('%subject%',sub)
+                        dummy = dummy.replace('%run%',run)
+                        dummy = dummy.replace('%acquisition%',acq)
+                        path = [data_dir] +dummy.split('/')
+                        fpath = os.path.join(*path)
+                        _write_raw_brainvision(raw,fpath,new_events)

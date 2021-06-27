@@ -24,7 +24,7 @@ from typing import Pattern
 from sovabids.utils import parse_string_from_template
 
 
-def test_():
+def test_parser():
     string = r'Y:\code\sovabids\_data\lemon2\sub-010002\ses-001\resting\sub-010002.vhdr'
     path_pattern = 'sub-%ignore%\ses-%entities.session%\%entities.task%\sub-%entities.subject%.vhdr'
     result = parse_string_from_template(string,path_pattern,'%')

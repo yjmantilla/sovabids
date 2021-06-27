@@ -111,6 +111,9 @@ channels :
 #   Code : RECOMMENDED
 
 non-bids :
+  io: # For individual file mappings
+    source : OPTIONAL
+    target : OPTIONAL
   eeg_extension : OPTIONAL # to say which files to take into account when reading a directory, can be a list of extensions or a single one
   path_pattern : OPTIONAL #USE POSIX REQUIRED
   splitter : OPTIONAL # the split symbol for the path pattern, defaults to %

@@ -3,7 +3,7 @@ import mne_bids
 import json
 import yaml
 import argparse
-from sovabids.utils import deep_merge_N,get_supported_extensions,get_files,macro, run_command,split_by_n,parse_string_from_template,mne_open
+from sovabids.utils import create_dir, get_nulls,deep_merge_N,get_supported_extensions,get_files,macro, run_command,split_by_n,parse_string_from_template,mne_open
 from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
 from copy import deepcopy
 
@@ -16,7 +16,7 @@ def get_info_from_path(path,rules_):
     else:
         splitter = '%'
 
-    if "path_pattern" in rules.get('non-bids',{}):
+    if "path_pattern" in rules.get('non-bids',{}) and rules['non-bids']['path_pattern'] not in get_nulls():
         patterns_extracted = parse_string_from_template(path,rules['non-bids']['path_pattern'],splitter)
     if 'ignore' in patterns_extracted:
         del patterns_extracted['ignore']
@@ -29,6 +29,61 @@ def load_rules(rules_):
         with open(rules_,encoding="utf-8") as f:
             return yaml.load(f,yaml.FullLoader)
     return rules_
+
+def apply_rules_to_single_file(f,rules_,bids_root):
+    rules = deepcopy(rules_) #otherwise the deepmerge wont update the values for a new file
+
+    # Upon reading RAW MNE makes the assumptions
+    raw = mne_open(f)
+
+    # First get info from path
+
+    rules = get_info_from_path(f,rules)
+
+    # Apply Rules
+    assert 'entities' in rules
+    entities = rules['entities'] # this key has the same fields as BIDSPath constructor argument
+
+    if 'sidecar' in rules:
+        sidecar = rules['sidecar']
+        if "PowerLineFrequency" in sidecar and sidecar['PowerLineFrequency'] not in get_nulls():
+            raw.info['line_freq'] = sidecar["PowerLineFrequency"]  # specify power line frequency as required by BIDS
+        # Should we try to infer the line frequency automatically from the psd?
+
+    if 'channels' in rules:
+        channels = rules['channels']
+        if "type" in channels:
+            raw.set_channel_types(channels["type"])
+
+    if 'non-bids' in rules:
+        non_bids = rules['non-bids']
+        if "code_execution" in non_bids:
+            if isinstance(non_bids["code_execution"],str):
+                non_bids["code_execution"] = [non_bids["code_execution"]]
+            if isinstance(non_bids["code_execution"],list):
+                for command in non_bids["code_execution"]:
+                    exec(macro)
+                    #raw = run_command(raw,command) #another way...
+                    # maybe log errors here?
+
+
+        bids_path = BIDSPath(**entities,root=bids_root)
+        write_raw_bids(raw, bids_path=bids_path,overwrite=True)
+        rules['io']={}
+        rules['io']['target'] = bids_path.fpath.__str__()
+        rules['io']['source'] = f
+        # Rules that need to be applied to the result of mne-bids
+        # Or maybe we should add the functionality directly to mne-bids
+
+        if 'sidecar' in rules:
+            sidecar_path = bids_path.copy().update(suffix='eeg', extension='.json')
+            with open(sidecar_path.fpath) as f:
+                dummy_dict = json.load(f)
+                sidecar = rules['sidecar']
+                dummy_dict.update(sidecar)
+                # maybe include an overwrite rule
+                mne_bids.utils._write_json(sidecar_path.fpath,dummy_dict,overwrite=True)
+    return rules
 def apply_rules(source_path,bids_root,rules_):
 
     rules_ = load_rules(rules_)
@@ -48,59 +103,10 @@ def apply_rules(source_path,bids_root,rules_):
     filepaths = [x for x in filepaths if os.path.splitext(x)[1] in extensions]
 
     #%% BIDS CONVERSION
-
+    all_mappings = []
     for f in filepaths:
-        rules = deepcopy(rules_) #otherwise the deepmerge wont update the values for a new file
-
-        # Upon reading RAW MNE makes the assumptions
-        raw = mne_open(f)
-
-        # First get info from path
-
-        rules = get_info_from_path(f,rules)
-
-        # Apply Rules
-        assert 'entities' in rules
-        entities = rules['entities'] # this key has the same fields as BIDSPath constructor argument
-
-        if 'sidecar' in rules:
-            sidecar = rules['sidecar']
-            if "PowerLineFrequency" in sidecar:
-                raw.info['line_freq'] = sidecar["PowerLineFrequency"]  # specify power line frequency as required by BIDS
-            # Should we try to infer the line frequency automatically from the psd?
-
-        if 'channels' in rules:
-            channels = rules['channels']
-            if "type" in channels:
-                raw.set_channel_types(channels["type"])
-
-        if 'non-bids' in rules:
-            non_bids = rules['non-bids']
-            if "code_execution" in non_bids:
-                if isinstance(non_bids["code_execution"],str):
-                    non_bids["code_execution"] = [non_bids["code_execution"]]
-                if isinstance(non_bids["code_execution"],list):
-                    for command in non_bids["code_execution"]:
-                        exec(macro)
-                        #raw = run_command(raw,command) #another way...
-                        # maybe log errors here?
-
-
-        bids_path = BIDSPath(**entities,root=bids_root)
-        write_raw_bids(raw, bids_path=bids_path,overwrite=True)
-
-        # Rules that need to be applied to the result of mne-bids
-        # Or maybe we should add the functionality directly to mne-bids
-
-        if 'sidecar' in rules:
-            sidecar_path = bids_path.copy().update(suffix='eeg', extension='.json')
-            with open(sidecar_path.fpath) as f:
-                dummy_dict = json.load(f)
-                sidecar = rules['sidecar']
-                dummy_dict.update(sidecar)
-                # maybe include an overwrite rule
-                mne_bids.utils._write_json(sidecar_path.fpath,dummy_dict,overwrite=True)
-
+        rules = apply_rules_to_single_file(f,rules_,bids_root)
+        all_mappings.append(rules)
     # Grab the info from the last file to make the dataset description
     if 'dataset_description' in rules:
         dataset_description = rules['dataset_description']
@@ -112,6 +118,13 @@ def apply_rules(source_path,bids_root,rules_):
 
         mne_bids.make_dataset_description(bids_root,**dataset_description,overwrite=True)
         # Problem: Authors with strange characters are written incorrectly.
+    outputname = 'file_mappings.yml'
+    outputfolder = os.path.join(bids_root,'code','sovabids')
+    create_dir(outputfolder)
+    full_rules_path = os.path.join(outputfolder,outputname)
+    with open(full_rules_path, 'w') as outfile:
+        yaml.dump(all_mappings, outfile, default_flow_style=False)
+    return all_mappings
 
 def main():
     """Console script usage"""

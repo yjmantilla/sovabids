@@ -41,16 +41,17 @@ def split_by_n(lst,n):
     return [lst[i:i + n] for i in range(0, len(lst), n)]
 
 def deep_merge_N(l):
+    ## Last items should have greater precedence
     d = {}
     while True:
         if len(l) == 0:
             return {}
         if len(l) == 1:
             return l[0]
-        d1 = l.pop()
-        d2 = l.pop()
+        d1 = l.pop(0)
+        d2 = l.pop(0)
         d = deep_merge(d1,d2)
-        l.append(d)
+        l.insert(0, d)
 
 def deep_merge(a, b):
     """

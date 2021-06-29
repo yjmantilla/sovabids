@@ -2,11 +2,12 @@ import os
 import shutil
 from sys import path
 import yaml
+from sovabids.parsers import custom_notation_to_regex
 from sovabids.apply_rules import apply_rules,load_rules
-from sovabids.utils import create_dir, make_dummy_dataset
+from sovabids.utils import create_dir, make_dummy_dataset,deep_merge_N
 from bids_validator import BIDSValidator
 
-def test_dummy_dataset():
+def test_dummy_dataset(pattern_type='custom'):
 
     # Getting current file path and then going to _data directory
     this_dir = os.path.dirname(__file__)
@@ -16,7 +17,7 @@ def test_dummy_dataset():
     # Defining relevant conversion paths
     test_root = os.path.join(data_dir,'DUMMY')
     input_root = os.path.join(test_root,'DUMMY_SOURCE')
-    bids_root = os.path.join(test_root,'DUMMY_BIDS')
+    bids_root = os.path.join(test_root,'DUMMY_BIDS'+'_'+pattern_type)
 
     # PARAMS for making the dummy dataset
     DATA_PARAMS ={ 'PATTERN':'T%task%/S%session%/sub%subject%_%acquisition%_%run%',
@@ -35,7 +36,7 @@ def test_dummy_dataset():
 
 
     # Preparing directories
-    dirs = [test_root,input_root,bids_root]
+    dirs = [input_root,bids_root] #dont include test_root for saving multiple conversions
     for dir in dirs:
         try:
             shutil.rmtree(dir)
@@ -81,8 +82,12 @@ def test_dummy_dataset():
         'type':{'ECG_CHAN':'ECG','EOG_CHAN':'EOG'}}
     }
 
+    if pattern_type == 'regex':
+        FIXED_PATTERN_RE,fields = custom_notation_to_regex(FIXED_PATTERN)
+        dregex = {'non-bids':{'path_analysis':{'fields':fields,'pattern':FIXED_PATTERN_RE}}}
+        data = deep_merge_N([data,dregex])
     # Writing the rules file
-    outputname = 'dummy_rules.yml'
+    outputname = 'dummy_rules'+pattern_type+'.yml'
 
     full_rules_path = os.path.join(test_root,outputname)
     with open(full_rules_path, 'w') as outfile:
@@ -101,4 +106,5 @@ def test_dummy_dataset():
 
 if __name__ == '__main__':
     test_dummy_dataset()
+    test_dummy_dataset(pattern_type='regex')
     print('ok')

@@ -87,7 +87,7 @@ def test_dummy_dataset(pattern_type='custom'):
         dregex = {'non-bids':{'path_analysis':{'fields':fields,'pattern':FIXED_PATTERN_RE}}}
         data = deep_merge_N([data,dregex])
     # Writing the rules file
-    outputname = 'dummy_rules'+pattern_type+'.yml'
+    outputname = 'dummy_rules'+'_'+pattern_type+'.yml'
 
     full_rules_path = os.path.join(test_root,outputname)
     with open(full_rules_path, 'w') as outfile:

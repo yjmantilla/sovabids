@@ -12,6 +12,5 @@ channels:
 
 non-bids:
   eeg_extension : .vhdr
-  #path_pattern : /%ignore%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr #USE POSIX
   code_execution: # To manipulate the raw mne object for further changes
     - print(raw.info)

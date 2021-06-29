@@ -312,8 +312,8 @@ This is the hardest dictionary to master. As of now what is supported is:
 ```yaml
 non-bids :
   eeg_extension : value
-  path_pattern : value
-  splitter : value
+  path_analysis : 
+    pattern : value
   code_execution : code
 ```
 
@@ -321,7 +321,7 @@ non-bids :
 
 Just defines the extension of the eeg files we want to read, it could also not be in the dictionary, in which case the eeg files will be any from the following extensions: ['.set' ,'.cnt' ,'.vhdr' ,'.bdf' ,'.fif']. Notice it is preferable that you put the dot before the extension; the code should add it if you dont though.
 
-#### path_pattern
+#### path_analysis
 
 Is used to infer information from the path. Any of the fields from the previous dictionaries are supported as long they consist of a single simple value (anything that is a single number or string). The pattern is applied to every file that has the eeg_extension mentioned before.
 
@@ -338,10 +338,6 @@ bad: %entities.subject%%entities.task%
 
 Notice that here we are depending on the extension being the same, what if the extension varied?. For cases like this you can use a special field "ignore" (``%ignore%``). The algorithm will throw away that information. Remember though that we need the fields to be separated by at least a character; luckily the extension is always preceded by a dot. So you could do ``sub-%entities.subject%.%ignore%``.
 
-#### splitter
-
-Is used to set up symbol for the path pattern, defaults to % so you dont need to set it up.
-
 #### code_execution
 
 Is used to hold a list of commands you want to run for additional flexibility but at the cost of knowing a bit about the backend of this package. Mainly that eeg object is called "raw" and is from mne; that is, you can manipulate it if you know how to use mne.
@@ -355,7 +351,8 @@ Wow, this part was intense but in the end we just have:
 ```yaml
 non-bids:
   eeg_extension : .vhdr
-  path_pattern : sub-%entities.subject%.vhdr
+  path_analysis:
+    pattern : sub-%entities.subject%.vhdr
   code_execution: # To manipulate the raw mne object for further changes
     - print(raw.info)
 ```
@@ -462,7 +459,8 @@ channels:
 
 non-bids:
   eeg_extension : .vhdr
-  path_pattern : sub-%entities.subject%.vhdr
+  path_analysis :
+    pattern : sub-%entities.subject%.vhdr
   code_execution: # To manipulate the raw mne object for further changes
     - print(raw.info)
 ```
@@ -499,6 +497,10 @@ Or in our case:
 sovapply y:\code\sovabids\_data\lemon y:\code\sovabids\_data\lemon_bids y:\code\sovabids\examples\sovabids_example_rules.yml
 ```
 
-## Future Work
+## Blueprint of the schema
 
 The overall blueprint of the Rules File is in sovabids\rules_schema.yml .
+
+## Future Work
+
+...

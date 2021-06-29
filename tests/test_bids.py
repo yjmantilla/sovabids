@@ -73,7 +73,7 @@ def test_dummy_dataset():
     'non-bids':
         {
         'eeg_extension':'.vhdr',
-        'path_pattern':FIXED_PATTERN,
+        'path_analysis':{'pattern':FIXED_PATTERN},
         'code_execution':['print(raw.info)']
         },
     'channels':
@@ -101,3 +101,4 @@ def test_dummy_dataset():
 
 if __name__ == '__main__':
     test_dummy_dataset()
+    print('ok')

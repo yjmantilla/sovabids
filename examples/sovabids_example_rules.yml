@@ -85,6 +85,7 @@ channels:
 
 non-bids:
   eeg_extension : .vhdr
-  path_pattern : sub-%entities.subject%.vhdr #USE POSIX
+  path_analysis:
+    pattern : sub-%entities.subject%.vhdr #USE POSIX
   code_execution: # To manipulate the raw mne object for further changes
     - print(raw.info)

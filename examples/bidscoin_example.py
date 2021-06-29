@@ -61,7 +61,8 @@ Options:
     sova2coin:            #module add sovabids #
       rules_file : {}
       non-bids:
-        path_pattern : /%ignore%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr #USE POSIX
+        path_analysis:
+          pattern : /%ignore%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr #USE POSIX
 
 EEG:
 # --------------------------------------------------------------------------------

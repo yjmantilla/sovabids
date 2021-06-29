@@ -549,7 +549,8 @@ The most important parts of the file are:
 sova2coin:            #module add sovabids #
     rules_file : y:\code\sovabids\examples\bidscoin_example_rules.yml
     non-bids:
-    path_pattern : /%ignore%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr #USE POSIX
+    path_analysis :
+        pattern: /%ignore%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr #USE POSIX
 ```
 
 This part configures the sovabids plugin on bidscoin side. Here we are passing the path for our "rules" file. We can also directly pass dictionaries directly from our rules file. For example in this case we are passing the "non-bids" dictionary which has a path pattern to infer the subject,session and task properties.

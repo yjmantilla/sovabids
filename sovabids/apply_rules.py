@@ -6,21 +6,38 @@ import argparse
 import pandas as pd
 
 from sovabids.utils import create_dir, get_nulls,deep_merge_N,get_supported_extensions,get_files,macro, run_command,split_by_n,mne_open
-from sovabids.parsers import parse_string_from_template
+from sovabids.parsers import regex_parser,parse_from_custom_notation
 from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
 from copy import deepcopy
 
 
 def get_info_from_path(path,rules_):
+    """
+    Two ways to parse:
+
+    Through regex:
+        pattern: REQUIRED
+        fields: REQUIRED
+    We know it is regex because fields are given, if not it is custom notation.
+
+    Through custom notation:
+        pattern: REQUIRED
+        splitter: OPTIONAL %
+        matcher: OPTIONAL, (.+)
+    """
     rules = deepcopy(rules_)
     patterns_extracted = {}
-    if 'splitter' in rules.get('non-bids',{}):
-        splitter = rules['non-bids']['splitter']
-    else:
-        splitter = '%'
-
-    if "path_pattern" in rules.get('non-bids',{}) and rules['non-bids']['path_pattern'] not in get_nulls():
-        patterns_extracted = parse_string_from_template(path,rules['non-bids']['path_pattern'],splitter)
+    non_bids_rules = rules.get('non-bids',{})
+    if 'path_analysis' in non_bids_rules:
+        path_analysis = non_bids_rules['path_analysis']
+        pattern = path_analysis.get('pattern','')
+        # Check if regex
+        if 'fields' in path_analysis:
+            patterns_extracted = regex_parser(path,pattern,path_analysis.get('fields',[]))
+        else: # custom notation
+            splitter = path_analysis.get('splitter','%')
+            matcher = path_analysis.get('matcher','(.+)')
+            patterns_extracted = parse_from_custom_notation(path,pattern,splitter,matcher)
     if 'ignore' in patterns_extracted:
         del patterns_extracted['ignore']
     # this what needed because using rules.update(patterns_extracted) replaced it all

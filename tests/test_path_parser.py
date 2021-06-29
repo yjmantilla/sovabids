@@ -21,8 +21,7 @@ In example:
 
 import pytest
 from typing import Pattern
-from sovabids.utils import parse_string_from_template
-
+from sovabids.parsers import parse_string_from_template,parse_from_custom_notation,regex_parser
 
 def test_custom_parser():
     string = r'Y:\code\sovabids\_data\lemon2\sub-010002\ses-001\resting\sub-010002.vhdr'
@@ -35,9 +34,9 @@ def test_custom_parser():
     assert result['ignore']=='010002'
 
     string = r'Y:\code\sovabids\_data\lemon2\sub-010004\ses-001\sub-010004.vhdr'
-    path_pattern = 'ses-%entities.task%/s%ignore%-%entities.subject%.vhdr'
+    path_pattern = 'ses-%entities.session%/s%ignore%-%entities.subject%.vhdr'
     result = parse_string_from_template(string,path_pattern,'%')
-    assert result['entities']['task']=='001'
+    assert result['entities']['session']=='001'
     assert result['entities']['subject']=='010004'
     assert result['ignore']=='ub'
 
@@ -65,8 +64,85 @@ def test_custom_parser():
     assert result['entities']['subject'] == '010002.vhdr'
 
 def test_regex_parser():
-    pass
+    string = r'Y:\code\sovabids\_data\lemon2\sub-010002\ses-001\resting\sub-010002.vhdr'
+    path_pattern = '.*?\\/.*?\\/.*?\\/.*?\\/.*?\\/sub-(.*?)\\/ses-(.*?)\\/(.*?)\\/sub-(.*?).vhdr'
+    fields = ['ignore','entities.session','entities.task','entities.subject']
+    result = regex_parser(string,path_pattern,fields)
+    assert result['entities']['subject'] == '010002'
+    assert result['entities']['session']=='001'
+    assert result['entities']['task']=='resting'
+    assert result['ignore']=='010002'
+
+    string = r'Y:\code\sovabids\_data\lemon2\sub-010004\ses-001\sub-010004.vhdr'
+
+    path_pattern = 'ses-(.*?)\\/s(.*?)-(.*?).vhdr'
+    fields = ['entities.session','ignore','entities.subject']
+    result = regex_parser(string,path_pattern,fields)
+    assert result['entities']['session']=='001'
+    assert result['entities']['subject']=='010004'
+    assert result['ignore']=='ub'
+    
+    string = 'y:\\code\\sovabids\\_data\\lemon\\sub-010002.vhdr'
+    path_pattern = 'sub-(.*?).vhdr'
+    fields = 'entities.subject'
+    result = regex_parser(string,path_pattern,fields)
+    assert result['entities']['subject'] == '010002'
+
+    path_pattern = '(.*?)\\/sub-(.*?).vhdr'
+    fields = ['ignore','entities.subject']
+    result = regex_parser(string,path_pattern,fields)
+    assert result['entities']['subject'] == '010002'
+    assert result['ignore'] == 'y:/code/sovabids/_data/lemon' #USE POSIX
+
+    path_pattern = '(.*?).vhdr'
+    fields = 'entities.subject'
+    result = regex_parser(string,path_pattern,fields)
+    assert result['entities']['subject'] == 'y:/code/sovabids/_data/lemon/sub-010002'
+
+    path_pattern = 'sub-(.*)' # notice no "?",or use .+
+    fields = 'entities.subject'
+    result = regex_parser(string,path_pattern,fields)
+    assert result['entities']['subject'] == '010002.vhdr'
+
+
+def test_custom_notation_to_regex():
+    matcher = '(.+)'
+    string = r'Y:\code\sovabids\_data\lemon2\sub-010002\ses-001\resting\sub-010002.vhdr'
+    path_pattern = 'sub-%ignore%\ses-%entities.session%\%entities.task%\sub-%entities.subject%.vhdr'
+    result = parse_from_custom_notation(string,path_pattern,matcher=matcher)
+    assert result['entities']['subject'] == '010002'
+    assert result['entities']['session']=='001'
+    assert result['entities']['task']=='resting'
+    assert result['ignore']=='010002'
+
+    string = r'Y:\code\sovabids\_data\lemon2\sub-010004\ses-001\sub-010004.vhdr'
+    path_pattern = 'ses-%entities.session%/s%ignore%-%entities.subject%.vhdr'
+    result = parse_from_custom_notation(string,path_pattern,matcher=matcher)
+    assert result['entities']['session']=='001'
+    assert result['entities']['subject']=='010004'
+    assert result['ignore']=='ub'
+    
+    string = 'y:\\code\\sovabids\\_data\\lemon\\sub-010002.vhdr'
+    path_pattern = 'sub-%entities.subject%.vhdr'
+    result = parse_from_custom_notation(string,path_pattern,matcher=matcher)
+    assert result['entities']['subject'] == '010002'
+
+    path_pattern = '%ignore%\sub-%entities.subject%.vhdr'
+    result = parse_from_custom_notation(string,path_pattern,matcher=matcher)
+    assert result['entities']['subject'] == '010002'
+    assert result['ignore'] == 'y:/code/sovabids/_data/lemon' #USE POSIX
+
+    path_pattern = '%entities.subject%.vhdr'
+    result = parse_from_custom_notation(string,path_pattern,matcher=matcher)
+    assert result['entities']['subject'] == 'y:/code/sovabids/_data/lemon/sub-010002'
+
+    path_pattern = 'sub-%entities.subject%'
+    result = parse_from_custom_notation(string,path_pattern,matcher=matcher)
+    assert result['entities']['subject'] == '010002.vhdr'
+
 
 if __name__ == '__main__':
     test_custom_parser()
     test_regex_parser()
+    test_custom_notation_to_regex()
+    print('ok')

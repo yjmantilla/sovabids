@@ -5,7 +5,8 @@ import yaml
 import argparse
 import pandas as pd
 
-from sovabids.utils import create_dir, get_nulls,deep_merge_N,get_supported_extensions,get_files,macro, run_command,split_by_n,parse_string_from_template,mne_open
+from sovabids.utils import create_dir, get_nulls,deep_merge_N,get_supported_extensions,get_files,macro, run_command,split_by_n,mne_open
+from sovabids.parsers import parse_string_from_template
 from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
 from copy import deepcopy
 

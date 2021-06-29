@@ -91,7 +91,7 @@ def apply_rules_to_single_file(f,rules_,bids_root):
 
         if 'channels' in rules:
             channels_path = bids_path.copy().update(datatype='eeg',suffix='channels', extension='.tsv')
-            channels_table = pd.read_csv (channels_path.fpath, sep = '\t',dtype=str)
+            channels_table = pd.read_csv (channels_path.fpath, sep = '\t',dtype=str,keep_default_na=False,na_filter=False,na_values=[],true_values=[],false_values=[])
             channels_rules = rules['channels']
             if 'type' in channels_rules: # types are post since they are not saved in vhdr (are they in edf??)
                 for ch_name,ch_type in channels_rules['type'].items():

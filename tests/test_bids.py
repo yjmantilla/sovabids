@@ -77,8 +77,8 @@ def test_dummy_dataset():
         'code_execution':['print(raw.info)']
         },
     'channels':
-        {'name':{'0':'00'},
-        'type':{'00':'ECG','1':'EOG'}}
+        {'name':{'0':'ECG_CHAN','1':'EOG_CHAN'},
+        'type':{'ECG_CHAN':'ECG','EOG_CHAN':'EOG'}}
     }
 
     # Writing the rules file

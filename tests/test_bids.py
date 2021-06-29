@@ -59,9 +59,26 @@ def test_dummy_dataset():
 
     # Making the rules dictionary
     data={
-    'dataset_description':{'Name':'Dummy','Authors':['A1','A2'],},
-    'sidecar':  {'PowerLineFrequency' : 50,'EEGReference':'FCz'},
-    'non-bids':{'eeg_extension':'.vhdr','path_pattern':FIXED_PATTERN,'code_execution':['print(raw.info)']}
+    'dataset_description':
+        {
+            'Name':'Dummy',
+            'Authors':['A1','A2'],
+        },
+    'sidecar':  
+        {
+            'PowerLineFrequency' : 50,
+            'EEGReference':'FCz',
+            'SoftwareFilters':{"Anti-aliasing filter": {"half-amplitude cutoff (Hz)": 500, "Roll-off": "6dB/Octave"}}
+        },
+    'non-bids':
+        {
+        'eeg_extension':'.vhdr',
+        'path_pattern':FIXED_PATTERN,
+        'code_execution':['print(raw.info)']
+        },
+    'channels':
+        {'name':{'0':'00'},
+        'type':{'00':'ECG','1':'EOG'}}
     }
 
     # Writing the rules file
@@ -81,3 +98,6 @@ def test_dummy_dataset():
     filepaths = [x['io']['target'].replace(bids_root,'') for x in file_mappings]
     for filepath in filepaths:
         assert validator.is_bids(filepath)
+
+if __name__ == '__main__':
+    test_dummy_dataset()

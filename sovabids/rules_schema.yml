@@ -1,3 +1,4 @@
+#TODO: Do a validator of this file schema
 # # eeg bids fields collection
 # # Unsupported files are commented
 entities : #see https://github.com/bids-standard/bids-specification/blob/66d8532065bdae6a7275efd8bbe05a8e00dc1031/src/schema/datatypes/eeg.yaml#L13-L18
@@ -38,7 +39,7 @@ sidecar :
   EEGReference : REQUIRED
 #   SamplingFrequency : REQUIRED
   PowerLineFrequency : REQUIRED
-#   SoftwareFilters : REQUIRED
+  SoftwareFilters : REQUIRED # do a dictionary tree like {"Anti-aliasing filter": {"half-amplitude cutoff (Hz)": 500, "Roll-off": "6dB/Octave"}}
 #   CapManufacturer : RECOMMENDED
 #   CapManufacturersModelName : RECOMMENDED
 #   EEGChannelCount : RECOMMENDED
@@ -57,8 +58,8 @@ sidecar :
 #   SubjectArtefactDescription : RECOMMENDED
 
 channels :
-#   name : REQUIRED
-  type : REQUIRED
+  name : REQUIRED #notice, this will be applied first so if other fields are changed use the new name as index
+  type : REQUIRED #dictionary following name : bids-type
 #   units : REQUIRED
 #   description : OPTIONAL
 #   sampling_frequency : OPTIONAL

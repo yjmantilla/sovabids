@@ -8,7 +8,7 @@ sidecar:
 
 channels:
   type : # To overwrite channel types inferred by MNE
-    VEOG : eog #white-space separating key and value is important
+    VEOG : VEOG #white-space separating key and value is important
 
 non-bids:
   eeg_extension : .vhdr

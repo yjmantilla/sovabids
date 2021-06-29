@@ -267,20 +267,40 @@ In our case all channel types are correctly inferred by mne but one. An ocular. 
 ```yaml
 channels:
   type :
-    VEOG : eog
+    VEOG : VEOG
 ```
 
-Here we are assigning the channel labeled as "VEOG" with the type "eog". The types have to follow the [MNE notation](https://mne.tools/stable/generated/mne.io.Raw.html#mne.io.Raw.set_channel_types).
+Here we are assigning the channel labeled as "VEOG" with the type "EOG". The types have to follow the [BIDS notation](https://bids-specification.readthedocs.io/en/stable/04-modality-specific-files/03-electroencephalography.html).
 
-Notice here we only set up the type of a single channel, that is because all the other ones are inferred correctly as "eeg" by mne. You are free to set the type of each channel here by hand though; it would overwrite the types gotten by MNE.
+| Keyword  | Description                                                  |
+|----------|--------------------------------------------------------------|
+| AUDIO    | Audio signal                                                 |
+| EEG      | Electroencephalogram channel                                 |
+| EOG      | Generic electrooculogram (eye), different from HEOG and VEOG |
+| ECG      | Electrocardiogram (heart)                                    |
+| EMG      | Electromyogram (muscle)                                      |
+| EYEGAZE  | Eye tracker gaze                                             |
+| GSR      | Galvanic skin response                                       |
+| HEOG     | Horizontal EOG (eye)                                         |
+| MISC     | Miscellaneous                                                |
+| PPG      | Photoplethysmography                                         |
+| PUPIL    | Eye tracker pupil diameter                                   |
+| REF      | Reference channel                                            |
+| RESP     | Respiration                                                  |
+| SYSCLOCK | System time showing elapsed time since trial started         |
+| TEMP     | Temperature                                                  |
+| TRIG     | System triggers                                              |
+| VEOG     | Vertical EOG (eye)                                           |
+
+Notice here we only set up the type of a single channel, that is because all the other ones are inferred correctly as "EEG" by mne. You are free to set the type of each channel here by hand though; it would overwrite the types gotten by MNE.
 
 For example you could do:
 
 ```yaml
 channels:
   type :
-    VEOG : eog
-    F3 : eeg
+    VEOG : VEOG
+    F3 : EEG
 ```
 
 Notice here we are not using the list notation (``-``) of yaml; this is because of a technical reason.

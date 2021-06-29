@@ -3,6 +3,8 @@ import mne_bids
 import json
 import yaml
 import argparse
+import pandas as pd
+
 from sovabids.utils import create_dir, get_nulls,deep_merge_N,get_supported_extensions,get_files,macro, run_command,split_by_n,parse_string_from_template,mne_open
 from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
 from copy import deepcopy
@@ -52,8 +54,8 @@ def apply_rules_to_single_file(f,rules_,bids_root):
 
     if 'channels' in rules:
         channels = rules['channels']
-        if "type" in channels:
-            raw.set_channel_types(channels["type"])
+        if "name" in channels:
+            raw.rename_channels(channels['name'])
 
     if 'non-bids' in rules:
         non_bids = rules['non-bids']
@@ -72,17 +74,29 @@ def apply_rules_to_single_file(f,rules_,bids_root):
         rules['io']={}
         rules['io']['target'] = bids_path.fpath.__str__()
         rules['io']['source'] = f
+
+        # POST-PROCESSING. For stuff easier to overwrite in the files rather than in the raw object
         # Rules that need to be applied to the result of mne-bids
         # Or maybe we should add the functionality directly to mne-bids
 
         if 'sidecar' in rules:
-            sidecar_path = bids_path.copy().update(suffix='eeg', extension='.json')
+            sidecar_path = bids_path.copy().update(datatype='eeg',suffix='eeg', extension='.json')
             with open(sidecar_path.fpath) as f:
                 dummy_dict = json.load(f)
                 sidecar = rules['sidecar']
+                #TODO Validate the sidecar rules so as not to include dangerous stuff??
                 dummy_dict.update(sidecar)
                 # maybe include an overwrite rule
                 mne_bids.utils._write_json(sidecar_path.fpath,dummy_dict,overwrite=True)
+
+        if 'channels' in rules:
+            channels_path = bids_path.copy().update(datatype='eeg',suffix='channels', extension='.tsv')
+            channels_table = pd.read_csv (channels_path.fpath, sep = '\t',dtype=str)
+            channels_rules = rules['channels']
+            if 'type' in channels_rules: # types are post since they are not saved in vhdr (are they in edf??)
+                for ch_name,ch_type in channels_rules['type'].items():
+                    channels_table.loc[(channels_table.name==str(ch_name)),'type'] = ch_type
+            channels_table.to_csv(channels_path.fpath, index=False,sep='\t')
     return rules
 def apply_rules(source_path,bids_root,rules_):
 

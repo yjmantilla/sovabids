@@ -222,7 +222,7 @@ def make_dummy_dataset(PATTERN = '%dataset_description.Name%/T%entities.task%/S%
         return int(np.floor(np.log10(N-1)))
 
     sub_zeros = get_num_leading_zeros(NSUBS)
-    subs = [str(x).zfill(sub_zeros+1) for x in range(NSUBS)]
+    subs = [ str(x).zfill(sub_zeros+1) for x in range(NSUBS)]
 
     task_zeros = get_num_leading_zeros(NTASKS)
     tasks = [ str(x).zfill(task_zeros+1) for x in range(NTASKS)]

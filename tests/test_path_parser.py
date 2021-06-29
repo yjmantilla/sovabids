@@ -24,7 +24,7 @@ from typing import Pattern
 from sovabids.utils import parse_string_from_template
 
 
-def test_parser():
+def test_custom_parser():
     string = r'Y:\code\sovabids\_data\lemon2\sub-010002\ses-001\resting\sub-010002.vhdr'
     path_pattern = 'sub-%ignore%\ses-%entities.session%\%entities.task%\sub-%entities.subject%.vhdr'
     result = parse_string_from_template(string,path_pattern,'%')
@@ -64,3 +64,9 @@ def test_parser():
     result = parse_string_from_template(string,path_pattern,'%')
     assert result['entities']['subject'] == '010002.vhdr'
 
+def test_regex_parser():
+    pass
+
+if __name__ == '__main__':
+    test_custom_parser()
+    test_regex_parser()

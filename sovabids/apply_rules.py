@@ -71,9 +71,9 @@ def apply_rules_to_single_file(f,rules_,bids_root):
 
         bids_path = BIDSPath(**entities,root=bids_root)
         write_raw_bids(raw, bids_path=bids_path,overwrite=True)
-        rules['io']={}
-        rules['io']['target'] = bids_path.fpath.__str__()
-        rules['io']['source'] = f
+        rules['IO']={}
+        rules['IO']['target'] = bids_path.fpath.__str__()
+        rules['IO']['source'] = f
 
         # POST-PROCESSING. For stuff easier to overwrite in the files rather than in the raw object
         # Rules that need to be applied to the result of mne-bids
@@ -97,6 +97,7 @@ def apply_rules_to_single_file(f,rules_,bids_root):
                 for ch_name,ch_type in channels_rules['type'].items():
                     channels_table.loc[(channels_table.name==str(ch_name)),'type'] = ch_type
             channels_table.to_csv(channels_path.fpath, index=False,sep='\t')
+    #TODO remove general information of the dataset from the INDIVIDUAL FILES (ie dataset_description stuff)
     return rules
 def apply_rules(source_path,bids_root,rules_):
 
@@ -136,9 +137,10 @@ def apply_rules(source_path,bids_root,rules_):
     outputfolder = os.path.join(bids_root,'code','sovabids')
     create_dir(outputfolder)
     full_rules_path = os.path.join(outputfolder,outputname)
+    mapping_data = {'General_Rules':rules_,'Individual_Mappings':all_mappings}
     with open(full_rules_path, 'w') as outfile:
-        yaml.dump(all_mappings, outfile, default_flow_style=False)
-    return all_mappings
+        yaml.dump(mapping_data, outfile, default_flow_style=False)
+    return mapping_data
 
 def main():
     """Console script usage"""

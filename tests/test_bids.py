@@ -92,10 +92,10 @@ def test_dummy_dataset():
     rules = load_rules(full_rules_path)
 
     file_mappings = apply_rules(source_path=input_root,bids_root=bids_root,rules_=rules)
-
+    file_mappings=file_mappings['Individual_Mappings']
     # Testing the mappings (at the moment it only test the filepaths)
     validator = BIDSValidator()
-    filepaths = [x['io']['target'].replace(bids_root,'') for x in file_mappings]
+    filepaths = [x['IO']['target'].replace(bids_root,'') for x in file_mappings]
     for filepath in filepaths:
         assert validator.is_bids(filepath)
 

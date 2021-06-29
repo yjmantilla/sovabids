@@ -7,7 +7,7 @@ from sovabids.apply_rules import apply_rules,load_rules
 from sovabids.utils import create_dir, make_dummy_dataset,deep_merge_N
 from bids_validator import BIDSValidator
 
-def test_dummy_dataset(pattern_type='custom'):
+def dummy_dataset(pattern_type='custom'):
 
     # Getting current file path and then going to _data directory
     this_dir = os.path.dirname(__file__)
@@ -104,7 +104,10 @@ def test_dummy_dataset(pattern_type='custom'):
     for filepath in filepaths:
         assert validator.is_bids(filepath)
 
+def test_dummy_dataset():
+    dummy_dataset('custom')
+    dummy_dataset('regex')
+
 if __name__ == '__main__':
     test_dummy_dataset()
-    test_dummy_dataset(pattern_type='regex')
     print('ok')

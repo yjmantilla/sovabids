@@ -1,2 +1,2 @@
 fixes:
-  - "sovabids/::sovabids/sovabids/"  # move path   e.g., "before/path" => "after/path"
+  - "sovabids/::/"  # move path   e.g., "before/path" => "after/path"

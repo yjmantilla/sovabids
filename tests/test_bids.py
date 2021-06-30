@@ -2,7 +2,7 @@ import os
 import shutil
 from sys import path
 import yaml
-from sovabids.parsers import custom_notation_to_regex
+from sovabids.parsers import placeholder_to_regex
 from sovabids.rules import apply_rules,load_rules
 from sovabids.utils import make_dummy_dataset,deep_merge_N
 from bids_validator import BIDSValidator
@@ -84,7 +84,7 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
     }
 
     if pattern_type == 'regex':
-        FIXED_PATTERN_RE,fields = custom_notation_to_regex(FIXED_PATTERN)
+        FIXED_PATTERN_RE,fields = placeholder_to_regex(FIXED_PATTERN)
         dregex = {'non-bids':{'path_analysis':{'fields':fields,'pattern':FIXED_PATTERN_RE}}}
         data = deep_merge_N([data,dregex])
     # Writing the rules file

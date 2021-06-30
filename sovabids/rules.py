@@ -11,7 +11,7 @@ from pandas import read_csv
 from traceback import format_exc
 
 from sovabids.utils import get_nulls,deep_merge_N,get_supported_extensions,get_files,mne_open
-from sovabids.parsers import regex_parser,parse_from_custom_notation
+from sovabids.parsers import parse_from_regex,parse_from_placeholder
 
 def get_info_from_path(path,rules_):
     """
@@ -24,7 +24,7 @@ def get_info_from_path(path,rules_):
 
     Through custom notation:
         pattern: REQUIRED
-        splitter: OPTIONAL %
+        encloser: OPTIONAL %
         matcher: OPTIONAL, (.+)
     """
     rules = deepcopy(rules_)
@@ -35,11 +35,11 @@ def get_info_from_path(path,rules_):
         pattern = path_analysis.get('pattern','')
         # Check if regex
         if 'fields' in path_analysis:
-            patterns_extracted = regex_parser(path,pattern,path_analysis.get('fields',[]))
+            patterns_extracted = parse_from_regex(path,pattern,path_analysis.get('fields',[]))
         else: # custom notation
-            splitter = path_analysis.get('splitter','%')
+            encloser = path_analysis.get('encloser','%')
             matcher = path_analysis.get('matcher','(.+)')
-            patterns_extracted = parse_from_custom_notation(path,pattern,splitter,matcher)
+            patterns_extracted = parse_from_placeholder(path,pattern,encloser,matcher)
     if 'ignore' in patterns_extracted:
         del patterns_extracted['ignore']
     # this what needed because using rules.update(patterns_extracted) replaced it all

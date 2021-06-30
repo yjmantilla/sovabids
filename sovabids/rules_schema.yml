@@ -118,7 +118,7 @@ non-bids :
     fields: #REQUIRED if regex # dot notation of the other dicts, same order as they appear in the regex pattern
       - field1.something
       - field2
-    splitter : OPTIONAL # the split symbol, only for custom notation of path pattern, defaults to %
+    encloser : OPTIONAL # the split symbol, only for custom notation of path pattern, defaults to %
     matcher : OPTIONAL # the regex matcher that replaces %field% to translate it to regex, only for custom notation.defaults to (.+)
   code_execution : OPTIONAL # if the code itself needs ie quotes, escape characters may be nedeed
                             # example: raw.set_channel_mapping({\"VEOG\":\"eog\"})" # this is an example, this line of code actually doesnt work

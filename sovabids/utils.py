@@ -8,14 +8,14 @@ import collections
 
 
 def get_nulls():
-    """Returns values we will consider as empty."""
+    """Return values we consider as 'empty'."""
     return ['',None,{},[]]
 def get_supported_extensions():
-    """Returns the current supported extensions."""
+    """Return the current supported extensions."""
     return ['.set' ,'.cnt' ,'.vhdr' ,'.bdf','.edf' ,'.fif'] 
 
 def get_files(root_path):
-    """Recursively scans a directory for files, returning a list with the full paths to each."""
+    """Recursively scan the directory for files, returning a list with the full-paths to each."""
     filepaths = []
     for root, dirs, files  in os.walk(root_path, topdown=False):
         for name in files:
@@ -23,11 +23,11 @@ def get_files(root_path):
     return filepaths
 
 def split_by_n(lst,n):
-    """Splits a list in sublist of n elements."""
+    """Split the list in sublists of n elements."""
     return [lst[i:i + n] for i in range(0, len(lst), n)]
 
 def deep_merge_N(l):
-    """Merges a list of dictionaries, the latest one has the greater precedence."""
+    """Merge the list of dictionaries, such that the latest one has the greater precedence."""
     d = {}
     while True:
         if len(l) == 0:
@@ -71,7 +71,10 @@ def deep_merge(a, b):
 
 
 def flatten(d, parent_key='', sep='.'):
-    """Flats a nested dictionary structure using dot notation."""
+    """Flatten the nested dictionary structure using the given separator.
+
+    If parent_key is given, then that level is added at the start of the tree.
+    """
     items = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
@@ -83,7 +86,7 @@ def flatten(d, parent_key='', sep='.'):
 
 
 def nested_notation_to_tree(key,value,leaf='.'):
-    """Creates a nested dictionary from a single key,value pair where the key is splitted by the leaf separator."""
+    """Create a nested dictionary from the single (key,value) pair, with the key being branched by the leaf separator."""
     if leaf in key:
         tree_list = key.split(leaf)
         tree_dict = value
@@ -94,8 +97,8 @@ def nested_notation_to_tree(key,value,leaf='.'):
         return {key:value}
 
 def flat_paren_counter(string):
-    """Counts the number of non-nested balanced parentheses in a string.
-    If parenthesis is not balanced then it returns -1.
+    """Count the number of non-nested balanced parentheses in the string.
+    If parenthesis is not balanced then return -1.
     """
     #Modified from
     #jeremy radcliff
@@ -119,31 +122,28 @@ def flat_paren_counter(string):
     return -1
 
 
-def mne_open(filename,verbose='CRITICAL',preload=False):
-    """
-    Function wrapper to read many eeg file types.
-    Returns the Raw mne object or the RawEpoch object depending on the case. 
-    """
-    if '.set' in filename:
+def mne_open(filepath,verbose='CRITICAL',preload=False):
+    """Return the Raw mne object or the RawEpoch object depending on the case given a filepath."""
+    if '.set' in filepath:
         try:
-            return mne.io.read_raw_eeglab(filename,preload=preload,verbose=verbose)
+            return mne.io.read_raw_eeglab(filepath,preload=preload,verbose=verbose)
         except:
-            return mne.io.read_epochs_eeglab(filename,verbose=verbose)
-    elif '.cnt' in filename:
-        return mne.io.read_raw_cnt(filename,preload=preload,verbose=verbose)
-    elif '.vhdr' in filename:
-        return mne.io.read_raw_brainvision(filename,preload=preload,verbose=verbose)
-    elif '.bdf' in filename:
-        return mne.io.read_raw_bdf(filename,preload=preload,verbose=verbose)
-    elif '-epo.fif' in filename:
-        return mne.read_epochs(filename, preload=preload, verbose=verbose)
-    elif '.fif' in filename:
-        return mne.io.read_raw_fif(filename,preload=preload,verbose=verbose)
+            return mne.io.read_epochs_eeglab(filepath,verbose=verbose)
+    elif '.cnt' in filepath:
+        return mne.io.read_raw_cnt(filepath,preload=preload,verbose=verbose)
+    elif '.vhdr' in filepath:
+        return mne.io.read_raw_brainvision(filepath,preload=preload,verbose=verbose)
+    elif '.bdf' in filepath:
+        return mne.io.read_raw_bdf(filepath,preload=preload,verbose=verbose)
+    elif '-epo.fif' in filepath:
+        return mne.read_epochs(filepath, preload=preload, verbose=verbose)
+    elif '.fif' in filepath:
+        return mne.io.read_raw_fif(filepath,preload=preload,verbose=verbose)
     else:
         return None
 
 def download(url,path):
-    """Downloads a file from an url in a given path.
+    """Download in the path the file from the given url.
     From H S Umer farooq answer at https://stackoverflow.com/questions/22676/how-to-download-a-file-over-http
     """
     get_response = requests.get(url,stream=True)
@@ -161,7 +161,7 @@ def download(url,path):
         print("WARNING: File already existed. Skipping...")
 
 def get_num_digits(N):
-    """Returns the number of digits of a given number N."""
+    """Return the number of digits of the given number N."""
     return int(np.log10(N))+1
 
 def make_dummy_dataset(PATTERN = '%dataset_description.Name%/T%entities.task%/S%entities.session%/sub%entities.subject%_%entities.run%',
@@ -176,7 +176,7 @@ def make_dummy_dataset(PATTERN = '%dataset_description.Name%/T%entities.task%/S%
     STOP = 10,
     NUMEVENTS = 10,
     ROOT=None):
-    """Creates a dummy dataset given the following parameters.
+    """Create a dummy dataset given the following parameters.
     
     DATASET   : Name of the dataset.
     NSUBS     : Number of subjects.

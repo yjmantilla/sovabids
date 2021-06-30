@@ -1,6 +1,7 @@
 from sovabids.rules import load_rules,apply_rules_to_single_file
-import mne_bids
+from mne_bids import make_dataset_description
 import argparse
+
 def convert_them(mappings_input):
     rules = load_rules(mappings_input)
     assert 'Individual' in rules
@@ -16,7 +17,7 @@ def convert_them(mappings_input):
             dataset_description['name'] = dataset_description.pop('Name')
         if 'Authors' in dataset_description:
             dataset_description['authors'] = dataset_description.pop('Authors')
-        mne_bids.make_dataset_description(bids_root,**dataset_description,overwrite=True)
+        make_dataset_description(bids_root,**dataset_description,overwrite=True)
         # Problem: Authors with strange characters are written incorrectly.
 
 

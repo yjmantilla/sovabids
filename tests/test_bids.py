@@ -6,8 +6,8 @@ from sovabids.parsers import custom_notation_to_regex
 from sovabids.apply_rules import apply_rules,load_rules
 from sovabids.utils import create_dir, make_dummy_dataset,deep_merge_N
 from bids_validator import BIDSValidator
-
-def dummy_dataset(pattern_type='custom'):
+from sovabids.convert_them import convert_them
+def dummy_dataset(pattern_type='custom',write=True):
 
     # Getting current file path and then going to _data directory
     this_dir = os.path.dirname(__file__)
@@ -97,16 +97,18 @@ def dummy_dataset(pattern_type='custom'):
     rules = load_rules(full_rules_path)
 
     file_mappings = apply_rules(source_path=input_root,bids_root=bids_root,rules_=rules)
-    file_mappings=file_mappings['Individual_Mappings']
+    individuals=file_mappings['Individual']
     # Testing the mappings (at the moment it only test the filepaths)
     validator = BIDSValidator()
-    filepaths = [x['IO']['target'].replace(bids_root,'') for x in file_mappings]
+    filepaths = [x['IO']['target'].replace(bids_root,'') for x in individuals]
     for filepath in filepaths:
         assert validator.is_bids(filepath)
+    if write:
+        convert_them(file_mappings)
 
 def test_dummy_dataset():
-    dummy_dataset('custom')
-    dummy_dataset('regex')
+    dummy_dataset('custom',write=True)
+    dummy_dataset('regex',write=True)
 
 if __name__ == '__main__':
     test_dummy_dataset()

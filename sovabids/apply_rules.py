@@ -9,7 +9,8 @@ from sovabids.utils import create_dir, get_nulls,deep_merge_N,get_supported_exte
 from sovabids.parsers import regex_parser,parse_from_custom_notation
 from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
 from copy import deepcopy
-
+from mne_bids.utils import _handle_datatype
+from mne_bids.path import _parse_ext
 
 def get_info_from_path(path,rules_):
     """
@@ -50,7 +51,7 @@ def load_rules(rules_):
             return yaml.load(f,yaml.FullLoader)
     return rules_
 
-def apply_rules_to_single_file(f,rules_,bids_root):
+def apply_rules_to_single_file(f,rules_,bids_root,write=False):
     rules = deepcopy(rules_) #otherwise the deepmerge wont update the values for a new file
 
     # Upon reading RAW MNE makes the assumptions
@@ -88,7 +89,24 @@ def apply_rules_to_single_file(f,rules_,bids_root):
 
 
         bids_path = BIDSPath(**entities,root=bids_root)
-        write_raw_bids(raw, bids_path=bids_path,overwrite=True)
+        if write:
+            write_raw_bids(raw, bids_path=bids_path,overwrite=True)
+        else:
+            # These lines are taken from mne_bids.write
+            raw_fname = raw.filenames[0]
+            if '.ds' in os.path.dirname(raw.filenames[0]):
+                raw_fname = os.path.dirname(raw.filenames[0])
+            # point to file containing header info for multifile systems
+            raw_fname = raw_fname.replace('.eeg', '.vhdr')
+            raw_fname = raw_fname.replace('.fdt', '.set')
+            raw_fname = raw_fname.replace('.dat', '.lay')
+            _, ext = _parse_ext(raw_fname)
+
+            datatype = _handle_datatype(raw)
+            bids_path = bids_path.copy()
+            bids_path = bids_path.update(
+                datatype=datatype, suffix=datatype, extension=ext)
+
         rules['IO']={}
         rules['IO']['target'] = bids_path.fpath.__str__()
         rules['IO']['source'] = f
@@ -96,28 +114,28 @@ def apply_rules_to_single_file(f,rules_,bids_root):
         # POST-PROCESSING. For stuff easier to overwrite in the files rather than in the raw object
         # Rules that need to be applied to the result of mne-bids
         # Or maybe we should add the functionality directly to mne-bids
+        if write:
+            if 'sidecar' in rules:
+                sidecar_path = bids_path.copy().update(datatype='eeg',suffix='eeg', extension='.json')
+                with open(sidecar_path.fpath) as f:
+                    dummy_dict = json.load(f)
+                    sidecar = rules['sidecar']
+                    #TODO Validate the sidecar rules so as not to include dangerous stuff??
+                    dummy_dict.update(sidecar)
+                    # maybe include an overwrite rule
+                    mne_bids.utils._write_json(sidecar_path.fpath,dummy_dict,overwrite=True)
 
-        if 'sidecar' in rules:
-            sidecar_path = bids_path.copy().update(datatype='eeg',suffix='eeg', extension='.json')
-            with open(sidecar_path.fpath) as f:
-                dummy_dict = json.load(f)
-                sidecar = rules['sidecar']
-                #TODO Validate the sidecar rules so as not to include dangerous stuff??
-                dummy_dict.update(sidecar)
-                # maybe include an overwrite rule
-                mne_bids.utils._write_json(sidecar_path.fpath,dummy_dict,overwrite=True)
-
-        if 'channels' in rules:
-            channels_path = bids_path.copy().update(datatype='eeg',suffix='channels', extension='.tsv')
-            channels_table = pd.read_csv (channels_path.fpath, sep = '\t',dtype=str,keep_default_na=False,na_filter=False,na_values=[],true_values=[],false_values=[])
-            channels_rules = rules['channels']
-            if 'type' in channels_rules: # types are post since they are not saved in vhdr (are they in edf??)
-                for ch_name,ch_type in channels_rules['type'].items():
-                    channels_table.loc[(channels_table.name==str(ch_name)),'type'] = ch_type
-            channels_table.to_csv(channels_path.fpath, index=False,sep='\t')
-    #TODO remove general information of the dataset from the INDIVIDUAL FILES (ie dataset_description stuff)
+            if 'channels' in rules:
+                channels_path = bids_path.copy().update(datatype='eeg',suffix='channels', extension='.tsv')
+                channels_table = pd.read_csv (channels_path.fpath, sep = '\t',dtype=str,keep_default_na=False,na_filter=False,na_values=[],true_values=[],false_values=[])
+                channels_rules = rules['channels']
+                if 'type' in channels_rules: # types are post since they are not saved in vhdr (are they in edf??)
+                    for ch_name,ch_type in channels_rules['type'].items():
+                        channels_table.loc[(channels_table.name==str(ch_name)),'type'] = ch_type
+                channels_table.to_csv(channels_path.fpath, index=False,sep='\t')
+    #TODO remove general information of the dataset from the INDIVIDUAL MAPPINGS (ie dataset_description stuff)
     return rules
-def apply_rules(source_path,bids_root,rules_):
+def apply_rules(source_path,bids_root,rules_,mapping_path=None):
 
     rules_ = load_rules(rules_)
     # Generate all files
@@ -138,24 +156,21 @@ def apply_rules(source_path,bids_root,rules_):
     #%% BIDS CONVERSION
     all_mappings = []
     for f in filepaths:
-        rules = apply_rules_to_single_file(f,rules_,bids_root)
+        rules = apply_rules_to_single_file(f,rules_,bids_root,write=False)
         all_mappings.append(rules)
-    # Grab the info from the last file to make the dataset description
-    if 'dataset_description' in rules:
-        dataset_description = rules['dataset_description']
-        if 'Name' in dataset_description:
-            # Renaming for mne_bids.make_dataset_description support
-            dataset_description['name'] = dataset_description.pop('Name')
-        if 'Authors' in dataset_description:
-            dataset_description['authors'] = dataset_description.pop('Authors')
-
-        mne_bids.make_dataset_description(bids_root,**dataset_description,overwrite=True)
-        # Problem: Authors with strange characters are written incorrectly.
-    outputname = 'file_mappings.yml'
-    outputfolder = os.path.join(bids_root,'code','sovabids')
-    create_dir(outputfolder)
-    full_rules_path = os.path.join(outputfolder,outputname)
-    mapping_data = {'General_Rules':rules_,'Individual_Mappings':all_mappings}
+    
+    if mapping_path is None:
+        outputname = 'mappings.yml'
+        outputfolder = os.path.join(bids_root,'code','sovabids')
+        create_dir(outputfolder)
+        full_rules_path = os.path.join(outputfolder,outputname)
+    else:
+        full_rules_path = mapping_path
+    # ADD IO to General Rules (this is for the mapping file)
+    rules_['IO'] = {}
+    rules_['IO']['source'] = source_path
+    rules_['IO']['target'] = bids_root
+    mapping_data = {'General':rules_,'Individual':all_mappings}
     with open(full_rules_path, 'w') as outfile:
         yaml.dump(mapping_data, outfile, default_flow_style=False)
     return mapping_data

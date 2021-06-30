@@ -112,9 +112,6 @@ channels :
 #   Code : RECOMMENDED
 
 non-bids :
-  IO: # INPUT-OUTPUT For individual file mappings
-    source : OPTIONAL for RULES, REQUIRED for INDIVIDUAL MAPPINGS
-    target : OPTIONAL for RULES, REQUIRED for INDIVIDUAL MAPPINGS
   eeg_extension : OPTIONAL # to say which files to take into account when reading a directory, can be a list of extensions or a single one
   path_analysis : #OPTIONAL #USE POSIX REQUIRED
     pattern: REQUIRED-IF-PATH-ANALYSIS # Either regex or custom notation (which would have the fields already inside)
@@ -125,3 +122,7 @@ non-bids :
     matcher : OPTIONAL # the regex matcher that replaces %field% to translate it to regex, only for custom notation.defaults to (.+)
   code_execution : OPTIONAL # if the code itself needs ie quotes, escape characters may be nedeed
                             # example: raw.set_channel_mapping({\"VEOG\":\"eog\"})" # this is an example, this line of code actually doesnt work
+
+IO: # INPUT-OUTPUT
+  source : UNUSED for RULES, REQUIRED for MAPPINGS (the source file path for individual mappings,the source data root path for general mapping)
+  target : UNUSED for RULES, REQUIRED for MAPPINGS (the target file path for individual mappings,the target bids root path for general mapping)

@@ -18,5 +18,8 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    entry_points = {'console_scripts':['sovapply = sovabids.apply_rules:main']}
+    entry_points = {'console_scripts':[
+        'sovapply = sovabids.apply_rules:main',
+        'sovaconvert = sovabids.convert_them:main'
+        ]}
 )

@@ -18,9 +18,6 @@ For debugging:
 In example:
 >>> test_eegthresh(rej_matrix_tuple())
 """
-
-import pytest
-from typing import Pattern
 from sovabids.parsers import parse_from_placeholder,parse_from_regex
 
 def test_parse_from_regex():

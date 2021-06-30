@@ -1,4 +1,53 @@
-# --------------------------------------------------------------------------------
+from bidscoin.plugins.sova2coin import is_eeg,is_sourcefile,get_eegfield,get_attribute,bidsmapper_plugin
+from pathlib import Path
+from bidscoin.bidscoiner import bidscoiner
+from bidscoin.bidsmapper import bidsmapper
+import os
+import shutil
+from numpy import source
+from sovabids.utils import get_files
+from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset
+
+def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
+    this_dir = os.path.dirname(__file__)
+    data_dir = os.path.join(this_dir,'..','_data')
+    data_dir = os.path.abspath(data_dir)
+    example_dir = os.path.abspath(os.path.join(this_dir,'..','examples'))
+
+    source_path = os.path.abspath(os.path.join(data_dir,dataset+'_input'))
+    bids_root= os.path.abspath(os.path.join(data_dir,dataset+'_output'))
+    rules_path = os.path.join(example_dir,'bidscoin_example_rules.yml')
+    bidsmap_path = os.path.join(example_dir,'bidscoin_example_bidsmap.yml')
+
+    #CLEAN BIDS PATH
+    for dir in [bids_root,source_path]:
+      try:
+          shutil.rmtree(dir)
+      except:
+          pass
+
+    if dataset=='lemon_bidscoin':
+      lemon_bidscoin_prepare()
+
+
+    else:
+      pat = '%dataset%/sub-%subject%/ses-%session%/%task%/sub-%subject%'
+      make_dummy_dataset(DATASET=dataset+'_input',NSUBS=3,PATTERN=pat)
+
+    files = get_files(source_path)
+    any_vhdr = Path([x for x in files if '.vhdr' in x][0])
+    any_not_vhdr = Path([x for x in files if '.vhdr' not in x][0])
+
+    assert is_sourcefile(any_vhdr)=='EEG'
+    assert is_sourcefile(any_not_vhdr)==''
+    if dataset=='lemon_bidscoin':
+      assert get_eegfield('sidecar.SamplingFrequency',any_vhdr) == 2500.0
+      assert get_attribute('EEG',any_vhdr,'sidecar.SamplingFrequency') == 2500.0
+    else:
+      assert get_eegfield('sidecar.SamplingFrequency',any_vhdr) == 200.0
+      assert get_attribute('EEG',any_vhdr,'sidecar.SamplingFrequency') == 200.0
+
+    bidsmap = """# --------------------------------------------------------------------------------
     # This is a bidsmap YAML file with the key-value mappings for the different BIDS
     # datatypes (anat, func, dwi, etc). The datatype attributes are the keys that map
     # onto the BIDS labels. The bidsmap data-structure should be 5 levels deep:
@@ -27,10 +76,10 @@
       plugins:                        # List of plugins with plugin-specific key-value pairs (that can be used by the plugin)
         dcm2bidsmap:                  # The default plugin that is used by the bidsmapper to map DICOM and PAR/REC source data
         dcm2niix2bids:                # See dcm2niix -h and https://www.nitrc.org/plugins/mwiki/index.php/dcm2nii:MainPage#General_Usage for more info
-          path: module add dcm2niix;  # Command to set the path to dcm2niix (note the semi-colon), e.g. module add dcm2niix/1.0.20180622; or PATH=/opt/dcm2niix/bin:$PATH; or /opt/dcm2niix/bin/ or '"C:\Program Files\dcm2niix"' (note the quotes to deal with the whitespace)
+          path: module add dcm2niix;  # Command to set the path to dcm2niix (note the semi-colon), e.g. module add dcm2niix/1.0.20180622; or PATH=/opt/dcm2niix/bin:$PATH; or /opt/dcm2niix/bin/ or '"C:\Program Files\dcm2niix\"' (note the quotes to deal with the whitespace)
           args: -b y -z y -i n        # Argument string that is passed to dcm2niix. Tip: SPM users may want to use '-z n' (which produces unzipped nifti's, see dcm2niix -h for more information)
         sova2coin:            #module add sovabids #
-          rules_file : y:\code\sovabids\examples\bidscoin_example_rules.yml
+          rules_file : {}
           non-bids:
             path_analysis:
               pattern : /%ignore%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr #USE POSIX
@@ -63,4 +112,15 @@
           run: <<1>>                  # This will be updated during bidscoiner runtime (as it depends on the already existing files)
           suffix: eeg
         meta:                         # This is an optional entry for meta-data dictionary that will be appended to the json sidecar files produced by mne-bids
-    
+    """.format(rules_path)
+
+    with open(bidsmap_path,mode='w') as f:
+        f.write(bidsmap)
+
+    bidsmapper(rawfolder=source_path,bidsfolder=bids_root,subprefix='sub-',sesprefix='ses-',bidsmapfile='bidsmap.yaml',templatefile= bidsmap_path,noedit=noedit)
+
+    bidscoiner(rawfolder    = source_path,
+                bidsfolder   = bids_root,just_wrap=True)
+
+if __name__ == '__main__':
+    test_sova2coin(noedit=True)

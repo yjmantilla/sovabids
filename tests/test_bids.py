@@ -1,12 +1,15 @@
 import os
 import shutil
-from sys import path
 import yaml
+
+from bids_validator import BIDSValidator
+
 from sovabids.parsers import placeholder_to_regex
 from sovabids.rules import apply_rules,load_rules
-from sovabids.utils import make_dummy_dataset,deep_merge_N
-from bids_validator import BIDSValidator
+from sovabids.utils import deep_merge_N
+from sovabids.datasets import make_dummy_dataset
 from sovabids.convert import convert_them
+
 def dummy_dataset(pattern_type='custom',write=True,cli=False):
 
     # Getting current file path and then going to _data directory

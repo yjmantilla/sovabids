@@ -1,6 +1,8 @@
-from sovabids.rules import load_rules,apply_rules_to_single_file
-from mne_bids import make_dataset_description
 import argparse
+
+from mne_bids import make_dataset_description
+
+from sovabids.rules import load_rules,apply_rules_to_single_file
 
 def convert_them(mappings_input):
     rules = load_rules(mappings_input)

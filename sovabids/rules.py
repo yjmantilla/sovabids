@@ -1,8 +1,8 @@
 import os
-import mne_bids
 import json
 import yaml
 import argparse
+
 from copy import deepcopy
 from mne_bids import write_raw_bids,BIDSPath
 from mne_bids.utils import _handle_datatype,_write_json

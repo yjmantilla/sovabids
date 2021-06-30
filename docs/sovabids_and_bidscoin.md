@@ -28,7 +28,7 @@ The output folder will be (_data\lemon_bidscoin_output).
 
 ## BIDSCOIN execution
 
-Run examples\bidscoin_example.py
+Run tests\test_sova2coin.py
 
 You should see some output of this sort, this is BIDSCOIN starting the bidsmapper.
 
@@ -111,13 +111,15 @@ NB: Files in Y:\code\sovabids\_data\lemon_bidscoin_output\code\bidscoin may cont
 2021-06-21 15:46:14 - INFO | Importing plugin: 'y:\code\bidscoin\bidscoin\plugins\dcm2niix2bids.py'
 ```
 
-After some time you will see the BIDSeditor GUI of BIDSCOIN starting:
+If ``noedit = False`` then after some time you will see the BIDSeditor GUI of BIDSCOIN starting, otherwise the GUI will be skipped.
+
+If the GUI is not skipped then you will see:
 
 ![](2021-06-21-15-50-02.png)
 
 Press ok
 
-You can clik on edit to see how the details of the mapping at an individual level
+You can click on edit to see how the details of the mapping at an individual level
 
 ![](2021-06-21-15-52-28.png)
 
@@ -134,6 +136,8 @@ Then click on 'Save' on the main window. A popup file-explorer window will open.
 Then you can close the window to continue the script so that the conversion is actually done (given the mapping we did).
 
 ![](2021-06-21-15-56-30.png)
+
+Regardless if it was with the GUI or not you should see:
 
 You will start seeing some output like this:
 

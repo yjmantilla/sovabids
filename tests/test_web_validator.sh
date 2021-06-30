@@ -5,4 +5,5 @@ bids-validator _data/DUMMY/DUMMY_BIDS_custom
 bids-validator _data/DUMMY/DUMMY_BIDS_regex
 bids-validator _data/DUMMY/DUMMY_BIDS_custom_cli
 bids-validator _data/DUMMY/DUMMY_BIDS_regex_cli
+bids-validator _data/dummy_bidscoin_output
 #bids-validator _data/DUMMY/DUMMY_SOURCE

@@ -175,7 +175,7 @@ def apply_rules(source_path,bids_root,rules_,mapping_path=None):
         yaml.dump(mapping_data, outfile, default_flow_style=False)
     return mapping_data
 
-def main():
+def sovapply():
     """Console script usage"""
     # see https://github.com/Donders-Institute/bidscoin/blob/master/bidscoin/bidsmapper.py for example of how to make this
     parser = argparse.ArgumentParser()
@@ -189,4 +189,4 @@ def main():
     apply_rules(args.source_path,args.bids_root,args.rules)
 
 if __name__ == "__main__":
-    main()
+    sovapply()

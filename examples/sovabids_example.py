@@ -1,6 +1,6 @@
 import os
 import shutil
-from sovabids.apply_rules import apply_rules
+from sovabids.rules import apply_rules
 
 this_dir = os.path.dirname(__file__)
 data_dir = os.path.join(this_dir,'..','_data')

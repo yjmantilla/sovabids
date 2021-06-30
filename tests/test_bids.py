@@ -3,10 +3,10 @@ import shutil
 from sys import path
 import yaml
 from sovabids.parsers import custom_notation_to_regex
-from sovabids.apply_rules import apply_rules,load_rules
+from sovabids.rules import apply_rules,load_rules
 from sovabids.utils import create_dir, make_dummy_dataset,deep_merge_N
 from bids_validator import BIDSValidator
-from sovabids.convert_them import convert_them
+from sovabids.convert import convert_them
 def dummy_dataset(pattern_type='custom',write=True):
 
     # Getting current file path and then going to _data directory

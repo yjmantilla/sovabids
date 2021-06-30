@@ -1,4 +1,4 @@
-from sovabids.apply_rules import load_rules,apply_rules_to_single_file
+from sovabids.rules import load_rules,apply_rules_to_single_file
 import mne_bids
 import argparse
 def convert_them(mappings_input):
@@ -21,7 +21,7 @@ def convert_them(mappings_input):
 
 
 
-def main():
+def sovaconvert():
     """Console script usage"""
     # see https://github.com/Donders-Institute/bidscoin/blob/master/bidscoin/bidsmapper.py for example of how to make this
     parser = argparse.ArgumentParser()
@@ -33,4 +33,4 @@ def main():
     convert_them(args.mappings)
 
 if __name__ == "__main__":
-    main()
+    sovaconvert()

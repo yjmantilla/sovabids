@@ -33,7 +33,7 @@ First we import the modules needed; from sovabids we will just need ``apply_rule
 ```python
 import os
 import shutil
-from sovabids.apply_rules import apply_rules
+from sovabids.rules import apply_rules
 ```
 
 We will now define the variables needed for the ``apply_rules`` function. Because this example is intended to run relative to the repository directory we use relative path but for real use-cases it is easier to just input the absolute-path.
@@ -473,19 +473,7 @@ You should now be able to upload the dataset to assert if it is a valid bids dat
 
 ## CLI USAGE
 
-If your terminal is at the root of the repository then you can use something of this sort (by changing the path accordingly):
-
-```bash
-python sovabids\apply_rules.py sourcefolder outputfolder rulesfile
-```
-
-So in my particular case it is:
-
-```bash
-python sovabids\apply_rules.py y:\code\sovabids\_data\lemon y:\code\sovabids\_data\lemon_bids y:\code\sovabids\examples\sovabids_example_rules.yml
-```
-
-SOVABIDS also has command line entry points so you can also do:
+SOVABIDS has command line entry points so you can do:
 
 ```bash
 sovapply sourcefolder outputfolder rulesfile

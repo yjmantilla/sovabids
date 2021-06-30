@@ -3,14 +3,15 @@ import mne_bids
 import json
 import yaml
 import argparse
-import pandas as pd
-
-from sovabids.utils import create_dir, get_nulls,deep_merge_N,get_supported_extensions,get_files,macro, run_command,split_by_n,mne_open
-from sovabids.parsers import regex_parser,parse_from_custom_notation
-from mne_bids import BIDSPath, read_raw_bids, print_dir_tree, make_report,write_raw_bids
 from copy import deepcopy
-from mne_bids.utils import _handle_datatype
+from mne_bids import write_raw_bids,BIDSPath
+from mne_bids.utils import _handle_datatype,_write_json
 from mne_bids.path import _parse_ext
+from pandas import read_csv
+from traceback import format_exc
+
+from sovabids.utils import get_nulls,deep_merge_N,get_supported_extensions,get_files,mne_open
+from sovabids.parsers import regex_parser,parse_from_custom_notation
 
 def get_info_from_path(path,rules_):
     """
@@ -83,9 +84,13 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False):
                 non_bids["code_execution"] = [non_bids["code_execution"]]
             if isinstance(non_bids["code_execution"],list):
                 for command in non_bids["code_execution"]:
-                    exec(macro)
-                    #raw = run_command(raw,command) #another way...
-                    # maybe log errors here?
+                    try:
+                        exec(command)
+                    except:
+                        error_string = 'There was an error with the follwing command:\n'+command+'\ngiving the following traceback:\n'+format_exc()
+                        print(error_string)
+                        #maybe log errors here?
+                        #or should we raise an exception?
 
 
         bids_path = BIDSPath(**entities,root=bids_root)
@@ -123,11 +128,11 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False):
                     #TODO Validate the sidecar rules so as not to include dangerous stuff??
                     dummy_dict.update(sidecar)
                     # maybe include an overwrite rule
-                    mne_bids.utils._write_json(sidecar_path.fpath,dummy_dict,overwrite=True)
+                    _write_json(sidecar_path.fpath,dummy_dict,overwrite=True)
 
             if 'channels' in rules:
                 channels_path = bids_path.copy().update(datatype='eeg',suffix='channels', extension='.tsv')
-                channels_table = pd.read_csv (channels_path.fpath, sep = '\t',dtype=str,keep_default_na=False,na_filter=False,na_values=[],true_values=[],false_values=[])
+                channels_table = read_csv (channels_path.fpath, sep = '\t',dtype=str,keep_default_na=False,na_filter=False,na_values=[],true_values=[],false_values=[])
                 channels_rules = rules['channels']
                 if 'type' in channels_rules: # types are post since they are not saved in vhdr (are they in edf??)
                     for ch_name,ch_type in channels_rules['type'].items():
@@ -162,7 +167,7 @@ def apply_rules(source_path,bids_root,rules_,mapping_path=None):
     if mapping_path is None:
         outputname = 'mappings.yml'
         outputfolder = os.path.join(bids_root,'code','sovabids')
-        create_dir(outputfolder)
+        os.makedirs(outputfolder,exist_ok=True)
         full_rules_path = os.path.join(outputfolder,outputname)
     else:
         full_rules_path = mapping_path

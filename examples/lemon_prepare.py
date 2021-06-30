@@ -2,11 +2,11 @@ import os, sys
 import mne
 import pandas as pd 
 import shutil
-from sovabids.utils import create_dir,download,get_files
+from sovabids.utils import download,get_files
 this_dir = os.path.dirname(__file__)
 data_dir = os.path.join(this_dir,'..','_data')
 
-create_dir(data_dir)
+os.makedirs(data_dir,exist_ok=True)
 #shutil.unpack_archive("sub-032301.tar.gz")
 
 #%% Donwnload lemon Database
@@ -60,7 +60,7 @@ for i in range(len(indi_ids)):
 for i in range(len(new_paths)):
     dir,file = os.path.split(new_paths[i])
     if not os.path.exists(dir):
-        os.makedirs(dir)
+        os.makedirs(dir,exist_ok=True)
     shutil.move(old_paths[i],new_paths[i])
 
 # Cleanup Empty Folders

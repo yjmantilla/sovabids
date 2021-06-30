@@ -7,41 +7,27 @@ from mne_bids.write import _write_raw_brainvision
 import collections
 
 
-macro = """try:
-    exec(command)
-except:
-    print("WARNING, there was a problem with the following command:")
-    print(command)
-"""
-
 def get_nulls():
+    """Returns values we will consider as empty."""
     return ['',None,{},[]]
 def get_supported_extensions():
+    """Returns the current supported extensions."""
     return ['.set' ,'.cnt' ,'.vhdr' ,'.bdf','.edf' ,'.fif'] 
 
 def get_files(root_path):
+    """Recursively scans a directory for files, returning a list with the full paths to each."""
     filepaths = []
     for root, dirs, files  in os.walk(root_path, topdown=False):
         for name in files:
             filepaths.append(os.path.join(root, name))
     return filepaths
 
-def run_command(raw,command):
-    # Maybe we should actually stop the whole process instead of trying it
-    # After all it means ther is a problem with the rules, which is fundamental
-    try:
-        exec(command)
-        return raw
-    except:
-        print("WARNING, there was a problem with the following command:")
-        print(command)
-        return raw
-
 def split_by_n(lst,n):
+    """Splits a list in sublist of n elements."""
     return [lst[i:i + n] for i in range(0, len(lst), n)]
 
 def deep_merge_N(l):
-    ## Last items should have greater precedence
+    """Merges a list of dictionaries, the latest one has the greater precedence."""
     d = {}
     while True:
         if len(l) == 0:
@@ -65,6 +51,8 @@ def deep_merge(a, b):
           the output collection with its value intact.
         * For any key in common between `a` and `b`, the corresponding values
           will be merged with the same semantics.
+
+    From David Schneider answer at https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries/15836901#15836901
     """
     if not isinstance(a, dict) or not isinstance(b, dict):
         return a if b is None else b
@@ -83,6 +71,7 @@ def deep_merge(a, b):
 
 
 def flatten(d, parent_key='', sep='.'):
+    """Flats a nested dictionary structure using dot notation."""
     items = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
@@ -93,17 +82,21 @@ def flatten(d, parent_key='', sep='.'):
     return dict(items)
 
 
-def nested_notation_to_tree(field,value,leaf='.'):
-    if leaf in field:
-        tree_list = field.split(leaf)
+def nested_notation_to_tree(key,value,leaf='.'):
+    """Creates a nested dictionary from a single key,value pair where the key is splitted by the leaf separator."""
+    if leaf in key:
+        tree_list = key.split(leaf)
         tree_dict = value
         for key in reversed(tree_list):
             tree_dict = {key: tree_dict}
         return tree_dict
     else:
-        return {field:value}
+        return {key:value}
 
 def flat_paren_counter(string):
+    """Counts the number of non-nested balanced parentheses in a string.
+    If parenthesis is not balanced then it returns -1.
+    """
     #Modified from
     #jeremy radcliff
     #https://codereview.stackexchange.com/questions/153078/balanced-parentheses-checker-in-python
@@ -149,17 +142,14 @@ def mne_open(filename,verbose='CRITICAL',preload=False):
     else:
         return None
 
-
-def create_dir(data_dir):
-    if not os.path.isdir(data_dir):
-        os.makedirs(data_dir, exist_ok=True)
-        #os.mkdir(data_dir)
-
 def download(url,path):
+    """Downloads a file from an url in a given path.
+    From H S Umer farooq answer at https://stackoverflow.com/questions/22676/how-to-download-a-file-over-http
+    """
     get_response = requests.get(url,stream=True)
     file_name  = url.split("/")[-1]
     p = os.path.abspath(os.path.join(path))
-    create_dir(p)
+    os.makedirs(p,exist_ok=True)
     print('Downloading',file_name,'at',p)
     if not os.path.isfile(os.path.join(p,file_name)):
         with open(os.path.join(p,file_name), 'wb') as f:
@@ -170,14 +160,9 @@ def download(url,path):
     else:
         print("WARNING: File already existed. Skipping...")
 
-
-def get_files(root_path):
-    filepaths = []
-    for root, dirs, files  in os.walk(root_path, topdown=False):
-        for name in files:
-            filepaths.append(os.path.join(root, name))
-    return filepaths
-
+def get_num_digits(N):
+    """Returns the number of digits of a given number N."""
+    return int(np.log10(N))+1
 
 def make_dummy_dataset(PATTERN = '%dataset_description.Name%/T%entities.task%/S%entities.session%/sub%entities.subject%_%entities.run%',
     DATASET = 'DUMMY',
@@ -191,32 +176,44 @@ def make_dummy_dataset(PATTERN = '%dataset_description.Name%/T%entities.task%/S%
     STOP = 10,
     NUMEVENTS = 10,
     ROOT=None):
+    """Creates a dummy dataset given the following parameters.
+    
+    DATASET   : Name of the dataset.
+    NSUBS     : Number of subjects.
+    NTASKS    : Number of tasks.
+    NACQS     : Number of acquisitions.
+    NRUNS     : Number of runs.
+    NSESSIONS : Number of sessions.
+    NCHANNELS : Number of channels.
+    SFREQ     : Samplinf frequency of the data.
+    STOP      : Time duration of the data in seconds.
+    NUMEVENTS : Number of events along the duration.
+    ROOT      : Path where the files will be generated.
+    """
 
     if ROOT is None:
         this_dir = os.path.dirname(__file__)
         data_dir = os.path.abspath(os.path.join(this_dir,'..','_data'))
     else:
         data_dir = ROOT
-    create_dir(data_dir)
+    os.makedirs(data_dir,exist_ok=True)
 
 
-    def get_num_leading_zeros(N):
-        return int(np.floor(np.log10(N-1)))
 
-    sub_zeros = get_num_leading_zeros(NSUBS)
-    subs = [ str(x).zfill(sub_zeros+1) for x in range(NSUBS)]
+    sub_zeros = get_num_digits(NSUBS)
+    subs = [ str(x).zfill(sub_zeros) for x in range(NSUBS)]
 
-    task_zeros = get_num_leading_zeros(NTASKS)
-    tasks = [ str(x).zfill(task_zeros+1) for x in range(NTASKS)]
+    task_zeros = get_num_digits(NTASKS)
+    tasks = [ str(x).zfill(task_zeros) for x in range(NTASKS)]
 
-    run_zeros = get_num_leading_zeros(NRUNS)
-    runs = [ str(x).zfill(run_zeros+1) for x in range(NRUNS)]
+    run_zeros = get_num_digits(NRUNS)
+    runs = [ str(x).zfill(run_zeros) for x in range(NRUNS)]
 
-    ses_zeros = get_num_leading_zeros(NSESSIONS)
-    sessions = [ str(x).zfill(ses_zeros+1) for x in range(NSESSIONS)]
+    ses_zeros = get_num_digits(NSESSIONS)
+    sessions = [ str(x).zfill(ses_zeros) for x in range(NSESSIONS)]
 
-    acq_zeros = get_num_leading_zeros(NACQS)
-    acquisitions = [ str(x).zfill(acq_zeros+1) for x in range(NACQS)]
+    acq_zeros = get_num_digits(NACQS)
+    acquisitions = [ str(x).zfill(acq_zeros) for x in range(NACQS)]
 
     # Create some dummy metadata
     n_channels = NCHANNELS

@@ -5,14 +5,14 @@ import mne
 import pandas as pd 
 import shutil
 import requests
-from sovabids.utils import get_files,create_dir
+from sovabids.utils import get_files
 
 this_dir = os.path.dirname(__file__)
 data_dir = os.path.join(this_dir,'..','_data')
 root_path = os.path.abspath(os.path.join(data_dir,'lemon'))
 bidscoin_input_path = os.path.abspath(os.path.join(data_dir,'lemon_bidscoin_input'))
 
-create_dir(bidscoin_input_path)
+os.makedirs(bidscoin_input_path,exist_ok=True)
 
 files = get_files(root_path)
 files = [x for x in files if x.split('.')[-1] in ['eeg','vmrk','vhdr'] ]

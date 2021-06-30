@@ -4,7 +4,7 @@ from sys import path
 import yaml
 from sovabids.parsers import custom_notation_to_regex
 from sovabids.rules import apply_rules,load_rules
-from sovabids.utils import create_dir, make_dummy_dataset,deep_merge_N
+from sovabids.utils import make_dummy_dataset,deep_merge_N
 from bids_validator import BIDSValidator
 from sovabids.convert import convert_them
 def dummy_dataset(pattern_type='custom',write=True,cli=False):
@@ -44,7 +44,7 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
         except:
             pass
 
-    [create_dir(dir) for dir in dirs]
+    [os.makedirs(dir,exist_ok=True) for dir in dirs]
 
     # Generating the dummy dataset
     make_dummy_dataset(**DATA_PARAMS)
@@ -76,7 +76,7 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
         {
         'eeg_extension':'.vhdr',
         'path_analysis':{'pattern':FIXED_PATTERN},
-        'code_execution':['print(raw.info)']
+        'code_execution':['print(\'some good code\')','print(raw.info)','print(some bad code)']
         },
     'channels':
         {'name':{'0':'ECG_CHAN','1':'EOG_CHAN'},

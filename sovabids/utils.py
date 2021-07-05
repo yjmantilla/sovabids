@@ -3,6 +3,7 @@ import mne
 import requests
 import numpy as np
 import collections
+from sovabids import __path__
 
 from mne_bids.write import _write_raw_brainvision
 
@@ -169,7 +170,7 @@ def get_data_dir():
     return data_dir
 
 def get_project_dir():
-    this_dir = os.path.dirname(__file__)
-    data_dir = os.path.join(this_dir,'..')
-    data_dir = os.path.abspath(data_dir)
-    return data_dir
+    #this_dir = os.path.dirname(__file__)
+    #data_dir = os.path.join(this_dir,'..')
+    #data_dir = os.path.abspath(data_dir)
+    return os.path.abspath(__path__)

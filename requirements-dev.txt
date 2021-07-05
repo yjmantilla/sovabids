@@ -10,3 +10,4 @@ sphinxcontrib-mermaid
 sphinx-autoapi
 myst-parser
 git+https://github.com/yjmantilla/bidscoin.git@sovabids
+-e .

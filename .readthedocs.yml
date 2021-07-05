@@ -13,6 +13,9 @@ sphinx:
 python:
   version: 3.8
   install:
-    - requirements: docs/requirements-doc.txt
+    - requirements: requirements-dev.txt
+    # is important that "-e ." exist in requirements-dev.txt
+    # see https://github.com/readthedocs/readthedocs.org/issues/3986
+    # see https://github.com/readthedocs/readthedocs.org/issues/6243
     #- method: pip
     #  path: .

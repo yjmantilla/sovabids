@@ -33,7 +33,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pytest
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-        pip install -e .
+#        pip install -e .,already inside requirements-dev.txt
     - name: Test with pytest
       run: |
         pytest tests/ --cov=sovabids/ --cov-report=xml --verbose -s

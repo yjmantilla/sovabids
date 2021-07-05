@@ -14,8 +14,10 @@ sovabids
 Installation
 ------------
 
-.. code-block:: Text
+.. code-block:: bash
+
    git clone https://github.com/yjmantilla/sovabids.git
    cd sovabids
    pip install .
+
 

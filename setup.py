@@ -9,7 +9,7 @@ setuptools.setup(
     author="Yorguin Mantilla",
     description="Automated eeg2bids conversion",
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type="text/x-rst",
     packages=setuptools.find_packages(),
     install_requires = ['mne_bids','requests','pybv','pyyaml','pandas'],
     classifiers=[

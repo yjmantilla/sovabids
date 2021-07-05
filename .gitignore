@@ -78,7 +78,8 @@ instance/
 # Sphinx documentation
 docs/_build/
 make.bat
-
+docs/source/generated
+docs/source/auto_examples
 # PyBuilder
 target/
 

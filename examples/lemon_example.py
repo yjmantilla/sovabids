@@ -64,8 +64,8 @@ lemon_prepare()
 
 source_path = os.path.abspath(os.path.join(get_project_dir(),'_data','lemon')) # For the input data we will convert
 bids_root= os.path.abspath(os.path.join(get_project_dir(),'_data','lemon_bids')) # The output directory that will have the converted data
-rules_path = os.abspath(os.path.join(get_project_dir(),'examples','lemon_example_rules.yml')) # The rules file that setups the rule for conversion
-mapping_path = os.abspath(os.path.join(bids_root,'code','sovabids','mappings.yml')) # The mapping file that will hold the results of applying the rules to each file
+rules_path = os.path.abspath(os.path.join(get_project_dir(),'examples','lemon_example_rules.yml')) # The rules file that setups the rule for conversion
+mapping_path = os.path.abspath(os.path.join(bids_root,'code','sovabids','mappings.yml')) # The mapping file that will hold the results of applying the rules to each file
 
 print('source_path:',source_path)
 print('bids_root:', bids_root)

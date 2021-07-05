@@ -37,6 +37,11 @@ jobs:
     - name: Test with pytest
       run: |
         pytest tests/ --cov=sovabids/ --cov-report=xml --verbose -s
+    - name: Build docs
+      run: |
+        cd docs
+        make clean
+        make html
     - name: Upload coverage report
       uses: codecov/codecov-action@v1
       with:

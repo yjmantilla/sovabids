@@ -173,4 +173,4 @@ def get_project_dir():
     #this_dir = os.path.dirname(__file__)
     #data_dir = os.path.join(this_dir,'..')
     #data_dir = os.path.abspath(data_dir)
-    return os.path.abspath(os.path.join(__path__[0],'..'))
+    return os.path.realpath(os.path.join(__path__[0],'..'))

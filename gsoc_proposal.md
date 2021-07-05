@@ -1,7 +1,3 @@
-[<img src="https://img.shields.io/codecov/c/github/yjmantilla/sovabids">](https://app.codecov.io/gh/yjmantilla/sovabids)
-[<img src="https://img.shields.io/github/workflow/status/yjmantilla/sovabids/python-tests/main?label=tests">](https://github.com/yjmantilla/sovabids/actions?query=workflow%3Apython-tests)
-
-
 # SOVABIDS
 
 A python package for the automatic conversion of MEG/EEG datasets to the BIDS standard, with a focus on making the most out of metadata

@@ -140,7 +140,7 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False):
                 channels_table.to_csv(channels_path.fpath, index=False,sep='\t')
     #TODO remove general information of the dataset from the INDIVIDUAL MAPPINGS (ie dataset_description stuff)
     return rules
-def apply_rules(source_path,bids_root,rules_,mapping_path=None):
+def apply_rules(source_path,bids_root,rules_,mapping_path=''):
 
     rules_ = load_rules(rules_)
     # Generate all files
@@ -161,16 +161,17 @@ def apply_rules(source_path,bids_root,rules_,mapping_path=None):
     #%% BIDS CONVERSION
     all_mappings = []
     for f in filepaths:
-        rules = apply_rules_to_single_file(f,rules_,bids_root,write=False)
+        rules = apply_rules_to_single_file(f,rules_,bids_root,write=False) #TODO There should be a way to control how verbose this is
         all_mappings.append(rules)
     
-    if mapping_path is None:
+    outputfolder,outputname = os.path.split(mapping_path)
+    if outputname == '':
         outputname = 'mappings.yml'
+    if outputfolder == '':
         outputfolder = os.path.join(bids_root,'code','sovabids')
-        os.makedirs(outputfolder,exist_ok=True)
-        full_rules_path = os.path.join(outputfolder,outputname)
-    else:
-        full_rules_path = mapping_path
+    os.makedirs(outputfolder,exist_ok=True)
+    full_rules_path = os.path.join(outputfolder,outputname)
+
     # ADD IO to General Rules (this is for the mapping file)
     rules_['IO'] = {}
     rules_['IO']['source'] = source_path
@@ -178,6 +179,8 @@ def apply_rules(source_path,bids_root,rules_,mapping_path=None):
     mapping_data = {'General':rules_,'Individual':all_mappings}
     with open(full_rules_path, 'w') as outfile:
         yaml.dump(mapping_data, outfile, default_flow_style=False)
+
+    print('Mapping file wrote to:',full_rules_path) #TODO This should be a log print
     return mapping_data
 
 def sovapply():

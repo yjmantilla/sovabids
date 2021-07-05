@@ -163,3 +163,13 @@ def get_num_digits(N):
     """Return the number of digits of the given number N."""
     return int(np.log10(N))+1
 
+def get_data_dir():
+    project=get_project_dir()
+    data_dir = os.path.join(project,'_data')
+    return data_dir
+
+def get_project_dir():
+    this_dir = os.path.dirname(__file__)
+    data_dir = os.path.join(this_dir,'..')
+    data_dir = os.path.abspath(data_dir)
+    return data_dir

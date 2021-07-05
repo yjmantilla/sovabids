@@ -11,6 +11,10 @@
 sovabids
 ========
 
+.. after-init-label
+
+A python package for automating eeg2bids conversion.
+
 Installation
 ------------
 

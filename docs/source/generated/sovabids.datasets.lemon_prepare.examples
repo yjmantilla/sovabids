@@ -1,0 +1,23 @@
+
+
+Examples using ``sovabids.datasets.lemon_prepare``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates the use of sovabids on the `LEMON dataset &lt;http://fcon_1000.projects.n...">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_lemon_example_thumb.png
+     :alt: LEMON dataset example
+
+     :ref:`sphx_glr_auto_examples_lemon_example.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+ * :ref:`sphx_glr_auto_examples_lemon_example.py`

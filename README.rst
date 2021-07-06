@@ -12,6 +12,7 @@ sovabids
 ========
 
 `Visit the documentation <https://sovabids.readthedocs.io/>`_
+
 .. after-init-label
 
 A python package for automating eeg2bids conversion. sovabids can be used through its python API or through its cli entry points.

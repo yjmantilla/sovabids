@@ -1,4 +1,4 @@
-Welcome to sovabids's documentation!
+Welcome to sovabids' documentation!
 ====================================
 
 .. toctree::
@@ -6,5 +6,7 @@ Welcome to sovabids's documentation!
    :caption: Contents:
 
    README.rst
+   rules_schema.rst
+   validation.rst
    gsoc_proposal.md
    auto_examples/index.rst

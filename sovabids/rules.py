@@ -190,11 +190,12 @@ def sovapply():
     subparsers = parser.add_subparsers()
 
     parser = subparsers.add_parser('apply_rules')
-    parser.add_argument('source_path')  # add the name argument
-    parser.add_argument('bids_root')  # add the name argument
-    parser.add_argument('rules')  # add the name argument
+    parser.add_argument('source_path',help='The path to the input data directory that will be converted to bids')  # add the name argument
+    parser.add_argument('bids_root',help='The path to the output bids directory')  # add the name argument
+    parser.add_argument('rules',help='The fullpath of the rules file')  # add the name argument
+    parser.add_argument('-m','--mapping', help='The fullpath of the mapping file to be written. If not set it will be located in bids_root/code/sovabids/mappings.yml',default='')
     args = parser.parse_args()
-    apply_rules(args.source_path,args.bids_root,args.rules)
+    apply_rules(args.source_path,args.bids_root,args.rules,args.mapping)
 
 if __name__ == "__main__":
     sovapply()

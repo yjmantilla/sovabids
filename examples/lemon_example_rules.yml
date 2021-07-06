@@ -1,20 +1,11 @@
-# For this lemon dataset we dont need session,acquisition nor run. The task is constant for all subjects (resting). 
-# Now, the subject key holds the label of the subject. Since this varies from subject to subject we won't set that value as general. 
-# How we will do it then? you may ask... Well, we will infer that from the filename in the non-bids object. 
-# So in the end we will just set the task information in the entities object.
-
 entities:                                       # Configuring the file name structure of bids
   task : resting                                # Setting the task of all files to a fixed string
 
-                                                # Notice the indentation. Each level are 2 spaces here.
-
 dataset_description:                            # Configuring the dataset_description.json file
-                                                # Note that "BIDSVersion" which is a REQUIRED field of the dataset_description file
-                                                # is automatically set up by mne-bids, so we dont put it here in the rules.
   Name : Lemon                                  # Name of the dataset, set up as a fixed string
   Authors:                                      # Here I put the personnel involved in the acquisition of the dataset
     - Anahit Babayan                            # See http://fcon_1000.projects.nitrc.org/indi/retro/MPI_LEMON.html
-    - Miray Erbey                               # Notice the "-", it is a list
+    - Miray Erbey
     - Deniz Kumral
     - Janis D. Reinelt
     - Andrea M. F. Reiter
@@ -86,31 +77,15 @@ dataset_description:                            # Configuring the dataset_descri
     - Michael Gaebler
     - Arno Villringer
 
-
 sidecar:                                        # Configuring the sidecar eeg file
   PowerLineFrequency : 50                       # Noted from the visual inspection of the eeg spectrum
   EEGReference : FCz                            # As mentioned in https://www.nature.com/articles/sdata2018308
-                                                # If you know about bids you may notice that the only field left 
-                                                # that is required is the "TaskName" one. Since this is taken care 
-                                                # by the "entities" object, we didn't include it on this one.
 
 channels:                                       # Configuring the channels tsv
-                                                # Channel information is mostly inferred by MNE upon reading the file 
-                                                # so usually you wouldn't need to set a rule for this. 
-                                                # Ideally the types read by mne are correct. 
-                                                # In this dataset all channel types are correctly inferred by mne except for the ocular one. 
-                                                # We will overwrite this mistake with the correct type as follows.
   type :                                        # This property allow us to overwrite channel types inferred by MNE
     VEOG : VEOG                                 # Here the syntax is <channel name> : <channel type according to bids notation>
-                                                # For the valid types see https://bids-specification.readthedocs.io/en/stable/04-modality-specific-files/03-electroencephalography.html#channels-description-_channelstsv
-                                                # Notice white-space separating key and value is important
-                                                # Notice it is not a list, but a set of object following the syntax said above
     F3 : EEG                                    # Here we set the type of F3, it was already correctly inferred by mne but it is included to illustrate retyping of various channels.
 non-bids:                                       # Additional configuration not belonging specifically to any of the previous objects
   eeg_extension : .vhdr                         # Sets which extension to read as an eeg file
   path_analysis:                                # Some bids properties can be inferred from the path of the source files
-                                                # Put the path pattern with the bids-properties as they are notated in this yaml. Use dot notation for nesting.
     pattern : RSEEG/sub-%entities.subject%.vhdr # For example here we extract from the path the "subject" child of the "entities" object
-  code_execution:                               # To manipulate the raw mne object for further changes, this is power-user territory
-                                                # Notice it is a list of python lines acting on the "raw" object of mne
-    - print(raw.info)                           # For illustration purposes here we just print the info attribute of the raw mne object.

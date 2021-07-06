@@ -31,7 +31,7 @@ def sovaconvert():
     subparsers = parser.add_subparsers()
 
     parser = subparsers.add_parser('convert_them')
-    parser.add_argument('mappings')
+    parser.add_argument('mappings',help='The mapping file of the conversion.')
     args = parser.parse_args()
     convert_them(args.mappings)
 

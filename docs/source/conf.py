@@ -95,8 +95,8 @@ html_theme = 'furo'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_extra_path = ['_copyover']
 
-mermaid_params = ['--theme', 'forest']
 # Replace gallery.css for changing the highlight of the output cells in sphinx gallery
 # See:
 # https://github.com/sphinx-gallery/sphinx-gallery/issues/399

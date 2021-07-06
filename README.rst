@@ -11,9 +11,22 @@
 sovabids
 ========
 
+`Visit the documentation <https://sovabids.readthedocs.io/>`_
 .. after-init-label
 
-A python package for automating eeg2bids conversion.
+A python package for automating eeg2bids conversion. sovabids can be used through its python API or through its cli entry points.
+
+Architecture
+------------
+
+The main elements of sovabids are:
+    * A source path with the original dataset.
+    * A bids path that will be the output path of the conversion.
+    * A rules file that configures how the conversion is done from the general perspective.
+    * A mapping file that encodes how the conversion is performed to each individual file of the dataset.
+
+.. image:: https://mermaid.ink/svg/eyJjb2RlIjoiZ3JhcGggTFJcbiAgICBTPlwiU291cmNlIHBhdGhcIl1cbiAgICBCPlwiQmlkcyBwYXRoXCJdXG4gICAgUj5cIlJ1bGVzIGZpbGVcIl1cbiAgICBBUigoXCJBcHBseSBSdWxlc1wiKSlcbiAgICBNPlwiTWFwcGluZ3MgZmlsZVwiXVxuICAgIENUKChcIkNvbnZlcnQgVGhlbVwiKSlcbiAgICBPWyhcIkNvbnZlcnRlZCBkYXRhc2V0XCIpXVxuICAgIFMgLS0-IEFSXG4gICAgQiAtLT4gQVJcbiAgICBSIC0tPiBBUlxuICAgIEFSIC0tPiBNXG4gICAgTSAtLT4gQ1RcbiAgICBDVCAtLT4gT1xuICAiLCJtZXJtYWlkIjp7InRoZW1lIjoiZm9yZXN0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2UsImF1dG9TeW5jIjp0cnVlLCJ1cGRhdGVEaWFncmFtIjpmYWxzZX0
+
 
 Installation
 ------------
@@ -23,5 +36,37 @@ Installation
    git clone https://github.com/yjmantilla/sovabids.git
    cd sovabids
    pip install .
+
+Basic Usage
+-----------
+
+The easiest way is to use sovabids through its CLI entry-points as follows:
+
+sovapply
+^^^^^^^^
+
+Use the sovapply entry-point to produce a mapping file from a source path, an output bids root path and a rules filepath.
+
+
+.. code-block:: bash
+
+   sovapply source_path bids_root rules_path
+
+By default the mapping file made will have the following filepath:
+
+.. code-block:: text
+
+   bids_root/code/sovabids/mappings.yml
+
+
+sovaconvert
+^^^^^^^^^^^
+
+Use the sovaconvert entry-point to convert the dataset given its mapping file.
+
+.. code-block:: bash
+
+   sovaconvert mapping_file
+
 
 

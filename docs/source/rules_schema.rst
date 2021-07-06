@@ -5,6 +5,40 @@ The rules file setups the way the conversion is done from a general point of vie
 
 To make the rules file by hand we need to understand the schema of the file. For starts, the file is written in yaml. As of now the purpose of this documentation is not to teach yaml (we may have a dedicated file for that in the future). For now, you can check this `guide <https://www.cloudbees.com/blog/yaml-tutorial-everything-you-need-get-started>`_ though.
 
+A typical rules file looks like this:
+
+.. code-block:: yaml
+
+    entities:
+        task : resting
+        session : ses1
+    
+    dataset_description :
+        Name : MyDataset
+        Authors :
+            - Alice
+            - Bob
+
+    sidecar : 
+        EEGReference : 50
+        PowerLineFrequency : FCz
+
+    channels : 
+        name :
+            heo : HEO
+            veo : VEO
+        type :
+            HEO : HEOG
+            VEO : VEOG
+
+    non-bids:
+        eeg_extension : .vhdr
+        path_analysis:
+            pattern : _data/%dataset_description.Name%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr
+        code_execution:
+            - print(raw.info)
+
+
 To understand the rules file you first need to know a bit of the `bids specification for eeg <eegdocs_>`_ . Mainly that it contains 6 major files:
     - dataset_description
     - sidecar

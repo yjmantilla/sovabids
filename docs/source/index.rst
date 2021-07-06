@@ -10,3 +10,4 @@ Welcome to sovabids' documentation!
    validation.rst
    gsoc_proposal.md
    auto_examples/index.rst
+   GitHub Repository <https://github.com/yjmantilla/sovabids>

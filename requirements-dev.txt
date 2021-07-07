@@ -9,5 +9,5 @@ sphinx-copybutton
 sphinxcontrib-mermaid
 sphinx-autoapi
 myst-parser
-git+https://github.com/yjmantilla/bidscoin.git@sovabids
+git+https://github.com/yjmantilla/bidscoin.git@sovabids2
 -e .

@@ -3,6 +3,8 @@ import mne
 import requests
 import numpy as np
 import collections
+import json
+from mne_bids.utils import _write_json
 from sovabids import __path__
 
 from mne_bids.write import _write_raw_brainvision
@@ -97,6 +99,23 @@ def nested_notation_to_tree(key,value,leaf='.'):
     else:
         return {key:value}
 
+def flat(something):
+    """Flats a list or dictionary"""
+    # everything must be string
+    if isinstance(something,dict):
+        return flat_dict(something)
+    
+    if isinstance(something,list):
+        return ','.join(something)
+
+def flat_dict(d):
+    """Flat a dictionary to a single string."""
+    s =''
+    # works if everything is string
+    for key,value in d.items():
+        s += key + ':'+value+'__'
+    return s
+
 def flat_paren_counter(string):
     """Count the number of non-nested balanced parentheses in the string.
     If parenthesis is not balanced then return -1.
@@ -122,8 +141,13 @@ def flat_paren_counter(string):
         return times
     return -1
 
-def mne_open(filepath,verbose='CRITICAL',preload=False):
+def mne_open(filepath_,verbose='CRITICAL',preload=False):
     """Return the Raw mne object or the RawEpoch object depending on the case given a filepath."""
+
+    if not isinstance(filepath_,str):
+        filepath = filepath_._str
+    else:
+        filepath = filepath_
     if '.set' in filepath:
         try:
             return mne.io.read_raw_eeglab(filepath,preload=preload,verbose=verbose)
@@ -174,3 +198,15 @@ def get_project_dir():
     #data_dir = os.path.join(this_dir,'..')
     #data_dir = os.path.abspath(data_dir)
     return os.path.realpath(os.path.join(__path__[0],'..'))
+
+def update_dataset_description(dataset_description,bids_root):
+    jsonfile = os.path.join(bids_root,'dataset_description.json')
+    if os.path.isfile(jsonfile):
+        with open(jsonfile) as f:
+            info = json.load(f)
+    else:
+        info = {}
+    if dataset_description != {}:
+        info.update(dataset_description)
+        _write_json(jsonfile,info,overwrite=True)
+    # Problem: Authors with strange characters are written incorrectly.

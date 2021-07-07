@@ -1,8 +1,9 @@
 import argparse
-
+import json
+import os
 from mne_bids import make_dataset_description
-
 from sovabids.rules import load_rules,apply_rules_to_single_file
+from sovabids.utils import update_dataset_description
 
 def convert_them(mappings_input):
     rules = load_rules(mappings_input)
@@ -11,17 +12,11 @@ def convert_them(mappings_input):
     bids_root = rules['General']['IO']['target']
     for mapping in rules['Individual']:
         apply_rules_to_single_file(mapping['IO']['source'],mapping,bids_root,write=True)
-        # Grab the info from the last file to make the dataset description
+    
+    # Grab the info from the last file to make the dataset description
     if 'dataset_description' in rules['General']:
         dataset_description = rules['General']['dataset_description']
-        if 'Name' in dataset_description:
-            # Renaming for mne_bids.make_dataset_description support
-            dataset_description['name'] = dataset_description.pop('Name')
-        if 'Authors' in dataset_description:
-            dataset_description['authors'] = dataset_description.pop('Authors')
-        make_dataset_description(bids_root,**dataset_description,overwrite=True)
-        # Problem: Authors with strange characters are written incorrectly.
-
+        update_dataset_description(dataset_description,bids_root)
 
 
 def sovaconvert():

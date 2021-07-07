@@ -28,6 +28,7 @@ The main elements of sovabids are:
 
 .. image:: https://mermaid.ink/svg/eyJjb2RlIjoiZ3JhcGggTFJcbiAgICBTPlwiU291cmNlIHBhdGhcIl1cbiAgICBCPlwiQmlkcyBwYXRoXCJdXG4gICAgUj5cIlJ1bGVzIGZpbGVcIl1cbiAgICBBUigoXCJBcHBseSBSdWxlc1wiKSlcbiAgICBNPlwiTWFwcGluZ3MgZmlsZVwiXVxuICAgIENUKChcIkNvbnZlcnQgVGhlbVwiKSlcbiAgICBPWyhcIkNvbnZlcnRlZCBkYXRhc2V0XCIpXVxuICAgIFMgLS0-IEFSXG4gICAgQiAtLT4gQVJcbiAgICBSIC0tPiBBUlxuICAgIEFSIC0tPiBNXG4gICAgTSAtLT4gQ1RcbiAgICBDVCAtLT4gT1xuICAiLCJtZXJtYWlkIjp7InRoZW1lIjoiZm9yZXN0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2UsImF1dG9TeW5jIjp0cnVlLCJ1cGRhdGVEaWFncmFtIjpmYWxzZX0
 
+Internally sovabids uses `MNE-Python <https://github.com/mne-tools/mne-python>`_ and `MNE-BIDS <https://github.com/mne-tools/mne-bids>`_ to perform the conversion. In a sense is a wrapper that allows to do conversions from the command line.
 
 Installation
 ------------
@@ -37,6 +38,29 @@ Installation
    git clone https://github.com/yjmantilla/sovabids.git
    cd sovabids
    pip install .
+
+Installation for using examples
+-------------------------------
+
+We need the folders (like _data for example) of the git repository. To preserve that folder structure is advised to install sovabids in editable mode:
+
+.. code-block:: bash
+
+   git clone https://github.com/yjmantilla/sovabids.git
+   cd sovabids
+   pip install -e .
+
+Installation for development
+----------------------------
+
+Fork this repo and run:
+
+.. code-block:: bash
+
+   git clone https://github.com/<gh-username>/sovabids
+   cd sovabids
+   pip install -r requirements-dev.txt
+   pip install -e .
 
 Basic Usage
 -----------
@@ -72,6 +96,8 @@ Use the sovaconvert entry-point to convert the dataset given its mapping file.
 
 Acknowledgments
 ---------------
+
+sovabids is developed with the help of the following entities:
 
 .. raw:: html
 

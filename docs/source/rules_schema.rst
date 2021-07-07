@@ -418,6 +418,10 @@ Now you just need to set the pattern, remember we need to use forward-slash nota
         * that the fields are already in the pattern string
         * that there is no need to escape the forward-slash (```/``) character
 
+.. note::
+
+    You can use %ignore% if that part of the pattern varies but you don't care about its value.
+
 The placeholder has two advanced configurations which define how the pattern is translated to a regex pattern:
 
 .. code-block:: yaml

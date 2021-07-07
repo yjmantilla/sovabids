@@ -56,6 +56,7 @@ EEG:
       entities.subject:
       entities.task:
       entities.session:
+      entities.run:
       dataset_description:
     bids: &eeg_bids               # See: schema/datatypes/eeg.yaml
       task: <<entities.task>>     # Note Dynamic values are not previewed in the bids editor but they do work, this should be fixed anyway

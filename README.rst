@@ -39,17 +39,6 @@ Installation
    cd sovabids
    pip install .
 
-Installation for using examples
--------------------------------
-
-We need the folders (like _data for example) of the git repository. To preserve that folder structure is advised to install sovabids in editable mode:
-
-.. code-block:: bash
-
-   git clone https://github.com/yjmantilla/sovabids.git
-   cd sovabids
-   pip install -e .
-
 Installation for development
 ----------------------------
 

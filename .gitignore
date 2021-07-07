@@ -2,6 +2,7 @@
 
 src/
 _data/
+_temp/
 
 .vscode/
 

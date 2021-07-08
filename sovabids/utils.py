@@ -201,6 +201,7 @@ def get_project_dir():
 
 def update_dataset_description(dataset_description,bids_root):
     jsonfile = os.path.join(bids_root,'dataset_description.json')
+    os.makedirs(bids_root,exist_ok=True)
     if os.path.isfile(jsonfile):
         with open(jsonfile) as f:
             info = json.load(f)

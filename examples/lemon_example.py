@@ -53,7 +53,7 @@ from sovabids.datasets import lemon_prepare # Download the dataset
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # We have to download and decompress the dataset. We also need to fix a filename inconsistency
 # (without this correction the file won't be able to be opened in mne). Luckily all of that is 
-# encapsulated in the lemon_prepare.py function since these issues are not properly of sovabids. 
+# encapsulated in the lemon_prepare function since these issues are not properly of sovabids. 
 # 
 # By default the files are saved in the '_data' directory of the sovabids project.
 lemon_prepare()

@@ -94,7 +94,7 @@ html_theme = 'furo'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static'] #already done in the setup(app) section
 html_extra_path = ['_copyover']
 
 # Replace gallery.css for changing the highlight of the output cells in sphinx gallery
@@ -103,8 +103,8 @@ html_extra_path = ['_copyover']
 # https://github.com/sphinx-doc/sphinx/issues/2090
 # https://github.com/sphinx-doc/sphinx/issues/7747
 def setup(app):
-    app.connect('builder-inited', lambda app: app.config.html_static_path.append('_static'))
-    app.add_css_file('gallery.css')
+   app.connect('builder-inited', lambda app: app.config.html_static_path.append('_static'))
+   app.add_css_file('gallery.css')
 
 # Auto API
 extensions.append('autoapi.extension')

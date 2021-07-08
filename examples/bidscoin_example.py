@@ -23,6 +23,7 @@ Intuitively, the bidsmapper grabs a template to produce a study bidsmap, which m
 The connection of sovabids and bidscoin is through a plugin called sova2coin which helps the bidscoin modules by dealing with the EEG data.
 
 .. mermaid::
+
     graph LR
         S>"Source path"]
         B>"Bids path"]
@@ -53,6 +54,12 @@ The connection of sovabids and bidscoin is through a plugin called sova2coin whi
 
         pip install git+https://github.com/yjmantilla/bidscoin.git@sovabids
 
+    If that doesn't work try:
+
+    .. code-block:: bash
+        git clone https://github.com/yjmantilla/bidscoin/tree/sovabids
+        cd bidscoin
+        pip install .
 """
 
 #%%
@@ -154,14 +161,17 @@ with open(rules_path,encoding="utf-8") as f:
 #%%
 # Making the bidsmap template
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# The template is equivalent to the "rules" file of sovabids. It encodes the general way of doing the conversion.
 # Explaining this file is out of scope of this example (this is bidscoin territory).
 # We will notice however that: 
 #   * We input our rules file as an option to the sova2coin plugin.
 #   * We are interested in a "EEG" dataformat with an "eeg" datatype.
 #   * We match every file with a .* in the properties.filename section
-#   * In the attributes section we have the objects as they are named in our rules file schema (that is, here we deal with sovabids terminology)
+#   * The attributes are basically the metadata information extracted from the files which may be used to derive bids-related information.
+#   * In the attributes section we have the objects as they are named in our rules file schema (that is, here we deal with sovabids terminology using a dot notation for nesting)
+#   * We populate bids-related info with the extracted attributes (see subject, session and bids sections of the file)
 #   * We set the suffix to eeg.
-
+#   * The ``<`` and ``<<`` is best explained `here <https://bidscoin.readthedocs.io/en/stable/bidsmap.html#special-bidsmap-features>`_
 template = bidsmap_sova2coin.format(rules_path)
 
 print(template)
@@ -169,7 +179,17 @@ print(template)
 with open(template_path,mode='w') as f:
     f.write(template)
 
-
+#%%
+# .. tip::
+#       
+#       You can also input the rules directly (ie writing the rules instead of the path to the rules file)
+#       What is important is that inside the "rules" field of the sova2coin "options"
+#
+# .. note::
+#       The EEG:eeg hierarchy just says that there is an 'EEG' dataformat which a general 'eeg' datatype. 
+#       This is a bit redundant but it happens because bidscoin was originally thought for DICOM (dataformat) 
+#       which holds many datatypes (anat,perf,etc). In eeg this doesnt happens.
+#
 # %%
 # Some necessary code
 # ^^^^^^^^^^^^^^^^^^^
@@ -188,7 +208,8 @@ print(my_output)
 # bidsmapper
 # ^^^^^^^^^^
 # First we execute the bidsmapper to get a study bidsmap from our bidsmap template.
-# Lets see its help
+# The bidsmap file is equivalent to our "mappings" file; it encodes how the conversion is done on a per-file basis.
+# Lets see the help
 
 command = "bidsmapper --help"
 print(command)
@@ -202,6 +223,8 @@ print(my_output)
 # Now we will use the following command to get the bidsmap study file.
 # Note we use -t to set the template and -a to run this without the bidseditor
 # You can skip the -a option if you are able to open the bidseditor (ie you are able to give user-input in its interface)
+# Just remember to save the bidsmap yaml at the end.
+# See the `bidseditor documentation <https://bidscoin.readthedocs.io/en/stable/workflow.html#main-window>`_ for more info.
 command = 'bidsmapper '+source_path + ' '+ bids_root + ' -t ' + template_path + ' -a'
 print(command)
 

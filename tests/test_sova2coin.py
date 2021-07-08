@@ -5,19 +5,18 @@ from bidscoin.bidsmapper import bidsmapper
 import os
 import shutil
 from sovabids.schemas import bidsmap_sova2coin
-from sovabids.utils import get_files
+from sovabids.utils import get_files,get_project_dir
 from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset
 import yaml
 
 def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
-    this_dir = os.path.dirname(__file__)
-    data_dir = os.path.join(this_dir,'..','_data')
+    data_dir = os.path.join(get_project_dir(),'_data')
     data_dir = os.path.abspath(data_dir)
 
     source_path = os.path.abspath(os.path.join(data_dir,dataset+'_input'))
     bids_root= os.path.abspath(os.path.join(data_dir,dataset+'_output'))
     rules_path = os.path.join(data_dir,'bidscoin_'+dataset+'_rules.yml')
-    bidsmap_path = os.path.join(data_dir,'bidscoin_example_bidsmap.yml')
+    template_path = os.path.join(data_dir,'bidscoin_template.yml')
 
     if dataset == 'dummy_bidscoin':
       rules = {
@@ -73,10 +72,10 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
 
     bidsmap = bidsmap_sova2coin.format(rules_path)
 
-    with open(bidsmap_path,mode='w') as f:
+    with open(template_path,mode='w') as f:
         f.write(bidsmap)
 
-    bidsmapper(rawfolder=source_path,bidsfolder=bids_root,subprefix='sub-',sesprefix='ses-',bidsmapfile='bidsmap.yaml',templatefile= bidsmap_path,noedit=noedit)
+    bidsmapper(rawfolder=source_path,bidsfolder=bids_root,subprefix='sub-',sesprefix='ses-',bidsmapfile='bidsmap.yaml',templatefile= template_path,noedit=noedit)
 
     bidscoiner(rawfolder    = source_path,
                 bidsfolder   = bids_root)

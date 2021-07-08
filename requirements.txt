@@ -1,0 +1,5 @@
+requests
+pybv
+pyyaml
+pandas
+mne_bids @ git+https://github.com/AKSoo/mne-bids.git@preloaded#egg

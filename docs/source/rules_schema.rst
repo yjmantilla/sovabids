@@ -5,6 +5,9 @@ The rules file setups the way the conversion is done from a general point of vie
 
 To make the rules file by hand we need to understand the schema of the file. For starts, the file is written in yaml. As of now the purpose of this documentation is not to teach yaml (we may have a dedicated file for that in the future). For now, you can check this `guide <https://www.cloudbees.com/blog/yaml-tutorial-everything-you-need-get-started>`_ though.
 
+The Typical Rules File
+----------------------
+
 A typical rules file looks like this:
 
 .. code-block:: yaml
@@ -100,7 +103,7 @@ In essence the *entities* object holds information that triangulates the file in
         task : resting
         session : ses1
 
-.. note::
+.. tip::
     In general, you only configure what you have, it is not necessary to set up empty fields.
 
 .. warning:: 
@@ -191,7 +194,7 @@ channels
 
 Channel information is mostly inferred by MNE upon reading the eeg file so usually you wouldn't need to set a rule for this. In this sense, the rules file setups whatever corrections need to be done on top of the assumptions MNE makes upon reading. 
 
-.. note::
+.. tip::
     One strategy is to do the conversion without any corrections and see what was wrong, then changing the rules file accordingly.
 
 The *channels* object currently supports the following functionality:
@@ -344,14 +347,14 @@ Now you make your regex using capture groups and the forward-slash as the path s
     
     _data\/(.+)\/ses-(.+)\/(.+)\/sub-(.+).vhdr
 
-.. note::
+.. tip::
     The capture group (.+) is recommended. The dot will match any character (except line terminators) and the plus sign will match it 1 to unlimited times. Basically it will try to match the longest strings it can given the pattern you gave.
 
-.. note::
+.. warning::
 
     Use the forward-slash as the path separator (``/``) in your pattern regardless of the symbol your OS uses. This is to avoid problems when reading strings. This applies both to regex patterns and placeholder patterns.
 
-.. note::
+.. warning::
     We need to escape the forward slash in the regex pattern so ``/`` becomes ``\/``.
 
 So your *path_analysis* object is wrote in the *Rules File* as:
@@ -418,6 +421,10 @@ Now you just need to set the pattern, remember we need to use forward-slash nota
         * that the fields are already in the pattern string
         * that there is no need to escape the forward-slash (```/``) character
 
+.. tip::
+
+    You can use %ignore% if that part of the pattern varies but you don't care about its value.
+
 The placeholder has two advanced configurations which define how the pattern is translated to a regex pattern:
 
 .. code-block:: yaml
@@ -440,7 +447,7 @@ So if you don't set up these configurations, it is equivalent to having:
         path_analysis:
             pattern : placeholder-pattern
             matcher :  (.+)
-            encloser : %
+            encloser : "%"
 
 
 What we need to write in the *Rules File* is then:
@@ -451,7 +458,7 @@ What we need to write in the *Rules File* is then:
         path_analysis:
             pattern : _data/%dataset_description.Name%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr
 
-.. note::
+.. tip::
 
     You don't need to put the whole path structure, just from where it interests you. In the examples here we are only interested from the ``_data`` folder.
 
@@ -485,7 +492,7 @@ A useless but simple way to illustrate this is just to print the information of 
 
     Notice it is a **list** of commands, so each command has a (``-``); even if we execute only one command.
 
-the complete non-bids object
+The complete non-bids object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Finally, we will have this *non-bids* object (if using the placeholder pattern option):

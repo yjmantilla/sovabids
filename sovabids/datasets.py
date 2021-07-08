@@ -72,12 +72,12 @@ def lemon_prepare():
                 shutil.rmtree(olddir)
     print('LEMON PREPARE DONE!')
 
-def lemon_bidscoin_prepare():
+def lemon_bidscoin_prepare(src_path):
     lemon_prepare()
     this_dir = os.path.dirname(__file__)
     data_dir = os.path.join(this_dir,'..','_data')
     root_path = os.path.abspath(os.path.join(data_dir,'lemon'))
-    bidscoin_input_path = os.path.abspath(os.path.join(data_dir,'lemon_bidscoin_input'))
+    bidscoin_input_path = src_path
 
     os.makedirs(bidscoin_input_path,exist_ok=True)
 
@@ -104,12 +104,12 @@ def lemon_bidscoin_prepare():
 
 def make_dummy_dataset(PATTERN = '%dataset_description.Name%/T%entities.task%/S%entities.session%/sub%entities.subject%_%entities.run%',
     DATASET = 'DUMMY',
-    NSUBS = 11,
+    NSUBS = 2,
     NTASKS = 2,
     NACQS = 2,
     NRUNS = 2,
-    NSESSIONS = 4,
-    NCHANNELS = 32,
+    NSESSIONS = 2,
+    NCHANNELS = 2,
     SFREQ = 200,
     STOP = 10,
     NUMEVENTS = 10,

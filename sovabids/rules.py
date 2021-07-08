@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 import yaml
 import argparse
 
@@ -10,9 +11,9 @@ from mne_bids.path import _parse_ext
 from pandas import read_csv
 from traceback import format_exc
 
-from sovabids.utils import get_nulls,deep_merge_N,get_supported_extensions,get_files,mne_open
+from sovabids.utils import get_nulls,deep_merge_N,get_supported_extensions,get_files,mne_open,flat
 from sovabids.parsers import parse_from_regex,parse_from_placeholder
-
+from sovabids.utils import update_dataset_description
 def get_info_from_path(path,rules_):
     """
     Two ways to parse:
@@ -52,11 +53,14 @@ def load_rules(rules_):
             return yaml.load(f,yaml.FullLoader)
     return rules_
 
-def apply_rules_to_single_file(f,rules_,bids_root,write=False):
-    rules = deepcopy(rules_) #otherwise the deepmerge wont update the values for a new file
+def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
 
+    if not isinstance(rules_,dict):
+        rules_ = load_rules(rules_)
+
+    rules = deepcopy(rules_) #otherwise the deepmerge wont update the values for a new file
     # Upon reading RAW MNE makes the assumptions
-    raw = mne_open(f)
+    raw = mne_open(f,preload=False)#not write)
 
     # First get info from path
 
@@ -94,24 +98,34 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False):
 
 
         bids_path = BIDSPath(**entities,root=bids_root)
+
+        real_times = raw.times[-1]
         if write:
             write_raw_bids(raw, bids_path=bids_path,overwrite=True)
         else:
+            if preview:
+                max_samples = min(10,raw.last_samp)
+                tmax = max_samples/raw.info['sfreq']
+                raw.crop(tmax=tmax)
+                orig_files = get_files(bids_path.root)
+                write_raw_bids(raw, bids_path=bids_path,overwrite=True,format='BrainVision',allow_preload=True,verbose=False)
+            else:
             # These lines are taken from mne_bids.write
-            raw_fname = raw.filenames[0]
-            if '.ds' in os.path.dirname(raw.filenames[0]):
-                raw_fname = os.path.dirname(raw.filenames[0])
-            # point to file containing header info for multifile systems
-            raw_fname = raw_fname.replace('.eeg', '.vhdr')
-            raw_fname = raw_fname.replace('.fdt', '.set')
-            raw_fname = raw_fname.replace('.dat', '.lay')
-            _, ext = _parse_ext(raw_fname)
+                raw_fname = raw.filenames[0]
+                if '.ds' in os.path.dirname(raw.filenames[0]):
+                    raw_fname = os.path.dirname(raw.filenames[0])
+                # point to file containing header info for multifile systems
+                raw_fname = raw_fname.replace('.eeg', '.vhdr')
+                raw_fname = raw_fname.replace('.fdt', '.set')
+                raw_fname = raw_fname.replace('.dat', '.lay')
+                _, ext = _parse_ext(raw_fname)
 
-            datatype = _handle_datatype(raw)
-            bids_path = bids_path.copy()
-            bids_path = bids_path.update(
-                datatype=datatype, suffix=datatype, extension=ext)
+                datatype = _handle_datatype(raw,None)
+                bids_path = bids_path.copy()
+                bids_path = bids_path.update(
+                    datatype=datatype, suffix=datatype, extension=ext)
 
+        update_dataset_description(rules.get('dataset_description',{}),bids_path.root)
         rules['IO']={}
         rules['IO']['target'] = bids_path.fpath.__str__()
         rules['IO']['source'] = f
@@ -119,27 +133,75 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False):
         # POST-PROCESSING. For stuff easier to overwrite in the files rather than in the raw object
         # Rules that need to be applied to the result of mne-bids
         # Or maybe we should add the functionality directly to mne-bids
-        if write:
-            if 'sidecar' in rules:
+        if write or preview:
+            # sidecar
+            try:
                 sidecar_path = bids_path.copy().update(datatype='eeg',suffix='eeg', extension='.json')
                 with open(sidecar_path.fpath) as f:
-                    dummy_dict = json.load(f)
-                    sidecar = rules['sidecar']
+                    sidecarjson = json.load(f)
+                    sidecar = rules.get('sidecar',{})
                     #TODO Validate the sidecar rules so as not to include dangerous stuff??
-                    dummy_dict.update(sidecar)
+                    sidecarjson.update(sidecar)
+                    sidecarjson.update({'RecordingDuration':real_times}) # needed if preview,since we crop
                     # maybe include an overwrite rule
-                    _write_json(sidecar_path.fpath,dummy_dict,overwrite=True)
-
-            if 'channels' in rules:
-                channels_path = bids_path.copy().update(datatype='eeg',suffix='channels', extension='.tsv')
+                _write_json(sidecar_path.fpath,sidecarjson,overwrite=True)
+                with open(sidecar_path.fpath) as f:
+                    sidecarjson = f.read().replace('\n', '')
+            except:
+                sidecarjson = ''
+            # channels
+            channels_path = bids_path.copy().update(datatype='eeg',suffix='channels', extension='.tsv')
+            try:
                 channels_table = read_csv (channels_path.fpath, sep = '\t',dtype=str,keep_default_na=False,na_filter=False,na_values=[],true_values=[],false_values=[])
-                channels_rules = rules['channels']
+                channels_rules = rules.get('channels',{})
                 if 'type' in channels_rules: # types are post since they are not saved in vhdr (are they in edf??)
                     for ch_name,ch_type in channels_rules['type'].items():
                         channels_table.loc[(channels_table.name==str(ch_name)),'type'] = ch_type
                 channels_table.to_csv(channels_path.fpath, index=False,sep='\t')
+                # chans_dict = channels_table.to_dict(orient='index')
+                # channels = {}
+                # for key,value in chans_dict.items():
+                #     channels[str(key)] = flat(value)
+                with open(channels_path.fpath) as f:
+                    channels = f.read().replace('\n', '__').replace('\t',',')
+                chans_dict = channels_table.to_dict(orient='list')
+                channels={}
+                for key,value in chans_dict.items():
+                     channels[str(key)] = flat(value)
+            except:
+                channels = ''
+            # dataset_description
+            daset_path = os.path.join(bids_path.root, 'dataset_description.json')
+            if os.path.isfile(daset_path):
+                with open(daset_path) as f:
+                    #dasetjson = json.load(f)
+                    #daset = rules.get('dataset_description',{}) #TODO more work needed to overwrite, specifically fields which arent pure strings like authors
+                    #TODO Validate the sidecar rules so as not to include dangerous stuff??
+                    #dasetjson.update(daset)
+                    # maybe include an overwrite rule
+                    #if write:
+                    #    _write_json(daset_path.fpath,dasetjson,overwrite=True)
+                    dasetjson = f.read().replace('\n', '')
+            else:
+                dasetjson =''
+    if preview:
+        preview = {
+            'IO' : rules.get('IO',{}),
+            'entities':rules.get('entities',{}),
+            'dataset_description':dasetjson,
+            'sidecar':sidecarjson,
+            'channels':channels,
+            }
     #TODO remove general information of the dataset from the INDIVIDUAL MAPPINGS (ie dataset_description stuff)
-    return rules
+    
+    # CLEAN FILES IF NOT WRITE
+    if not write and preview:
+        new_files = get_files(bids_path.root)
+        new_files = list(set(new_files)-set(orig_files))
+        for filename in new_files:
+            if os.path.exists(filename): os.remove(filename)
+
+    return rules,preview
 def apply_rules(source_path,bids_root,rules_,mapping_path=''):
 
     rules_ = load_rules(rules_)
@@ -161,7 +223,7 @@ def apply_rules(source_path,bids_root,rules_,mapping_path=''):
     #%% BIDS CONVERSION
     all_mappings = []
     for f in filepaths:
-        rules = apply_rules_to_single_file(f,rules_,bids_root,write=False) #TODO There should be a way to control how verbose this is
+        rules,_ = apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False) #TODO There should be a way to control how verbose this is
         all_mappings.append(rules)
     
     outputfolder,outputname = os.path.split(mapping_path)

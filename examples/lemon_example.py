@@ -163,7 +163,8 @@ print('LEMON CONVERSION FINISHED!')
 # Notice that we will run this inside of python so that the example can be run without needing configuration.
 # To run this locally you will need to run lemon_prepare() function from the command line. You can do so by running:
 # .. code-block:: bash
-#       python -c "from sovabids.datasets import lemon_prepare; lemon_prepare()"
+#
+#    python -c "from sovabids.datasets import lemon_prepare; lemon_prepare()"
 #
 # Since we already have run lemon_prepare() inside this example, we will start from this step.
 # We set up the paths again, but now we will change the output to a new path (with "_cli" at the end). We will also clean this path as we did before.

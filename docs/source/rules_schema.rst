@@ -444,7 +444,7 @@ So if you don't set up these configurations, it is equivalent to having:
         path_analysis:
             pattern : placeholder-pattern
             matcher :  (.+)
-            encloser : %
+            encloser : "%"
 
 
 What we need to write in the *Rules File* is then:

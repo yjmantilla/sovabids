@@ -20,7 +20,7 @@ In summary, bidscoin uses a bidsmap to encode how a conversion is done.
 
 Intuitively, the bidsmapper grabs a template to produce a study bidsmap, which may or may not be customized for each file through the bidseditor. Either way the final study bidsmap is passed to bidscoiner to perform the conversion.
 
-The connection of sovabids and bidscoin is through a plugin called sova2coin which helps the bidscoin modules by dealing with the EEG data.
+The connection of sovabids and bidscoin is through a plugin called **sova2coin** which helps the bidscoin modules by dealing with the EEG data.
 
 .. mermaid::
 
@@ -46,7 +46,7 @@ The connection of sovabids and bidscoin is through a plugin called sova2coin whi
 
 .. warning::
 
-    To run this example you need to install our `bidscoin branch <>`_
+    To run this example you need to install our `bidscoin branch <https://github.com/yjmantilla/bidscoin/tree/sovabids>`_
     
     That is, you need to run:
 
@@ -57,6 +57,7 @@ The connection of sovabids and bidscoin is through a plugin called sova2coin whi
     If that doesn't work try:
 
     .. code-block:: bash
+
         git clone https://github.com/yjmantilla/bidscoin/tree/sovabids
         cd bidscoin
         pip install .
@@ -68,7 +69,6 @@ The connection of sovabids and bidscoin is through a plugin called sova2coin whi
 # First we import some functions we will need:
 
 import os
-from re import template # For path manipulation
 import shutil # File manipulation
 import yaml # To do yaml operations
 from mne_bids import print_dir_tree # To show the input/output directories structures inside this example
@@ -123,7 +123,7 @@ for p in [source_path,bids_root,code_path]:
 # (without this correction the file won't be able to be opened in mne). Luckily all of that is 
 # encapsulated in the lemon_prepare function since these issues are not properly of sovabids. 
 # 
-# We also need to prepare the data to the `bidscoin required source data structure <https://bidscoin.readthedocs.io/en/stable/preparation.html>`_
+# We also need to prepare the data to the `bidscoin required source data structure <https://bidscoin.readthedocs.io/en/stable/preparation.html>`_ .
 # We will save this input data to source_path .
 lemon_bidscoin_prepare(source_path)
 
@@ -164,14 +164,14 @@ with open(rules_path,encoding="utf-8") as f:
 # The template is equivalent to the "rules" file of sovabids. It encodes the general way of doing the conversion.
 # Explaining this file is out of scope of this example (this is bidscoin territory).
 # We will notice however that: 
-#   * We input our rules file as an option to the sova2coin plugin.
-#   * We are interested in a "EEG" dataformat with an "eeg" datatype.
-#   * We match every file with a .* in the properties.filename section
-#   * The attributes are basically the metadata information extracted from the files which may be used to derive bids-related information.
-#   * In the attributes section we have the objects as they are named in our rules file schema (that is, here we deal with sovabids terminology using a dot notation for nesting)
-#   * We populate bids-related info with the extracted attributes (see subject, session and bids sections of the file)
-#   * We set the suffix to eeg.
-#   * The ``<`` and ``<<`` is best explained `here <https://bidscoin.readthedocs.io/en/stable/bidsmap.html#special-bidsmap-features>`_
+# * We input our rules file as an option to the sova2coin plugin.
+# * We are interested in a "EEG" dataformat with an "eeg" datatype.
+# * We match every file with a .* in the properties.filename section
+# * The attributes are basically the metadata information extracted from the files which may be used to derive bids-related information.
+# * In the attributes section we have the objects as they are named in our rules file schema (that is, here we deal with sovabids terminology using a dot notation for nesting)
+# * We populate bids-related info with the extracted attributes (see subject, session and bids sections of the file)
+# * We set the suffix to eeg.
+# * The ``<`` and ``<<`` is best explained `here <https://bidscoin.readthedocs.io/en/stable/bidsmap.html#special-bidsmap-features>`_
 template = bidsmap_sova2coin.format(rules_path)
 
 print(template)
@@ -190,7 +190,6 @@ with open(template_path,mode='w') as f:
 #       This is a bit redundant but it happens because bidscoin was originally thought for DICOM (dataformat) 
 #       which holds many datatypes (anat,perf,etc). In eeg this doesnt happens.
 #
-# %%
 # Some necessary code
 # ^^^^^^^^^^^^^^^^^^^
 # To be able to run commands from this notebook and capture their outputs we need to define the following, nevertheless this is not relevant to actually running this from the command line.

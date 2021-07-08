@@ -112,7 +112,9 @@ with open(rules_path,encoding="utf-8") as f:
 # Applying the rules
 # ^^^^^^^^^^^^^^^^^^
 # We apply the rules to the input dataset by giving the input,ouput,rules, and mapping paths to the apply_rules function.
+#
 # This will produce by default a 'mappings.yml' file at the specified directory of 'bids_root/code/sovabids'.
+#
 # This file holds the result of applying the rules to each of the dataset files.
 apply_rules(source_path,bids_root,rules_path,mapping_path)
 
@@ -161,12 +163,14 @@ print('LEMON CONVERSION FINISHED!')
 # Same old blues
 # ^^^^^^^^^^^^^^
 # Notice that we will run this inside of python so that the example can be run without needing configuration.
+#
 # To run this locally you will need to run lemon_prepare() function from the command line. You can do so by running:
 # .. code-block:: bash
 #
 #    python -c "from sovabids.datasets import lemon_prepare; lemon_prepare()"
 #
 # Since we already have run lemon_prepare() inside this example, we will start from this step.
+#
 # We set up the paths again, but now we will change the output to a new path (with "_cli" at the end). We will also clean this path as we did before.
 #
 source_path = os.path.abspath(os.path.join(get_project_dir(),'_data','lemon')) # For the input data we will convert
@@ -202,6 +206,7 @@ print(my_output)
 # sovapply
 # ^^^^^^^^
 # In this example we have already made the rules. So we will apply them using the sovapply tool.
+#
 # Use the following command to print the help of the tool:
 #
 command = "sovapply --help"
@@ -227,6 +232,7 @@ print(my_output)
 # sovaconvert
 # ^^^^^^^^^^^
 # Now we are ready to perform the conversion given the mapping file just made.
+#
 # Use the following command to print the help of the tool:
 #
 command = "sovaconvert --help"

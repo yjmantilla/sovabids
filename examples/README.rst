@@ -6,7 +6,7 @@ Examples Gallery
 Here we show some exemplary use cases for sovabids.
 
 These examples assume the folder structure of the sovabids repository (ie having the "examples" directory).
-If you plan to run these examples it is recommended that you install sovabids in the following way:
+If you plan to run these examples you should install sovabids in the following way:
 
 Installation for using examples
 -------------------------------

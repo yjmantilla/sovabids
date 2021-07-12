@@ -1,3 +1,5 @@
+"Module with misc utils for sovabids."
+
 import os
 import mne
 import requests
@@ -14,11 +16,31 @@ def get_nulls():
     return ['',None,{},[]]
 
 def get_supported_extensions():
-    """Return the current supported extensions."""
+    """Return the current supported extensions.
+    
+    Returns
+    -------
+    
+    list of str :
+        The extensions supported by the package.
+    """
     return ['.set' ,'.cnt' ,'.vhdr' ,'.bdf','.edf' ,'.fif'] 
 
 def get_files(root_path):
-    """Recursively scan the directory for files, returning a list with the full-paths to each."""
+    """Recursively scan the directory for files, returning a list with the full-paths to each.
+    
+    Parameters
+    ----------
+
+    root_path : str
+        The path we want to obtain the files from.
+
+    Returns
+    -------
+
+    filepaths : list of str
+        A list containing the path to each file in root_path.
+    """
     filepaths = []
     for root, dirs, files  in os.walk(root_path, topdown=False):
         for name in files:
@@ -26,11 +48,40 @@ def get_files(root_path):
     return filepaths
 
 def split_by_n(lst,n):
-    """Split the list in sublists of n elements."""
+    """Split the list in sublists of n elements.
+    
+    Parameters
+    ----------
+
+    lst : list
+        The list to be split
+
+    n : int
+        The number of elements in each sublist.
+    
+    Returns
+    -------
+
+    list of list
+        The split list
+    """
     return [lst[i:i + n] for i in range(0, len(lst), n)]
 
 def deep_merge_N(l):
-    """Merge the list of dictionaries, such that the latest one has the greater precedence."""
+    """Merge the list of dictionaries, such that the latest one has the greater precedence.
+    
+    Parameters
+    ----------
+
+    l : list of dict
+        List containing the dictionaries to be merged, having precedence on the last ones.
+    
+    Returns
+    -------
+
+    dict :
+        The merged dictionary.
+    """
     d = {}
     while True:
         if len(l) == 0:
@@ -56,6 +107,18 @@ def deep_merge(a, b):
           will be merged with the same semantics.
 
     From David Schneider answer at https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries/15836901#15836901
+
+    Parameters
+    ----------
+
+    a : object
+    b : object
+
+    Returns
+    -------
+
+    dict :
+        Merged dictionary.
     """
     if not isinstance(a, dict) or not isinstance(b, dict):
         return a if b is None else b
@@ -77,6 +140,21 @@ def flatten(d, parent_key='', sep='.'):
     """Flatten the nested dictionary structure using the given separator.
 
     If parent_key is given, then that level is added at the start of the tree.
+
+    Parameters
+    ----------
+
+    d : dict
+        The dictionary to flat.
+    parent_key : str, optional
+        The optional top-level field of the dictionary.
+    sep : str, optional
+        The separator to indicate nesting/branching/hierarchy.
+
+    Returns
+    -------
+    dict :
+        A dictionary with only one level of fields.
     """
     items = []
     for k, v in d.items():
@@ -89,7 +167,23 @@ def flatten(d, parent_key='', sep='.'):
 
 
 def nested_notation_to_tree(key,value,leaf='.'):
-    """Create a nested dictionary from the single (key,value) pair, with the key being branched by the leaf separator."""
+    """Create a nested dictionary from the single (key,value) pair, with the key being branched by the leaf separator.
+    
+    Parameters
+    ----------
+    key : str
+        The key/field to be nested, assuming nesting is represented with the "leaf" parameters.
+    value : object
+        The value that it will have at the last level of nesting.
+    leaf : str, optional
+        The separator used to indicate nesting in "key" parameter.
+    
+    Returns
+    -------
+
+    dict :
+        Nested dictionary.
+    """
     if leaf in key:
         tree_list = key.split(leaf)
         tree_dict = value
@@ -99,26 +193,20 @@ def nested_notation_to_tree(key,value,leaf='.'):
     else:
         return {key:value}
 
-def flat(something):
-    """Flats a list or dictionary"""
-    # everything must be string
-    if isinstance(something,dict):
-        return flat_dict(something)
-    
-    if isinstance(something,list):
-        return ','.join(something)
-
-def flat_dict(d):
-    """Flat a dictionary to a single string."""
-    s =''
-    # works if everything is string
-    for key,value in d.items():
-        s += key + ':'+value+'__'
-    return s
-
 def flat_paren_counter(string):
-    """Count the number of non-nested balanced parentheses in the string.
-    If parenthesis is not balanced then return -1.
+    """Count the number of non-nested balanced parentheses in the string. If parenthesis is not balanced then return -1.
+
+    Parameters
+    ----------
+
+    string : str
+        The string we will inspect for balanced parentheses.
+    
+    Returns
+    -------
+
+    int :
+        The number of non-nested balanced parentheses or -1 if the string has unbalanced parentheses.
     """
     #Modified from
     #jeremy radcliff
@@ -141,34 +229,18 @@ def flat_paren_counter(string):
         return times
     return -1
 
-def mne_open(filepath_,verbose='CRITICAL',preload=False):
-    """Return the Raw mne object or the RawEpoch object depending on the case given a filepath."""
-
-    if not isinstance(filepath_,str):
-        filepath = filepath_._str
-    else:
-        filepath = filepath_
-    if '.set' in filepath:
-        try:
-            return mne.io.read_raw_eeglab(filepath,preload=preload,verbose=verbose)
-        except:
-            return mne.io.read_epochs_eeglab(filepath,verbose=verbose)
-    elif '.cnt' in filepath:
-        return mne.io.read_raw_cnt(filepath,preload=preload,verbose=verbose)
-    elif '.vhdr' in filepath:
-        return mne.io.read_raw_brainvision(filepath,preload=preload,verbose=verbose)
-    elif '.bdf' in filepath:
-        return mne.io.read_raw_bdf(filepath,preload=preload,verbose=verbose)
-    elif '-epo.fif' in filepath:
-        return mne.read_epochs(filepath, preload=preload, verbose=verbose)
-    elif '.fif' in filepath:
-        return mne.io.read_raw_fif(filepath,preload=preload,verbose=verbose)
-    else:
-        return None
-
 def download(url,path):
     """Download in the path the file from the given url.
+
     From H S Umer farooq answer at https://stackoverflow.com/questions/22676/how-to-download-a-file-over-http
+
+    Parameters
+    ----------
+
+    url : str
+        The url of the file to download.
+    path : str
+        The path where to download the file.
     """
     get_response = requests.get(url,stream=True)
     file_name  = url.split("/")[-1]
@@ -185,21 +257,46 @@ def download(url,path):
         print("WARNING: File already existed. Skipping...")
 
 def get_num_digits(N):
-    """Return the number of digits of the given number N."""
+    """Return the number of digits of the given number N.
+    
+    Paremeters
+    ----------
+    N : int
+        The number we want to apply the function to.
+    
+    Returns
+    -------
+    int :
+        The numbers of digits needed to represent the number N.
+    """
     return int(np.log10(N))+1
 
-def get_data_dir():
-    project=get_project_dir()
-    data_dir = os.path.join(project,'_data')
-    return data_dir
-
 def get_project_dir():
-    #this_dir = os.path.dirname(__file__)
-    #data_dir = os.path.join(this_dir,'..')
-    #data_dir = os.path.abspath(data_dir)
+    """Return the path of the sovabids project, that is the root of the git repository.
+
+    Needs that sovabids was installed in editable mode from the git repository.
+
+    Returns
+    -------
+
+    str :
+        Path of the root of the git repository.
+    """
     return os.path.realpath(os.path.join(__path__[0],'..'))
 
 def update_dataset_description(dataset_description,bids_root):
+    """Update the dataset_description.json located at bids_root given a dictionary.
+
+    If it exist, updates with the new given values. If it doesn't exist, then creates it.
+
+    Parameters
+    ----------
+
+    dataset_description : dict
+        The dataset_description dictionary to update with, following the schema of the dataset_description.json file of bids.
+    bids_root : str
+        The path of the bids_root of the dataset description file, basically the folder where the file is.
+    """
     jsonfile = os.path.join(bids_root,'dataset_description.json')
     os.makedirs(bids_root,exist_ok=True)
     if os.path.isfile(jsonfile):

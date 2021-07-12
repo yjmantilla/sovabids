@@ -1,3 +1,5 @@
+"""Module with dataset utilities.
+"""
 import os
 from pandas import read_csv
 import shutil
@@ -8,9 +10,12 @@ import numpy as np
 from mne_bids.write import _write_raw_brainvision
 
 def lemon_prepare():
-    """Download and prepares a few files of the lemon dataset.
-    
-    http://fcon_1000.projects.nitrc.org/indi/retro/MPI_LEMON.html
+    """Download and prepare a few files of the LEMON dataset.
+
+    Notes
+    -----
+
+    See the `LEMON dataset <http://fcon_1000.projects.nitrc.org/indi/retro/MPI_LEMON.html>`_ .
     """
 
     # Path Configuration
@@ -73,6 +78,18 @@ def lemon_prepare():
     print('LEMON PREPARE DONE!')
 
 def lemon_bidscoin_prepare(src_path):
+    """Download and prepare a few files of the LEMON dataset to be used with BIDSCOIN.
+    
+    Parameters
+    ----------
+    src_path : str
+        The path where the BIDSCOIN-ready LEMON files will be
+    
+    See Also
+    --------
+    
+    datasets.lemon_prepare
+    """
     lemon_prepare()
     this_dir = os.path.dirname(__file__)
     data_dir = os.path.join(this_dir,'..','_data')
@@ -114,19 +131,33 @@ def make_dummy_dataset(PATTERN = '%dataset_description.Name%/T%entities.task%/S%
     STOP = 10,
     NUMEVENTS = 10,
     ROOT=None):
-    """Create a dummy dataset given the following parameters.
+    """Create a dummy dataset given some parameters.
     
-    DATASET   : Name of the dataset.
-    NSUBS     : Number of subjects.
-    NTASKS    : Number of tasks.
-    NACQS     : Number of acquisitions.
-    NRUNS     : Number of runs.
-    NSESSIONS : Number of sessions.
-    NCHANNELS : Number of channels.
-    SFREQ     : Samplinf frequency of the data.
-    STOP      : Time duration of the data in seconds.
-    NUMEVENTS : Number of events along the duration.
-    ROOT      : Path where the files will be generated.
+    Parameters
+    ----------
+    DATASET : str, optional
+        Name of the dataset.
+    NSUBS : int, optional
+        Number of subjects.
+    NTASKS : int, optional
+        Number of tasks.
+    NACQS : int, optional
+        Number of acquisitions.
+    NRUNS : int, optional
+        Number of runs.
+    NSESSIONS : int, optional
+        Number of sessions.
+    NCHANNELS : int, optional
+        Number of channels.
+    SFREQ : float, optional
+        Samplinf frequency of the data.
+    STOP : float, optional
+        Time duration of the data in seconds.
+    NUMEVENTS : int, optional
+        Number of events along the duration.
+    ROOT : str, optional
+        Path where the files will be generated.
+        If None, the _data subdir will be used.
     """
 
     if ROOT is None:

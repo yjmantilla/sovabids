@@ -1,3 +1,5 @@
+"""Module to perform the conversions.
+"""
 import argparse
 import json
 import os
@@ -6,6 +8,13 @@ from sovabids.rules import load_rules,apply_rules_to_single_file
 from sovabids.utils import update_dataset_description
 
 def convert_them(mappings_input):
+    """Converts eeg files to bids according to the mapping given.
+
+    Parameters
+    ----------
+    mappings_input : str
+        The path to the mapping file or the mapping dictionary.
+    """
     rules = load_rules(mappings_input)
     assert 'Individual' in rules
     assert 'General' in rules
@@ -20,7 +29,7 @@ def convert_them(mappings_input):
 
 
 def sovaconvert():
-    """Console script usage"""
+    """Console script usage for conversion."""
     # see https://github.com/Donders-Institute/bidscoin/blob/master/bidscoin/bidsmapper.py for example of how to make this
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()

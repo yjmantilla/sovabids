@@ -1,3 +1,4 @@
+"""Module with parser utilities."""
 import re
 
 from sovabids.utils import deep_merge_N,nested_notation_to_tree,flat_paren_counter
@@ -5,9 +6,22 @@ from sovabids.utils import deep_merge_N,nested_notation_to_tree,flat_paren_count
 def placeholder_to_regex(placeholder,encloser='%',matcher='(.+)'):
     """Translate a placeholder pattern to a regex pattern.
 
-    placeholder : The placeholder pattern to translate.
-    matcher     : The regex pattern to use for the placeholder, ie : (.*?),(.*),(.+).
-    encloser    : The symbol which encloses the fields of the placeholder pattern.
+    Parameters
+    ----------
+    placeholder : str
+        The placeholder pattern to translate.
+    matcher : str, optional
+        The regex pattern to use for the placeholder, ie : (.*?),(.*),(.+).
+    encloser : str, optional
+        The symbol which encloses the fields of the placeholder pattern.
+    
+    Returns
+    -------
+
+    pattern : str
+        The regex pattern.
+    fields  : list of str
+        The fields as they appear in the regex pattern.
     """
     pattern = placeholder
     pattern = pattern.replace('\\','/')
@@ -24,10 +38,23 @@ def placeholder_to_regex(placeholder,encloser='%',matcher='(.+)'):
 def parse_from_placeholder(string,pattern,encloser='%',matcher='(.+)'):
     """Parse string from a placeholder pattern.
 
-    string      : The string to parse.
-    pattern     : The placeholder pattern to use for parsing.
-    matcher     : The regex pattern to use for the placeholder, ie : (.*?),(.*),(.+).
-    encloser    : The symbol which encloses the fields of the placeholder pattern.
+    Parameters
+    ----------
+
+    string : str
+        The string to parse.
+    pattern : str
+        The placeholder pattern to use for parsing.
+    matcher : str, optional
+        The regex pattern to use for the placeholder, ie : (.*?),(.*),(.+).
+    encloser : str, optional
+        The symbol which encloses the fields of the placeholder pattern.
+
+    Returns
+    -------
+
+    dict
+        The dictionary with the fields and values requested.
     """
     pattern,fields = placeholder_to_regex(pattern,encloser,matcher)
     return parse_from_regex(string,pattern,fields)
@@ -35,9 +62,20 @@ def parse_from_placeholder(string,pattern,encloser='%',matcher='(.+)'):
 def parse_from_regex(string,pattern,fields):
     """Parse string from regex pattern.
 
-    string      : The string to parse.
-    pattern     : The regex pattern to use for parsing.
-    fields      : List of fields in the same order as they appear in the regex pattern.
+    Parameters
+    ----------
+    string : str
+        The string to parse.
+    pattern : str
+        The regex pattern to use for parsing.
+    fields : list of str
+        List of fields in the same order as they appear in the regex pattern.
+
+    Returns
+    -------
+
+    dict
+        The dictionary with the fields and values requested.
     """
 
     string = string.replace('\\','/') # USE POSIX PLEASE

@@ -1,3 +1,4 @@
+"""Module dealing with the rules for bids conversion."""
 import os
 import json
 import shutil
@@ -8,25 +9,28 @@ from copy import deepcopy
 from mne_bids import write_raw_bids,BIDSPath
 from mne_bids.utils import _handle_datatype,_write_json
 from mne_bids.path import _parse_ext
+from mne.io import read_raw
 from pandas import read_csv
 from traceback import format_exc
 
-from sovabids.utils import get_nulls,deep_merge_N,get_supported_extensions,get_files,mne_open,flat
+from sovabids.utils import get_nulls,deep_merge_N,get_supported_extensions,get_files
 from sovabids.parsers import parse_from_regex,parse_from_placeholder
 from sovabids.utils import update_dataset_description
 def get_info_from_path(path,rules_):
-    """
-    Two ways to parse:
+    """Parse information from a given path, given a set of rules.
 
-    Through regex:
-        pattern: REQUIRED
-        fields: REQUIRED
-    We know it is regex because fields are given, if not it is custom notation.
+    Parameters
+    ----------
 
-    Through custom notation:
-        pattern: REQUIRED
-        encloser: OPTIONAL %
-        matcher: OPTIONAL, (.+)
+    path : str
+        The path from where we want to extract information.
+    rules_ : dict
+        A dictionary following the "Rules File Schema".
+
+    Notes
+    --------
+
+    See the Rules File Schema documentation for the expected schema of the dictionary.
     """
     rules = deepcopy(rules_)
     patterns_extracted = {}
@@ -37,7 +41,7 @@ def get_info_from_path(path,rules_):
         # Check if regex
         if 'fields' in path_analysis:
             patterns_extracted = parse_from_regex(path,pattern,path_analysis.get('fields',[]))
-        else: # custom notation
+        else: # Assume placeholder notation
             encloser = path_analysis.get('encloser','%')
             matcher = path_analysis.get('matcher','(.+)')
             patterns_extracted = parse_from_placeholder(path,pattern,encloser,matcher)
@@ -48,19 +52,58 @@ def get_info_from_path(path,rules_):
     return rules
 
 def load_rules(rules_):
+    """Load rules if given a path, bypass if given a dict.
+
+    Parameters
+    ----------
+    
+    rules : str|dict
+        The path to the rules file, or the rules dictionary.
+
+    Returns
+    -------
+
+    dict
+        The rules dictionary.
+    """
     if not isinstance(rules_,dict):
         with open(rules_,encoding="utf-8") as f:
             return yaml.load(f,yaml.FullLoader)
     return rules_
 
 def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
+    """Apply rule to a single file.
 
+    Parameters
+    ----------
+
+    f : str
+        Path to the file.
+    rules_ : str|dict
+        Path to the rules file or rules dictionary.
+    bids_root : str
+        Path to the bids directory
+    write : bool, optional
+        Whether to write output or not.
+    preview : bool, optional
+        Whether to return a dictionary with a "preview" of the conversion.
+        This dict will have the same schema as the "Mapping File Schema" but may have flat versions of its fields.
+        *UNDER CONSTRUCTION*
+
+    Returns
+    -------
+
+    mapping : dict
+        The mapping obtained from applying the rules to the given file
+    preview : bool|dict
+        If preview = False, then False. If True, then the preview dictionary.
+    """
     if not isinstance(rules_,dict):
         rules_ = load_rules(rules_)
 
     rules = deepcopy(rules_) #otherwise the deepmerge wont update the values for a new file
     # Upon reading RAW MNE makes the assumptions
-    raw = mne_open(f,preload=False)#not write)
+    raw = read_raw(f,preload=False)#not write)
 
     # First get info from path
 
@@ -158,16 +201,12 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
                     for ch_name,ch_type in channels_rules['type'].items():
                         channels_table.loc[(channels_table.name==str(ch_name)),'type'] = ch_type
                 channels_table.to_csv(channels_path.fpath, index=False,sep='\t')
-                # chans_dict = channels_table.to_dict(orient='index')
-                # channels = {}
-                # for key,value in chans_dict.items():
-                #     channels[str(key)] = flat(value)
                 with open(channels_path.fpath) as f:
                     channels = f.read().replace('\n', '__').replace('\t',',')
                 chans_dict = channels_table.to_dict(orient='list')
                 channels={}
                 for key,value in chans_dict.items():
-                     channels[str(key)] = flat(value)
+                     channels[str(key)] = ','.join(value)
             except:
                 channels = ''
             # dataset_description
@@ -200,10 +239,30 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
         new_files = list(set(new_files)-set(orig_files))
         for filename in new_files:
             if os.path.exists(filename): os.remove(filename)
-
-    return rules,preview
+    mapping = rules
+    return mapping,preview
 def apply_rules(source_path,bids_root,rules_,mapping_path=''):
+    """Apply rules to all the accepted files in a source path.
 
+    Parameters
+    ----------
+
+    source_path : str
+        The path with the files we want to convert to bids.
+    bids_root : str
+        The path we want the converted files in.
+    rules_ : str|dict
+        The path to the rules file, or a dictionary with the rules.
+    mapping_path : str, optional
+        The fullpath where we want to write the mappings file.
+        If '', then bids_root/code/sovabids/mappings.yml will be used.
+    
+    Returns
+    -------
+
+    mapping_data : dict
+        A dictionary following: {'General': rules given,'Individual':list of mapping dictionaries for each file}
+    """
     rules_ = load_rules(rules_)
     # Generate all files
     try:
@@ -246,7 +305,7 @@ def apply_rules(source_path,bids_root,rules_,mapping_path=''):
     return mapping_data
 
 def sovapply():
-    """Console script usage"""
+    """Console script usage for applying rules."""
     # see https://github.com/Donders-Institute/bidscoin/blob/master/bidscoin/bidsmapper.py for example of how to make this
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()

@@ -4,7 +4,7 @@ from bidscoin.bidscoiner import bidscoiner
 from bidscoin.bidsmapper import bidsmapper
 import os
 import shutil
-from sovabids.schemas import bidsmap_sova2coin
+from sovabids.schemas import get_sova2coin_bidsmap
 from sovabids.utils import get_files,get_project_dir
 from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset
 import yaml
@@ -70,7 +70,7 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
     # else:
     #   assert get_attribute('EEG',any_vhdr,'sidecar.SamplingFrequency') == 200.0
 
-    bidsmap = bidsmap_sova2coin.format(rules_path)
+    bidsmap = get_sova2coin_bidsmap().format(rules_path)
 
     with open(template_path,mode='w') as f:
         f.write(bidsmap)

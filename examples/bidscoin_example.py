@@ -74,7 +74,7 @@ import yaml # To do yaml operations
 from mne_bids import print_dir_tree # To show the input/output directories structures inside this example
 from sovabids.utils import get_project_dir # Getting a directory to get the dataset files
 from sovabids.datasets import lemon_bidscoin_prepare # Dataset
-from sovabids.schemas import bidsmap_sova2coin # bidsmap template schema
+from sovabids.schemas import get_sova2coin_bidsmap # bidsmap template schema
 
 #%%
 # Setting up the paths
@@ -177,7 +177,7 @@ with open(rules_path,encoding="utf-8") as f:
 #    * We populate bids-related info with the extracted attributes (see subject, session and bids sections of the file)
 #    * We set the suffix to eeg.
 #    * The ``<`` and ``<<`` is best explained `here <https://bidscoin.readthedocs.io/en/stable/bidsmap.html#special-bidsmap-features>`_
-template = bidsmap_sova2coin.format(rules_path)
+template = get_sova2coin_bidsmap().format(rules_path)
 
 print(template)
 

@@ -7,6 +7,7 @@ Welcome to sovabids' documentation!
 
    README.rst
    rules_schema.rst
+   mappings_schema.rst
    validation.rst
    gsoc_proposal.md
    auto_examples/index.rst

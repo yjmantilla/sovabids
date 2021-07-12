@@ -43,6 +43,7 @@ extensions = [
     #"gh_substitutions",  # custom extension, see ./sphinxext/gh_substitutions.py
     "sphinx_copybutton",
     'sphinxcontrib.mermaid',
+    'sphinx.ext.napoleon',
 ]
 
 copybutton_prompt_text = r">>> |\.\.\. "
@@ -67,7 +68,7 @@ sphinx_gallery_conf = {
     "gallery_dirs": "auto_examples",
     "filename_pattern": "^((?!sgskip).)*$",
     "backreferences_dir": "generated",
-    'run_stale_examples': True,
+    'run_stale_examples': True, #Force (or not) re running examples
 }
 
 # List of patterns, relative to source directory, that match files and

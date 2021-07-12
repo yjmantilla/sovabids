@@ -2,4 +2,4 @@ requests
 pybv
 pyyaml
 pandas
-mne_bids @ git+https://github.com/AKSoo/mne-bids.git@preloaded#egg
+mne_bids @ git+https://github.com/mne-tools/mne-bids.git@main#egg

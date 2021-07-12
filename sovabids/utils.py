@@ -259,7 +259,7 @@ def download(url,path):
 def get_num_digits(N):
     """Return the number of digits of the given number N.
     
-    Paremeters
+    Parameters
     ----------
     N : int
         The number we want to apply the function to.

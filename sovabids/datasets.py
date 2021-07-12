@@ -119,7 +119,7 @@ def lemon_bidscoin_prepare(src_path):
             print('already done, skipping...')
     print('finish')
 
-def make_dummy_dataset(PATTERN = '%dataset_description.Name%/T%entities.task%/S%entities.session%/sub%entities.subject%_%entities.run%',
+def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%run%',
     DATASET = 'DUMMY',
     NSUBS = 2,
     NTASKS = 2,
@@ -135,6 +135,9 @@ def make_dummy_dataset(PATTERN = '%dataset_description.Name%/T%entities.task%/S%
     
     Parameters
     ----------
+    PATTERN : str, optional
+        The pattern in placeholder notation using the following fields:
+        %dataset%, %task%, %session%, %subject%, %run%, %acquisition%
     DATASET : str, optional
         Name of the dataset.
     NSUBS : int, optional

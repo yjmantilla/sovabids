@@ -9,7 +9,7 @@ Welcome to sovabids' documentation!
    rules_schema.rst
    mappings_schema.rst
    validation.rst
-   gsoc_proposal.md
    auto_examples/index.rst
    autoapi/index.rst
+   gsoc_proposal.md
    GitHub Repository <https://github.com/yjmantilla/sovabids>

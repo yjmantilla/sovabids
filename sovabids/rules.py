@@ -124,6 +124,9 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
         if "name" in channels:
             raw.rename_channels(channels['name'])
         if "type" in channels: # We overwrite whatever channel types we can on the files
+            # https://github.com/mne-tools/mne-bids/blob/3711613edc0e2039c921ad9b1a32beccc52156b1/mne_bids/utils.py#L78-L83
+            # care should be taken with the channel counts set up by mne-bids https://github.com/mne-tools/mne-bids/blob/main/mne_bids/write.py#L774-L782
+            # but right now is inofensive
             types = channels['type']
             types = {key:_get_ch_type_mapping(fro='bids',to='mne').get(val,None) for key,val in types.items() }
             valid_types = {k: v for k, v in types.items() if v is not None}

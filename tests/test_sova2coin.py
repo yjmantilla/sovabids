@@ -6,7 +6,7 @@ import os
 import shutil
 from sovabids.schemas import get_sova2coin_bidsmap
 from sovabids.utils import get_files,get_project_dir
-from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset
+from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset,_modify_entities_of_placeholder_pattern
 import yaml
 
 def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
@@ -19,12 +19,13 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
     template_path = os.path.join(data_dir,'bidscoin_template.yml')
 
     if dataset == 'dummy_bidscoin':
+      pat = 'sub-%entities.subject%/ses-%entities.session%/eeg-%entities.task%-%entities.run%.vhdr'
       rules = {
         'entities': None,
         'dataset_description':{'Name':dataset},
         'non-bids':{
           'path_analysis':
-          {'pattern':'sub-%entities.subject%/ses-%entities.session%/eeg-%entities.task%-%entities.run%.vhdr'}
+          {'pattern':pat}
         }
       }
     elif dataset=='lemon_bidscoin':
@@ -50,7 +51,8 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
     if dataset=='lemon_bidscoin':
       lemon_bidscoin_prepare(source_path)
     else:
-      pat = 'sub-%subject%/ses-%session%/eeg-%task%-%run%'
+      pat = _modify_entities_of_placeholder_pattern(rules['non-bids']['path_analysis']['pattern'],'cut')
+      pat = pat.replace('.vhdr','')
       try:
         shutil.rmtree(source_path)
       except:

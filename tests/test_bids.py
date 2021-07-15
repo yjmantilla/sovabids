@@ -7,7 +7,7 @@ from bids_validator import BIDSValidator
 from sovabids.parsers import placeholder_to_regex
 from sovabids.rules import apply_rules,load_rules
 from sovabids.utils import deep_merge_N
-from sovabids.datasets import make_dummy_dataset
+from sovabids.datasets import make_dummy_dataset,_modify_entities_of_placeholder_pattern
 from sovabids.convert import convert_them
 
 def dummy_dataset(pattern_type='custom',write=True,cli=False):
@@ -57,9 +57,7 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
     # Gotta fix the pattern that wrote the dataset to the notation of the rules file
     FIXED_PATTERN =DATA_PARAMS.get('PATTERN',None)
 
-    for keyword in ['%task%','%session%','%subject%','%run%','%acquisition%']:
-        FIXED_PATTERN = FIXED_PATTERN.replace(keyword,'%entities.'+keyword[1:])
-    FIXED_PATTERN = FIXED_PATTERN.replace('%dataset%','%dataset_description.Name%')
+    FIXED_PATTERN = _modify_entities_of_placeholder_pattern(FIXED_PATTERN,'append')
     FIXED_PATTERN = FIXED_PATTERN + '.' + 'vhdr'
 
     # Making the rules dictionary

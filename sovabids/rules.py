@@ -7,7 +7,7 @@ import argparse
 
 from copy import deepcopy
 from mne_bids import write_raw_bids,BIDSPath
-from mne_bids.utils import _handle_datatype,_write_json
+from mne_bids.utils import _handle_datatype,_write_json,_get_ch_type_mapping
 from mne_bids.path import _parse_ext
 from mne.io import read_raw
 from pandas import read_csv
@@ -123,7 +123,11 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
         channels = rules['channels']
         if "name" in channels:
             raw.rename_channels(channels['name'])
-
+        if "type" in channels: # We overwrite whatever channel types we can on the files
+            types = channels['type']
+            types = {key:_get_ch_type_mapping(fro='bids',to='mne').get(val,None) for key,val in types.items() }
+            valid_types = {k: v for k, v in types.items() if v is not None}
+            raw.set_channel_types(valid_types)
     if 'non-bids' in rules:
         non_bids = rules['non-bids']
         if "code_execution" in non_bids:

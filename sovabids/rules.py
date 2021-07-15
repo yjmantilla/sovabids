@@ -240,6 +240,8 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
         for filename in new_files:
             if os.path.exists(filename): os.remove(filename)
     mapping = rules
+    if 'dataset_description' in rules:
+        del rules['dataset_description']
     return mapping,preview
 def apply_rules(source_path,bids_root,rules_,mapping_path=''):
     """Apply rules to all the accepted files in a source path.

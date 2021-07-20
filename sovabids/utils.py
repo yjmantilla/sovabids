@@ -6,6 +6,7 @@ import requests
 import numpy as np
 import collections
 import json
+import logging
 from mne_bids.utils import _write_json
 from sovabids import __path__
 
@@ -308,3 +309,54 @@ def update_dataset_description(dataset_description,bids_root):
         info.update(dataset_description)
         _write_json(jsonfile,info,overwrite=True)
     # Problem: Authors with strange characters are written incorrectly.
+
+def setup_logging(log_file, debug=False):
+    """Setup the logging
+
+    Parameters
+    ----------
+    log_file: str
+        Name of the logfile
+    debug: bool
+        Set log level to DEBUG if debug==True
+
+    Notes
+    -----
+    This function is a copy of the one found in bidscoin.
+    https://github.com/Donders-Institute/bidscoin/blob/748ea2ba537b06d8eee54ac7217b909bdf91a812/bidscoin/bidscoin.py#L41-L83
+    """
+
+    # Get the root logger
+    logger = logging.getLogger()
+
+    # Set the format and logging level
+    if debug:
+        fmt = '%(asctime)s - %(name)s - %(levelname)s | %(message)s'
+        logger.setLevel(logging.DEBUG)
+    else:
+        fmt = '%(asctime)s - %(levelname)s | %(message)s'
+        logger.setLevel(logging.INFO)
+    datefmt   = '%Y-%m-%d %H:%M:%S'
+    formatter = logging.Formatter(fmt=fmt, datefmt=datefmt)
+
+    # Set & add the streamhandler and add some color to those boring terminal logs! :-)
+    #coloredlogs.install(level=logger.level, fmt=fmt, datefmt=datefmt)
+
+    if not log_file.name:
+        return
+
+    # Set & add the log filehandler
+    log_file.parent.mkdir(parents=True, exist_ok=True)      # Create the log dir if it does not exist
+    loghandler = logging.FileHandler(log_file)
+    loghandler.setLevel(logging.DEBUG)
+    loghandler.setFormatter(formatter)
+    loghandler.set_name('loghandler')
+    logger.addHandler(loghandler)
+
+    # Set & add the error / warnings handler
+    error_file = log_file.with_suffix('.errors')            # Derive the name of the error logfile from the normal log_file
+    errorhandler = logging.FileHandler(error_file, mode='w')
+    errorhandler.setLevel(logging.WARNING)
+    errorhandler.setFormatter(formatter)
+    errorhandler.set_name('errorhandler')
+    logger.addHandler(errorhandler)

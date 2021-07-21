@@ -4,7 +4,8 @@ import argparse
 import os
 
 from sovabids.rules import load_rules,apply_rules_to_single_file
-from sovabids.utils import update_dataset_description,setup_logging,START_DECORATOR
+from sovabids.utils import update_dataset_description,
+from sovabids.loggers import setup_logging,START_DECORATOR
 
 def convert_them(mappings_input):
     """Converts eeg files to bids according to the mapping given.
@@ -31,7 +32,7 @@ def convert_them(mappings_input):
     # Setup the logging
     LOGGER = setup_logging(log_file)
     LOGGER.info('')
-    LOGGER.info(START_DECORATOR+ ' START CONVERT_THEM '+START_DECORATOR)
+    LOGGER.info(START_DECORATOR+ ' START CONVERT_THEM ' + START_DECORATOR)
     LOGGER.info(f"source_path={rawfolder} targetfolder={bids_path} bidsmap={str(mapping_file)} ")
 
     for mapping in mappings['Individual']:

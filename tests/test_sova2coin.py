@@ -77,10 +77,10 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
     with open(template_path,mode='w') as f:
         f.write(bidsmap)
 
-    bidsmapper(rawfolder=source_path,bids_path=bids_path,subprefix='sub-',sesprefix='ses-',bidsmapfile='bidsmap.yaml',templatefile= template_path,noedit=noedit)
+    bidsmapper(rawfolder=source_path,bidsfolder=bids_path,subprefix='sub-',sesprefix='ses-',bidsmapfile='bidsmap.yaml',templatefile= template_path,noedit=noedit)
 
     bidscoiner(rawfolder    = source_path,
-                bids_path   = bids_path)
+                bidsfolder   = bids_path)
 
 if __name__ == '__main__':
     noedit=False

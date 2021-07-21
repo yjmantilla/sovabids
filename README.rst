@@ -50,10 +50,12 @@ Fork this repo and run:
 
 .. code-block:: bash
 
-   git clone https://github.com/<gh-username>/sovabids
+   git clone https://github.com/<gh-username>/sovabids.git
    cd sovabids
    pip install -r requirements-dev.txt
-   pip install -e .
+
+Notice  that the requirements-dev.txt file already has the sovabids installation using editable mode.
+
 
 Basic Usage
 -----------

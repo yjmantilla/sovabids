@@ -13,7 +13,8 @@ from mne.io import read_raw
 from pandas import read_csv
 from traceback import format_exc
 
-from sovabids.utils import get_nulls,deep_merge_N,get_supported_extensions,get_files
+from sovabids.settings import NULL_VALUES,SUPPORTED_EXTENSIONS
+from sovabids.utils import deep_merge_N,get_files
 from sovabids.parsers import parse_from_regex,parse_from_placeholder
 from sovabids.utils import update_dataset_description
 def get_info_from_path(path,rules_):
@@ -117,7 +118,7 @@ def apply_rules_to_single_file(f,rules_,bids_path,write=False,preview=False,logg
 
     if 'sidecar' in rules:
         sidecar = rules['sidecar']
-        if "PowerLineFrequency" in sidecar and sidecar['PowerLineFrequency'] not in get_nulls():
+        if "PowerLineFrequency" in sidecar and sidecar['PowerLineFrequency'] not in NULL_VALUES:
             raw.info['line_freq'] = sidecar["PowerLineFrequency"]  # specify power line frequency as required by BIDS
         # Should we try to infer the line frequency automatically from the psd?
 
@@ -279,7 +280,7 @@ def apply_rules(source_path,bids_path,rules_,mapping_path=''):
     try:
         extensions = rules_['non-bids']['eeg_extension']
     except:
-        extensions = get_supported_extensions()
+        extensions = deepcopy(SUPPORTED_EXTENSIONS)
 
     if isinstance(extensions,str):
         extensions = [extensions]

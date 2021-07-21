@@ -1,32 +1,13 @@
 "Module with misc utils for sovabids."
 
 import os
-import mne
 import requests
 import numpy as np
 import collections
 import json
-import logging
-import sys
+
 from mne_bids.utils import _write_json
 from sovabids import __path__
-
-from mne_bids.write import _write_raw_brainvision
-
-def get_nulls():
-    """Return values we consider as 'empty'."""
-    return ['',None,{},[]]
-
-def get_supported_extensions():
-    """Return the current supported extensions.
-    
-    Returns
-    -------
-    
-    list of str :
-        The extensions supported by the package.
-    """
-    return ['.set' ,'.cnt' ,'.vhdr' ,'.bdf','.edf' ,'.fif'] 
 
 def get_files(root_path):
     """Recursively scan the directory for files, returning a list with the full-paths to each.
@@ -310,69 +291,3 @@ def update_dataset_description(dataset_description,bids_path):
         info.update(dataset_description)
         _write_json(jsonfile,info,overwrite=True)
     # Problem: Authors with strange characters are written incorrectly.
-
-def setup_logging(log_file=None, debug=False):
-    """Setup the logging
-
-    Parameters
-    ----------
-    log_file: str
-        Name of the logfile
-    debug: bool
-        Set log level to DEBUG if debug==True
-
-    Returns
-    -------
-    logging.logger:
-        The logger. None if no log_file provided.
-
-    
-    Notes
-    -----
-    This function is a copy of the one found in bidscoin.
-    https://github.com/Donders-Institute/bidscoin/blob/748ea2ba537b06d8eee54ac7217b909bdf91a812/bidscoin/bidscoin.py#L41-L83
-    """
-
-    # Get the root logger
-    logger = logging.getLogger()
-
-    # Set the format and logging level
-    if debug:
-        fmt = '%(asctime)s - %(name)s - %(levelname)s | %(message)s'
-        logger.setLevel(logging.DEBUG)
-    else:
-        fmt = '%(asctime)s - %(levelname)s | %(message)s'
-        logger.setLevel(logging.INFO)
-    datefmt   = '%Y-%m-%d %H:%M:%S'
-    formatter = logging.Formatter(fmt=fmt, datefmt=datefmt)
-
-    # Set & add the streamhandler and add some color to those boring terminal logs! :-)
-    #coloredlogs.install(level=logger.level, fmt=fmt, datefmt=datefmt)
-
-    if not log_file:
-        return logger
-
-    # Set & add the log filehandler
-    logdir,_ = os.path.split(log_file)
-    os.makedirs(logdir,exist_ok=True) # Create the log dir if it does not exist
-    loghandler = logging.FileHandler(log_file)
-    loghandler.setLevel(logging.DEBUG)
-    loghandler.setFormatter(formatter)
-    loghandler.set_name('loghandler')
-    logger.addHandler(loghandler)
-
-    # Set & add the error / warnings handler
-    error_file = os.path.join(logdir,log_file+'.errors')            # Derive the name of the error logfile from the normal log_file
-    errorhandler = logging.FileHandler(error_file, mode='w')
-    errorhandler.setLevel(logging.WARNING)
-    errorhandler.setFormatter(formatter)
-    errorhandler.set_name('errorhandler')
-    logger.addHandler(errorhandler)
-    return logger
-
-def excepthook(*args):
-  logging.getLogger().error('Uncaught exception:', exc_info=args)
-
-sys.excepthook = excepthook
-
-START_DECORATOR = 11*'-'

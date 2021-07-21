@@ -66,12 +66,12 @@ lemon_prepare()
 # easier to just input the absolute-path. We will print these paths for more clarity.
 
 source_path = os.path.abspath(os.path.join(get_project_dir(),'_data','lemon')) # For the input data we will convert
-bidsfolder= os.path.abspath(os.path.join(get_project_dir(),'_data','lemon_bids')) # The output directory that will have the converted data
+bids_path= os.path.abspath(os.path.join(get_project_dir(),'_data','lemon_bids')) # The output directory that will have the converted data
 rules_path = os.path.abspath(os.path.join(get_project_dir(),'examples','lemon_example_rules.yml')) # The rules file that setups the rule for conversion
-mapping_path = os.path.abspath(os.path.join(bidsfolder,'code','sovabids','mappings.yml')) # The mapping file that will hold the results of applying the rules to each file
+mapping_path = os.path.abspath(os.path.join(bids_path,'code','sovabids','mappings.yml')) # The mapping file that will hold the results of applying the rules to each file
 
 print('source_path:',source_path)
-print('bidsfolder:', bidsfolder)
+print('bids_path:', bids_path)
 print('rules_path:',rules_path)
 print('mapping_path:',mapping_path)
 
@@ -81,7 +81,7 @@ print('mapping_path:',mapping_path)
 # We will clean the output path as a safety measure from previous conversions.
 
 try:
-    shutil.rmtree(bidsfolder)
+    shutil.rmtree(bids_path)
 except:
     pass
 
@@ -113,10 +113,10 @@ with open(rules_path,encoding="utf-8") as f:
 # ^^^^^^^^^^^^^^^^^^
 # We apply the rules to the input dataset by giving the input,ouput,rules, and mapping paths to the apply_rules function.
 #
-# This will produce by default a 'mappings.yml' file at the specified directory of 'bidsfolder/code/sovabids'.
+# This will produce by default a 'mappings.yml' file at the specified directory of 'bids_path/code/sovabids'.
 #
 # This file holds the result of applying the rules to each of the dataset files.
-apply_rules(source_path,bidsfolder,rules_path,mapping_path)
+apply_rules(source_path,bids_path,rules_path,mapping_path)
 
 #%%
 # Doing the conversion
@@ -129,7 +129,7 @@ convert_them(mapping_path)
 # ^^^^^^^^^^^^^^^^^^^^^^^
 # For clarity purposes we will check the output directory we got from sovabids.
 
-print_dir_tree(bidsfolder)
+print_dir_tree(bids_path)
 
 print('LEMON CONVERSION FINISHED!')
 
@@ -174,17 +174,17 @@ print('LEMON CONVERSION FINISHED!')
 # We set up the paths again, but now we will change the output to a new path (with "_cli" at the end). We will also clean this path as we did before.
 #
 source_path = os.path.abspath(os.path.join(get_project_dir(),'_data','lemon')) # For the input data we will convert
-bidsfolder= os.path.abspath(os.path.join(get_project_dir(),'_data','lemon_bids_cli')) # The output directory that will have the converted data
+bids_path= os.path.abspath(os.path.join(get_project_dir(),'_data','lemon_bids_cli')) # The output directory that will have the converted data
 rules_path = os.path.abspath(os.path.join(get_project_dir(),'examples','lemon_example_rules.yml')) # The rules file that setups the rule for conversion
-mapping_path = os.path.abspath(os.path.join(bidsfolder,'code','sovabids','mappings.yml')) # The mapping file that will hold the results of applying the rules to each file
+mapping_path = os.path.abspath(os.path.join(bids_path,'code','sovabids','mappings.yml')) # The mapping file that will hold the results of applying the rules to each file
 
 print('source_path:',source_path)
-print('bidsfolder:', bidsfolder)
+print('bids_path:', bids_path)
 print('rules_path:',rules_path)
 print('mapping_path:',mapping_path)
 
 try:
-    shutil.rmtree(bidsfolder)
+    shutil.rmtree(bids_path)
 except:
     pass
 
@@ -220,7 +220,7 @@ print(my_output)
 #%%
 # Now we will use the following command to get the mappings file.
 #
-command = 'sovapply '+source_path + ' '+ bidsfolder + ' ' + rules_path + ' -m ' + mapping_path
+command = 'sovapply '+source_path + ' '+ bids_path + ' ' + rules_path + ' -m ' + mapping_path
 print(command)
 
 #%%
@@ -259,7 +259,7 @@ print(my_output)
 # ^^^^^^^^^^^^^^^^^^^^^^^
 # For clarity purposes we will check the output directory we got from sovabids.
 
-print_dir_tree(bidsfolder)
+print_dir_tree(bids_path)
 
 print('LEMON CLI CONVERSION FINISHED!')
 

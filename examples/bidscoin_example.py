@@ -88,13 +88,13 @@ data_dir = os.path.join(get_project_dir(),'_data')
 data_dir = os.path.abspath(data_dir)
 
 source_path = os.path.abspath(os.path.join(data_dir,dataset+'_input'))
-bidsfolder= os.path.abspath(os.path.join(data_dir,dataset+'_output'))
-code_path = os.path.join(bidsfolder,'code','bidscoin')
+bids_path= os.path.abspath(os.path.join(data_dir,dataset+'_output'))
+code_path = os.path.join(bids_path,'code','bidscoin')
 rules_path = os.path.join(code_path,'rules.yml')
 template_path = os.path.join(code_path,'template.yml')
 bidsmap_path  = os.path.join( code_path,'bidsmap.yaml')
 print('source_path:',source_path)
-print('bidsfolder:', bidsfolder)
+print('bids_path:', bids_path)
 print('rules_path:',rules_path)
 print('template_path:',template_path)
 print('bidsmap_path:',bidsmap_path)
@@ -105,7 +105,7 @@ print('bidsmap_path:',bidsmap_path)
 # We will clean the output path as a safety measure from previous conversions.
 
 try:
-    shutil.rmtree(bidsfolder)
+    shutil.rmtree(bids_path)
 except:
     pass
 
@@ -113,7 +113,7 @@ except:
 #
 # Make the folders if they don't exist to avoid errors
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-for p in [source_path,bidsfolder,code_path]:
+for p in [source_path,bids_path,code_path]:
     os.makedirs(p,exist_ok=True)
 
 #%%
@@ -237,7 +237,7 @@ print(my_output)
 # Just remember to save the bidsmap yaml at the end.
 #
 # See the `bidseditor documentation <https://bidscoin.readthedocs.io/en/stable/workflow.html#main-window>`_ for more info.
-command = 'bidsmapper '+source_path + ' '+ bidsfolder + ' -t ' + template_path + ' -a'
+command = 'bidsmapper '+source_path + ' '+ bids_path + ' -t ' + template_path + ' -a'
 print(command)
 
 #%%
@@ -273,7 +273,7 @@ print(my_output)
 #%%
 # Now we will use the following command to perform the conversion.
 #
-command = 'bidscoiner '+source_path + ' '+ bidsfolder + ' -b '+ bidsmap_path
+command = 'bidscoiner '+source_path + ' '+ bids_path + ' -b '+ bidsmap_path
 
 print(command)
 
@@ -287,7 +287,7 @@ print(my_output)
 # ^^^^^^^^^^^^^^^^^^^^^^^
 # For clarity purposes we will check the output directory we got from sovabids.
 
-print_dir_tree(bidsfolder)
+print_dir_tree(bids_path)
 
 print('BIDSCOIN CONVERSION FINISHED!')
 

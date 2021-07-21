@@ -29,23 +29,23 @@ def convert_them(mappings_input):
     assert 'General' in mappings
     
     # Getting input,output and log path
-    bidsfolder = mappings['General']['IO']['target']
+    bids_path = mappings['General']['IO']['target']
     rawfolder = mappings['General']['IO']['target']
-    log_file = os.path.join(bidsfolder,'code','sovabids','sovaconvert.log')
+    log_file = os.path.join(bids_path,'code','sovabids','sovaconvert.log')
 
     # Setup the logging
     LOGGER = setup_logging(log_file)
     LOGGER.info('')
     LOGGER.info(START_DECORATOR+ ' START CONVERT_THEM '+START_DECORATOR)
-    LOGGER.info(f"sourcefolder={rawfolder} targetfolder={bidsfolder} bidsmap={mapping_file} ")
+    LOGGER.info(f"source_path={rawfolder} targetfolder={bids_path} bidsmap={mapping_file} ")
 
     for mapping in mappings['Individual']:
-        apply_rules_to_single_file(mapping['IO']['source'],mapping,bidsfolder,write=True,logger=LOGGER)
+        apply_rules_to_single_file(mapping['IO']['source'],mapping,bids_path,write=True,logger=LOGGER)
     
     # Grab the info from the last file to make the dataset description
     if 'dataset_description' in mappings['General']:
         dataset_description = mappings['General']['dataset_description']
-        update_dataset_description(dataset_description,bidsfolder)
+        update_dataset_description(dataset_description,bids_path)
 
 
 def sovaconvert():

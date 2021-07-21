@@ -68,13 +68,13 @@ Use the sovapply entry-point to produce a mapping file from a source path, an ou
 
 .. code-block:: bash
 
-   sovapply source_path bids_root rules_path
+   sovapply source_path bidsfolder rules_path
 
 By default the mapping file made will have the following filepath:
 
 .. code-block:: text
 
-   bids_root/code/sovabids/mappings.yml
+   bidsfolder/code/sovabids/mappings.yml
 
 
 sovaconvert

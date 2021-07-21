@@ -21,7 +21,7 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
     test_root = os.path.join(data_dir,'DUMMY')
     input_root = os.path.join(test_root,'DUMMY_SOURCE')
     cli_str = '' if cli == False else '_cli'
-    bids_root = os.path.join(test_root,'DUMMY_BIDS'+'_'+pattern_type+cli_str)
+    bidsfolder = os.path.join(test_root,'DUMMY_BIDS'+'_'+pattern_type+cli_str)
 
     # PARAMS for making the dummy dataset
     DATA_PARAMS ={ 'PATTERN':'T%task%/S%session%/sub%subject%_%acquisition%_%run%',
@@ -40,7 +40,7 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
 
 
     # Preparing directories
-    dirs = [input_root,bids_root] #dont include test_root for saving multiple conversions
+    dirs = [input_root,bidsfolder] #dont include test_root for saving multiple conversions
     for dir in dirs:
         try:
             shutil.rmtree(dir)
@@ -101,17 +101,17 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
         # Loading the rules file (yes... kind of redundant but tests the io of the rules file)
         rules = load_rules(full_rules_path)
 
-        file_mappings = apply_rules(source_path=input_root,bids_root=bids_root,rules_=rules)
+        file_mappings = apply_rules(source_path=input_root,bidsfolder=bidsfolder,rules_=rules)
     else:
-        os.system('sovapply '+input_root + ' '+ bids_root + ' ' + full_rules_path)
-        mappings_path = os.path.join(bids_root,'code','sovabids','mappings.yml')
+        os.system('sovapply '+input_root + ' '+ bidsfolder + ' ' + full_rules_path)
+        mappings_path = os.path.join(bidsfolder,'code','sovabids','mappings.yml')
         file_mappings = load_rules(mappings_path)
 
     individuals=file_mappings['Individual']
 
     # Testing the mappings (at the moment it only test the filepaths)
     validator = BIDSValidator()
-    filepaths = [x['IO']['target'].replace(bids_root,'') for x in individuals]
+    filepaths = [x['IO']['target'].replace(bidsfolder,'') for x in individuals]
     for filepath in filepaths:
         assert validator.is_bids(filepath)
     if write:

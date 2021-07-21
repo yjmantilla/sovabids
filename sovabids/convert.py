@@ -3,9 +3,12 @@
 import argparse
 import json
 import os
+import logging
+from contextlib import suppress
+
 from mne_bids import make_dataset_description
 from sovabids.rules import load_rules,apply_rules_to_single_file
-from sovabids.utils import update_dataset_description
+from sovabids.utils import update_dataset_description,setup_logging,START_DECORATOR
 
 def convert_them(mappings_input):
     """Converts eeg files to bids according to the mapping given.
@@ -15,17 +18,34 @@ def convert_them(mappings_input):
     mappings_input : str
         The path to the mapping file or the mapping dictionary.
     """
-    rules = load_rules(mappings_input)
-    assert 'Individual' in rules
-    assert 'General' in rules
-    bids_root = rules['General']['IO']['target']
-    for mapping in rules['Individual']:
-        apply_rules_to_single_file(mapping['IO']['source'],mapping,bids_root,write=True)
+
+ 
+    # Loading Mappings
+    mappings = load_rules(mappings_input)
+    mapping_file = mappings_input if isinstance(mappings_input,str) else 'not a mapping file'
+    
+    # Verifying Mappings
+    assert 'Individual' in mappings
+    assert 'General' in mappings
+    
+    # Getting input,output and log path
+    bidsfolder = mappings['General']['IO']['target']
+    rawfolder = mappings['General']['IO']['target']
+    log_file = os.path.join(bidsfolder,'code','sovabids','sovaconvert.log')
+
+    # Setup the logging
+    LOGGER = setup_logging(log_file)
+    LOGGER.info('')
+    LOGGER.info(START_DECORATOR+ ' START CONVERT_THEM '+START_DECORATOR)
+    LOGGER.info(f"sourcefolder={rawfolder} targetfolder={bidsfolder} bidsmap={mapping_file} ")
+
+    for mapping in mappings['Individual']:
+        apply_rules_to_single_file(mapping['IO']['source'],mapping,bidsfolder,write=True,logger=LOGGER)
     
     # Grab the info from the last file to make the dataset description
-    if 'dataset_description' in rules['General']:
-        dataset_description = rules['General']['dataset_description']
-        update_dataset_description(dataset_description,bids_root)
+    if 'dataset_description' in mappings['General']:
+        dataset_description = mappings['General']['dataset_description']
+        update_dataset_description(dataset_description,bidsfolder)
 
 
 def sovaconvert():

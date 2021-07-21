@@ -7,6 +7,7 @@ import numpy as np
 import collections
 import json
 import logging
+import sys
 from mne_bids.utils import _write_json
 from sovabids import __path__
 
@@ -285,8 +286,8 @@ def get_project_dir():
     """
     return os.path.realpath(os.path.join(__path__[0],'..'))
 
-def update_dataset_description(dataset_description,bids_root):
-    """Update the dataset_description.json located at bids_root given a dictionary.
+def update_dataset_description(dataset_description,bidsfolder):
+    """Update the dataset_description.json located at bidsfolder given a dictionary.
 
     If it exist, updates with the new given values. If it doesn't exist, then creates it.
 
@@ -295,11 +296,11 @@ def update_dataset_description(dataset_description,bids_root):
 
     dataset_description : dict
         The dataset_description dictionary to update with, following the schema of the dataset_description.json file of bids.
-    bids_root : str
-        The path of the bids_root of the dataset description file, basically the folder where the file is.
+    bidsfolder : str
+        The path of the bidsfolder of the dataset description file, basically the folder where the file is.
     """
-    jsonfile = os.path.join(bids_root,'dataset_description.json')
-    os.makedirs(bids_root,exist_ok=True)
+    jsonfile = os.path.join(bidsfolder,'dataset_description.json')
+    os.makedirs(bidsfolder,exist_ok=True)
     if os.path.isfile(jsonfile):
         with open(jsonfile) as f:
             info = json.load(f)
@@ -310,7 +311,7 @@ def update_dataset_description(dataset_description,bids_root):
         _write_json(jsonfile,info,overwrite=True)
     # Problem: Authors with strange characters are written incorrectly.
 
-def setup_logging(log_file, debug=False):
+def setup_logging(log_file=None, debug=False):
     """Setup the logging
 
     Parameters
@@ -320,6 +321,12 @@ def setup_logging(log_file, debug=False):
     debug: bool
         Set log level to DEBUG if debug==True
 
+    Returns
+    -------
+    logging.logger:
+        The logger. None if no log_file provided.
+
+    
     Notes
     -----
     This function is a copy of the one found in bidscoin.
@@ -342,11 +349,12 @@ def setup_logging(log_file, debug=False):
     # Set & add the streamhandler and add some color to those boring terminal logs! :-)
     #coloredlogs.install(level=logger.level, fmt=fmt, datefmt=datefmt)
 
-    if not log_file.name:
-        return
+    if not log_file:
+        return logger
 
     # Set & add the log filehandler
-    log_file.parent.mkdir(parents=True, exist_ok=True)      # Create the log dir if it does not exist
+    logdir,_ = os.path.split(log_file)
+    os.makedirs(logdir,exist_ok=True) # Create the log dir if it does not exist
     loghandler = logging.FileHandler(log_file)
     loghandler.setLevel(logging.DEBUG)
     loghandler.setFormatter(formatter)
@@ -354,9 +362,17 @@ def setup_logging(log_file, debug=False):
     logger.addHandler(loghandler)
 
     # Set & add the error / warnings handler
-    error_file = log_file.with_suffix('.errors')            # Derive the name of the error logfile from the normal log_file
+    error_file = os.path.join(logdir,log_file+'.errors')            # Derive the name of the error logfile from the normal log_file
     errorhandler = logging.FileHandler(error_file, mode='w')
     errorhandler.setLevel(logging.WARNING)
     errorhandler.setFormatter(formatter)
     errorhandler.set_name('errorhandler')
     logger.addHandler(errorhandler)
+    return logger
+
+def excepthook(*args):
+  logging.getLogger().error('Uncaught exception:', exc_info=args)
+
+sys.excepthook = excepthook
+
+START_DECORATOR = 11*'-'

@@ -14,7 +14,7 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
     data_dir = os.path.abspath(data_dir)
 
     source_path = os.path.abspath(os.path.join(data_dir,dataset+'_input'))
-    bids_root= os.path.abspath(os.path.join(data_dir,dataset+'_output'))
+    bidsfolder= os.path.abspath(os.path.join(data_dir,dataset+'_output'))
     rules_path = os.path.join(data_dir,'bidscoin_'+dataset+'_rules.yml')
     template_path = os.path.join(data_dir,'bidscoin_template.yml')
 
@@ -42,7 +42,7 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
 
 
     #CLEAN BIDS PATH
-    for dir in [bids_root,source_path]:
+    for dir in [bidsfolder,source_path]:
       try:
           shutil.rmtree(dir)
       except:
@@ -77,10 +77,10 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
     with open(template_path,mode='w') as f:
         f.write(bidsmap)
 
-    bidsmapper(rawfolder=source_path,bidsfolder=bids_root,subprefix='sub-',sesprefix='ses-',bidsmapfile='bidsmap.yaml',templatefile= template_path,noedit=noedit)
+    bidsmapper(rawfolder=source_path,bidsfolder=bidsfolder,subprefix='sub-',sesprefix='ses-',bidsmapfile='bidsmap.yaml',templatefile= template_path,noedit=noedit)
 
     bidscoiner(rawfolder    = source_path,
-                bidsfolder   = bids_root)
+                bidsfolder   = bidsfolder)
 
 if __name__ == '__main__':
     noedit=False

@@ -72,10 +72,9 @@ import os
 import shutil # File manipulation
 import yaml # To do yaml operations
 from mne_bids import print_dir_tree # To show the input/output directories structures inside this example
-from sovabids.utils import get_project_dir # Getting a directory to get the dataset files
 from sovabids.datasets import lemon_bidscoin_prepare # Dataset
 from sovabids.schemas import get_sova2coin_bidsmap # bidsmap template schema
-
+from sovabids.settings import REPO_PATH
 #%%
 # Setting up the paths
 # ^^^^^^^^^^^^^^^^^^^^
@@ -84,7 +83,7 @@ from sovabids.schemas import get_sova2coin_bidsmap # bidsmap template schema
 # easier to just input the absolute-path. We will print these paths for more clarity.
 
 dataset = 'lemon_bidscoin' # Just folder name where to save or dataset
-data_dir = os.path.join(get_project_dir(),'_data')
+data_dir = os.path.join(REPO_PATH,'_data')
 data_dir = os.path.abspath(data_dir)
 
 source_path = os.path.abspath(os.path.join(data_dir,dataset+'_input'))

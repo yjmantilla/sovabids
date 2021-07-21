@@ -5,12 +5,13 @@ from bidscoin.bidsmapper import bidsmapper
 import os
 import shutil
 from sovabids.schemas import get_sova2coin_bidsmap
-from sovabids.utils import get_files,get_project_dir
+from sovabids.files import get_files
+from sovabids.settings import REPO_PATH
 from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset,_modify_entities_of_placeholder_pattern
 import yaml
 
 def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
-    data_dir = os.path.join(get_project_dir(),'_data')
+    data_dir = os.path.join(REPO_PATH,'_data')
     data_dir = os.path.abspath(data_dir)
 
     source_path = os.path.abspath(os.path.join(data_dir,dataset+'_input'))

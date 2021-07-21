@@ -3,7 +3,8 @@
 import os
 from pandas import read_csv
 import shutil
-from sovabids.utils import download,get_files,get_num_digits
+from sovabids.files import download,get_files
+from sovabids.misc import get_num_digits
 from sovabids.parsers import parse_from_regex
 import mne
 import numpy as np

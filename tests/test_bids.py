@@ -6,7 +6,7 @@ from bids_validator import BIDSValidator
 
 from sovabids.parsers import placeholder_to_regex
 from sovabids.rules import apply_rules,load_rules
-from sovabids.utils import deep_merge_N
+from sovabids.dicts import deep_merge_N
 from sovabids.datasets import make_dummy_dataset,_modify_entities_of_placeholder_pattern
 from sovabids.convert import convert_them
 

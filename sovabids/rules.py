@@ -1,7 +1,6 @@
 """Module dealing with the rules for bids conversion."""
 import os
 import json
-import shutil
 import yaml
 import argparse
 
@@ -14,9 +13,11 @@ from pandas import read_csv
 from traceback import format_exc
 
 from sovabids.settings import NULL_VALUES,SUPPORTED_EXTENSIONS
-from sovabids.utils import deep_merge_N,get_files
+from sovabids.files import get_files
+from sovabids.dicts import deep_merge_N
 from sovabids.parsers import parse_from_regex,parse_from_placeholder
-from sovabids.utils import update_dataset_description
+from sovabids.bids import update_dataset_description
+
 def get_info_from_path(path,rules_):
     """Parse information from a given path, given a set of rules.
 

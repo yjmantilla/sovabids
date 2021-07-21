@@ -43,11 +43,10 @@ The main elements of this example are:
 import os # For path manipulation
 import shutil # File manipulation
 from mne_bids import print_dir_tree # To show the input/output directories structures inside this example
-from sovabids.utils import get_project_dir # Getting a directory to get the dataset files
 from sovabids.rules import apply_rules # Apply rules for conversion
 from sovabids.convert import convert_them # Do the conversion
 from sovabids.datasets import lemon_prepare # Download the dataset
-
+from sovabids.settings import REPO_PATH
 #%%
 # Getting and preparing the dataset
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -65,9 +64,9 @@ lemon_prepare()
 # to the repository directory we use relative path but for real use-cases it is 
 # easier to just input the absolute-path. We will print these paths for more clarity.
 
-source_path = os.path.abspath(os.path.join(get_project_dir(),'_data','lemon')) # For the input data we will convert
-bids_path= os.path.abspath(os.path.join(get_project_dir(),'_data','lemon_bids')) # The output directory that will have the converted data
-rules_path = os.path.abspath(os.path.join(get_project_dir(),'examples','lemon_example_rules.yml')) # The rules file that setups the rule for conversion
+source_path = os.path.abspath(os.path.join(REPO_PATH,'_data','lemon')) # For the input data we will convert
+bids_path= os.path.abspath(os.path.join(REPO_PATH,'_data','lemon_bids')) # The output directory that will have the converted data
+rules_path = os.path.abspath(os.path.join(REPO_PATH,'examples','lemon_example_rules.yml')) # The rules file that setups the rule for conversion
 mapping_path = os.path.abspath(os.path.join(bids_path,'code','sovabids','mappings.yml')) # The mapping file that will hold the results of applying the rules to each file
 
 print('source_path:',source_path)
@@ -173,9 +172,9 @@ print('LEMON CONVERSION FINISHED!')
 #
 # We set up the paths again, but now we will change the output to a new path (with "_cli" at the end). We will also clean this path as we did before.
 #
-source_path = os.path.abspath(os.path.join(get_project_dir(),'_data','lemon')) # For the input data we will convert
-bids_path= os.path.abspath(os.path.join(get_project_dir(),'_data','lemon_bids_cli')) # The output directory that will have the converted data
-rules_path = os.path.abspath(os.path.join(get_project_dir(),'examples','lemon_example_rules.yml')) # The rules file that setups the rule for conversion
+source_path = os.path.abspath(os.path.join(REPO_PATH,'_data','lemon')) # For the input data we will convert
+bids_path= os.path.abspath(os.path.join(REPO_PATH,'_data','lemon_bids_cli')) # The output directory that will have the converted data
+rules_path = os.path.abspath(os.path.join(REPO_PATH,'examples','lemon_example_rules.yml')) # The rules file that setups the rule for conversion
 mapping_path = os.path.abspath(os.path.join(bids_path,'code','sovabids','mappings.yml')) # The mapping file that will hold the results of applying the rules to each file
 
 print('source_path:',source_path)

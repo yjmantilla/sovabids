@@ -4,7 +4,7 @@ import argparse
 import os
 
 from sovabids.rules import load_rules,apply_rules_to_single_file
-from sovabids.utils import update_dataset_description,
+from sovabids.utils import update_dataset_description
 from sovabids.loggers import setup_logging
 from sovabids.settings import SECTION_STRING
 

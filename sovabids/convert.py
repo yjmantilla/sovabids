@@ -1,12 +1,8 @@
 """Module to perform the conversions.
 """
 import argparse
-import json
 import os
-import logging
-from contextlib import suppress
 
-from mne_bids import make_dataset_description
 from sovabids.rules import load_rules,apply_rules_to_single_file
 from sovabids.utils import update_dataset_description,setup_logging,START_DECORATOR
 
@@ -19,10 +15,9 @@ def convert_them(mappings_input):
         The path to the mapping file or the mapping dictionary.
     """
 
- 
     # Loading Mappings
     mappings = load_rules(mappings_input)
-    mapping_file = mappings_input if isinstance(mappings_input,str) else 'not a mapping file'
+    mapping_file = mappings_input if isinstance(mappings_input,str) else None
     
     # Verifying Mappings
     assert 'Individual' in mappings
@@ -37,7 +32,7 @@ def convert_them(mappings_input):
     LOGGER = setup_logging(log_file)
     LOGGER.info('')
     LOGGER.info(START_DECORATOR+ ' START CONVERT_THEM '+START_DECORATOR)
-    LOGGER.info(f"source_path={rawfolder} targetfolder={bids_path} bidsmap={mapping_file} ")
+    LOGGER.info(f"source_path={rawfolder} targetfolder={bids_path} bidsmap={str(mapping_file)} ")
 
     for mapping in mappings['Individual']:
         apply_rules_to_single_file(mapping['IO']['source'],mapping,bids_path,write=True,logger=LOGGER)

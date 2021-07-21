@@ -69,7 +69,7 @@ def load_rules(rules_):
     if not isinstance(rules_,dict):
         with open(rules_,encoding="utf-8") as f:
             return yaml.load(f,yaml.FullLoader)
-    return rules_
+    return deepcopy(rules_)
 
 def apply_rules_to_single_file(f,rules_,bids_path,write=False,preview=False,logger=None):
     """Apply rule to a single file.

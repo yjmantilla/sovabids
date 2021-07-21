@@ -1,4 +1,4 @@
-"Module with misc utils for sovabids."
+"Module with misc utilities for sovabids."
 
 import numpy as np
 

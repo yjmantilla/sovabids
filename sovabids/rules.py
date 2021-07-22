@@ -179,7 +179,7 @@ def apply_rules_to_single_file(f,rules_,bids_path,write=False,preview=False,logg
                 bids_path = bids_path.update(
                     datatype=datatype, suffix=datatype, extension=ext)
 
-        update_dataset_description(rules.get('dataset_description',{}),bids_path.root)
+        update_dataset_description(rules.get('dataset_description',{}),bids_path.root,do_not_create=write)
         rules['IO']={}
         rules['IO']['target'] = bids_path.fpath.__str__()
         rules['IO']['source'] = f

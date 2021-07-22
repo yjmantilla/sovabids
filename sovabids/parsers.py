@@ -1,7 +1,8 @@
 """Module with parser utilities."""
 import re
 
-from sovabids.utils import deep_merge_N,nested_notation_to_tree,flat_paren_counter
+from sovabids.misc import flat_paren_counter
+from sovabids.dicts import deep_merge_N,nested_notation_to_tree
 
 def placeholder_to_regex(placeholder,encloser='%',matcher='(.+)'):
     """Translate a placeholder pattern to a regex pattern.

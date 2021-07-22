@@ -1,21 +1,23 @@
 """Module dealing with the rules for bids conversion."""
 import os
 import json
-import shutil
 import yaml
 import argparse
 
 from copy import deepcopy
 from mne_bids import write_raw_bids,BIDSPath
-from mne_bids.utils import _handle_datatype,_write_json
+from mne_bids.utils import _handle_datatype,_write_json,_get_ch_type_mapping
 from mne_bids.path import _parse_ext
 from mne.io import read_raw
 from pandas import read_csv
 from traceback import format_exc
 
-from sovabids.utils import get_nulls,deep_merge_N,get_supported_extensions,get_files
+from sovabids.settings import NULL_VALUES,SUPPORTED_EXTENSIONS
+from sovabids.files import get_files
+from sovabids.dicts import deep_merge_N
 from sovabids.parsers import parse_from_regex,parse_from_placeholder
-from sovabids.utils import update_dataset_description
+from sovabids.bids import update_dataset_description
+
 def get_info_from_path(path,rules_):
     """Parse information from a given path, given a set of rules.
 
@@ -69,9 +71,9 @@ def load_rules(rules_):
     if not isinstance(rules_,dict):
         with open(rules_,encoding="utf-8") as f:
             return yaml.load(f,yaml.FullLoader)
-    return rules_
+    return deepcopy(rules_)
 
-def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
+def apply_rules_to_single_file(f,rules_,bids_path,write=False,preview=False,logger=None):
     """Apply rule to a single file.
 
     Parameters
@@ -81,7 +83,7 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
         Path to the file.
     rules_ : str|dict
         Path to the rules file or rules dictionary.
-    bids_root : str
+    bids_path : str
         Path to the bids directory
     write : bool, optional
         Whether to write output or not.
@@ -89,6 +91,8 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
         Whether to return a dictionary with a "preview" of the conversion.
         This dict will have the same schema as the "Mapping File Schema" but may have flat versions of its fields.
         *UNDER CONSTRUCTION*
+    logger : logging.logger object, optional
+        The logger, if None logging is skipped.
 
     Returns
     -------
@@ -115,7 +119,7 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
 
     if 'sidecar' in rules:
         sidecar = rules['sidecar']
-        if "PowerLineFrequency" in sidecar and sidecar['PowerLineFrequency'] not in get_nulls():
+        if "PowerLineFrequency" in sidecar and sidecar['PowerLineFrequency'] not in NULL_VALUES:
             raw.info['line_freq'] = sidecar["PowerLineFrequency"]  # specify power line frequency as required by BIDS
         # Should we try to infer the line frequency automatically from the psd?
 
@@ -123,7 +127,14 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
         channels = rules['channels']
         if "name" in channels:
             raw.rename_channels(channels['name'])
-
+        if "type" in channels: # We overwrite whatever channel types we can on the files
+            # https://github.com/mne-tools/mne-bids/blob/3711613edc0e2039c921ad9b1a32beccc52156b1/mne_bids/utils.py#L78-L83
+            # care should be taken with the channel counts set up by mne-bids https://github.com/mne-tools/mne-bids/blob/main/mne_bids/write.py#L774-L782
+            # but right now is inofensive
+            types = channels['type']
+            types = {key:_get_ch_type_mapping(fro='bids',to='mne').get(val,None) for key,val in types.items() }
+            valid_types = {k: v for k, v in types.items() if v is not None}
+            raw.set_channel_types(valid_types)
     if 'non-bids' in rules:
         non_bids = rules['non-bids']
         if "code_execution" in non_bids:
@@ -140,7 +151,7 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
                         #or should we raise an exception?
 
 
-        bids_path = BIDSPath(**entities,root=bids_root)
+        bids_path = BIDSPath(**entities,root=bids_path)
 
         real_times = raw.times[-1]
         if write:
@@ -168,7 +179,7 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
                 bids_path = bids_path.update(
                     datatype=datatype, suffix=datatype, extension=ext)
 
-        update_dataset_description(rules.get('dataset_description',{}),bids_path.root)
+        update_dataset_description(rules.get('dataset_description',{}),bids_path.root,do_not_create=write)
         rules['IO']={}
         rules['IO']['target'] = bids_path.fpath.__str__()
         rules['IO']['source'] = f
@@ -240,8 +251,10 @@ def apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False):
         for filename in new_files:
             if os.path.exists(filename): os.remove(filename)
     mapping = rules
+    if 'dataset_description' in rules:
+        del rules['dataset_description']
     return mapping,preview
-def apply_rules(source_path,bids_root,rules_,mapping_path=''):
+def apply_rules(source_path,bids_path,rules_,mapping_path=''):
     """Apply rules to all the accepted files in a source path.
 
     Parameters
@@ -249,13 +262,13 @@ def apply_rules(source_path,bids_root,rules_,mapping_path=''):
 
     source_path : str
         The path with the files we want to convert to bids.
-    bids_root : str
+    bids_path : str
         The path we want the converted files in.
     rules_ : str|dict
         The path to the rules file, or a dictionary with the rules.
     mapping_path : str, optional
         The fullpath where we want to write the mappings file.
-        If '', then bids_root/code/sovabids/mappings.yml will be used.
+        If '', then bids_path/code/sovabids/mappings.yml will be used.
     
     Returns
     -------
@@ -268,7 +281,7 @@ def apply_rules(source_path,bids_root,rules_,mapping_path=''):
     try:
         extensions = rules_['non-bids']['eeg_extension']
     except:
-        extensions = get_supported_extensions()
+        extensions = deepcopy(SUPPORTED_EXTENSIONS)
 
     if isinstance(extensions,str):
         extensions = [extensions]
@@ -282,21 +295,21 @@ def apply_rules(source_path,bids_root,rules_,mapping_path=''):
     #%% BIDS CONVERSION
     all_mappings = []
     for f in filepaths:
-        rules,_ = apply_rules_to_single_file(f,rules_,bids_root,write=False,preview=False) #TODO There should be a way to control how verbose this is
+        rules,_ = apply_rules_to_single_file(f,rules_,bids_path,write=False,preview=False) #TODO There should be a way to control how verbose this is
         all_mappings.append(rules)
     
     outputfolder,outputname = os.path.split(mapping_path)
     if outputname == '':
         outputname = 'mappings.yml'
     if outputfolder == '':
-        outputfolder = os.path.join(bids_root,'code','sovabids')
+        outputfolder = os.path.join(bids_path,'code','sovabids')
     os.makedirs(outputfolder,exist_ok=True)
     full_rules_path = os.path.join(outputfolder,outputname)
 
     # ADD IO to General Rules (this is for the mapping file)
     rules_['IO'] = {}
     rules_['IO']['source'] = source_path
-    rules_['IO']['target'] = bids_root
+    rules_['IO']['target'] = bids_path
     mapping_data = {'General':rules_,'Individual':all_mappings}
     with open(full_rules_path, 'w') as outfile:
         yaml.dump(mapping_data, outfile, default_flow_style=False)
@@ -312,11 +325,11 @@ def sovapply():
 
     parser = subparsers.add_parser('apply_rules')
     parser.add_argument('source_path',help='The path to the input data directory that will be converted to bids')  # add the name argument
-    parser.add_argument('bids_root',help='The path to the output bids directory')  # add the name argument
+    parser.add_argument('bids_path',help='The path to the output bids directory')  # add the name argument
     parser.add_argument('rules',help='The fullpath of the rules file')  # add the name argument
-    parser.add_argument('-m','--mapping', help='The fullpath of the mapping file to be written. If not set it will be located in bids_root/code/sovabids/mappings.yml',default='')
+    parser.add_argument('-m','--mapping', help='The fullpath of the mapping file to be written. If not set it will be located in bids_path/code/sovabids/mappings.yml',default='')
     args = parser.parse_args()
-    apply_rules(args.source_path,args.bids_root,args.rules,args.mapping)
+    apply_rules(args.source_path,args.bids_path,args.rules,args.mapping)
 
 if __name__ == "__main__":
     sovapply()

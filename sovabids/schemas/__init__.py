@@ -1,3 +1,4 @@
+"""Module with the schemas associated with sovabids."""
 import os
 
 def get_sova2coin_bidsmap():

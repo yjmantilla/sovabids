@@ -72,10 +72,9 @@ import os
 import shutil # File manipulation
 import yaml # To do yaml operations
 from mne_bids import print_dir_tree # To show the input/output directories structures inside this example
-from sovabids.utils import get_project_dir # Getting a directory to get the dataset files
 from sovabids.datasets import lemon_bidscoin_prepare # Dataset
 from sovabids.schemas import get_sova2coin_bidsmap # bidsmap template schema
-
+from sovabids.settings import REPO_PATH
 #%%
 # Setting up the paths
 # ^^^^^^^^^^^^^^^^^^^^
@@ -84,17 +83,17 @@ from sovabids.schemas import get_sova2coin_bidsmap # bidsmap template schema
 # easier to just input the absolute-path. We will print these paths for more clarity.
 
 dataset = 'lemon_bidscoin' # Just folder name where to save or dataset
-data_dir = os.path.join(get_project_dir(),'_data')
+data_dir = os.path.join(REPO_PATH,'_data')
 data_dir = os.path.abspath(data_dir)
 
 source_path = os.path.abspath(os.path.join(data_dir,dataset+'_input'))
-bids_root= os.path.abspath(os.path.join(data_dir,dataset+'_output'))
-code_path = os.path.join(bids_root,'code','bidscoin')
+bids_path= os.path.abspath(os.path.join(data_dir,dataset+'_output'))
+code_path = os.path.join(bids_path,'code','bidscoin')
 rules_path = os.path.join(code_path,'rules.yml')
 template_path = os.path.join(code_path,'template.yml')
 bidsmap_path  = os.path.join( code_path,'bidsmap.yaml')
 print('source_path:',source_path)
-print('bids_root:', bids_root)
+print('bids_path:', bids_path)
 print('rules_path:',rules_path)
 print('template_path:',template_path)
 print('bidsmap_path:',bidsmap_path)
@@ -105,7 +104,7 @@ print('bidsmap_path:',bidsmap_path)
 # We will clean the output path as a safety measure from previous conversions.
 
 try:
-    shutil.rmtree(bids_root)
+    shutil.rmtree(bids_path)
 except:
     pass
 
@@ -113,7 +112,7 @@ except:
 #
 # Make the folders if they don't exist to avoid errors
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-for p in [source_path,bids_root,code_path]:
+for p in [source_path,bids_path,code_path]:
     os.makedirs(p,exist_ok=True)
 
 #%%
@@ -237,7 +236,7 @@ print(my_output)
 # Just remember to save the bidsmap yaml at the end.
 #
 # See the `bidseditor documentation <https://bidscoin.readthedocs.io/en/stable/workflow.html#main-window>`_ for more info.
-command = 'bidsmapper '+source_path + ' '+ bids_root + ' -t ' + template_path + ' -a'
+command = 'bidsmapper '+source_path + ' '+ bids_path + ' -t ' + template_path + ' -a'
 print(command)
 
 #%%
@@ -273,7 +272,7 @@ print(my_output)
 #%%
 # Now we will use the following command to perform the conversion.
 #
-command = 'bidscoiner '+source_path + ' '+ bids_root + ' -b '+ bidsmap_path
+command = 'bidscoiner '+source_path + ' '+ bids_path + ' -b '+ bidsmap_path
 
 print(command)
 
@@ -287,7 +286,7 @@ print(my_output)
 # ^^^^^^^^^^^^^^^^^^^^^^^
 # For clarity purposes we will check the output directory we got from sovabids.
 
-print_dir_tree(bids_root)
+print_dir_tree(bids_path)
 
 print('BIDSCOIN CONVERSION FINISHED!')
 

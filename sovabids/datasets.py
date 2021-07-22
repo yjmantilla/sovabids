@@ -3,7 +3,8 @@
 import os
 from pandas import read_csv
 import shutil
-from sovabids.utils import download,get_files,get_num_digits
+from sovabids.files import download,get_files
+from sovabids.misc import get_num_digits
 from sovabids.parsers import parse_from_regex
 import mne
 import numpy as np
@@ -213,3 +214,28 @@ def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%r
                         path = [data_dir] +dummy.split('/')
                         fpath = os.path.join(*path)
                         _write_raw_brainvision(raw,fpath,new_events)
+
+def _modify_entities_of_placeholder_pattern(pattern,mode='append'):
+    """Convert between sovabids entities pattern notation and the make_dummy_dataset notation.
+
+    Parameters
+    ----------
+    string : str
+        The pattern string to convert.
+    mode : str
+        Whether to append 'entities' or cut it. One of {'append','cut'}
+
+    Returns
+    -------
+    str
+        The converted pattern string.
+    """
+    if mode == 'append':
+        for keyword in ['%task%','%session%','%subject%','%run%','%acquisition%']:
+            pattern = pattern.replace(keyword,'%entities.'+keyword[1:])
+        pattern = pattern.replace('%dataset%','%dataset_description.Name%')
+    elif mode == 'cut':
+        for keyword in ['%task%','%session%','%subject%','%run%','%acquisition%']:
+            pattern = pattern.replace('%entities.'+keyword[1:],keyword)
+        pattern = pattern.replace('%dataset_description.Name%','%dataset%')
+    return pattern

@@ -6,8 +6,8 @@ from bids_validator import BIDSValidator
 
 from sovabids.parsers import placeholder_to_regex
 from sovabids.rules import apply_rules,load_rules
-from sovabids.utils import deep_merge_N
-from sovabids.datasets import make_dummy_dataset
+from sovabids.dicts import deep_merge_N
+from sovabids.datasets import make_dummy_dataset,_modify_entities_of_placeholder_pattern
 from sovabids.convert import convert_them
 
 def dummy_dataset(pattern_type='custom',write=True,cli=False):
@@ -21,7 +21,7 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
     test_root = os.path.join(data_dir,'DUMMY')
     input_root = os.path.join(test_root,'DUMMY_SOURCE')
     cli_str = '' if cli == False else '_cli'
-    bids_root = os.path.join(test_root,'DUMMY_BIDS'+'_'+pattern_type+cli_str)
+    bids_path = os.path.join(test_root,'DUMMY_BIDS'+'_'+pattern_type+cli_str)
 
     # PARAMS for making the dummy dataset
     DATA_PARAMS ={ 'PATTERN':'T%task%/S%session%/sub%subject%_%acquisition%_%run%',
@@ -40,7 +40,7 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
 
 
     # Preparing directories
-    dirs = [input_root,bids_root] #dont include test_root for saving multiple conversions
+    dirs = [input_root,bids_path] #dont include test_root for saving multiple conversions
     for dir in dirs:
         try:
             shutil.rmtree(dir)
@@ -57,9 +57,7 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
     # Gotta fix the pattern that wrote the dataset to the notation of the rules file
     FIXED_PATTERN =DATA_PARAMS.get('PATTERN',None)
 
-    for keyword in ['%task%','%session%','%subject%','%run%','%acquisition%']:
-        FIXED_PATTERN = FIXED_PATTERN.replace(keyword,'%entities.'+keyword[1:])
-    FIXED_PATTERN = FIXED_PATTERN.replace('%dataset%','%dataset_description.Name%')
+    FIXED_PATTERN = _modify_entities_of_placeholder_pattern(FIXED_PATTERN,'append')
     FIXED_PATTERN = FIXED_PATTERN + '.' + 'vhdr'
 
     # Making the rules dictionary
@@ -103,17 +101,17 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
         # Loading the rules file (yes... kind of redundant but tests the io of the rules file)
         rules = load_rules(full_rules_path)
 
-        file_mappings = apply_rules(source_path=input_root,bids_root=bids_root,rules_=rules)
+        file_mappings = apply_rules(source_path=input_root,bids_path=bids_path,rules_=rules)
     else:
-        os.system('sovapply '+input_root + ' '+ bids_root + ' ' + full_rules_path)
-        mappings_path = os.path.join(bids_root,'code','sovabids','mappings.yml')
+        os.system('sovapply '+input_root + ' '+ bids_path + ' ' + full_rules_path)
+        mappings_path = os.path.join(bids_path,'code','sovabids','mappings.yml')
         file_mappings = load_rules(mappings_path)
 
     individuals=file_mappings['Individual']
 
     # Testing the mappings (at the moment it only test the filepaths)
     validator = BIDSValidator()
-    filepaths = [x['IO']['target'].replace(bids_root,'') for x in individuals]
+    filepaths = [x['IO']['target'].replace(bids_path,'') for x in individuals]
     for filepath in filepaths:
         assert validator.is_bids(filepath)
     if write:

@@ -5,26 +5,28 @@ from bidscoin.bidsmapper import bidsmapper
 import os
 import shutil
 from sovabids.schemas import get_sova2coin_bidsmap
-from sovabids.utils import get_files,get_project_dir
-from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset
+from sovabids.files import get_files
+from sovabids.settings import REPO_PATH
+from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset,_modify_entities_of_placeholder_pattern
 import yaml
 
 def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
-    data_dir = os.path.join(get_project_dir(),'_data')
+    data_dir = os.path.join(REPO_PATH,'_data')
     data_dir = os.path.abspath(data_dir)
 
     source_path = os.path.abspath(os.path.join(data_dir,dataset+'_input'))
-    bids_root= os.path.abspath(os.path.join(data_dir,dataset+'_output'))
+    bids_path= os.path.abspath(os.path.join(data_dir,dataset+'_output'))
     rules_path = os.path.join(data_dir,'bidscoin_'+dataset+'_rules.yml')
     template_path = os.path.join(data_dir,'bidscoin_template.yml')
 
     if dataset == 'dummy_bidscoin':
+      pat = 'sub-%entities.subject%/ses-%entities.session%/eeg-%entities.task%-%entities.run%.vhdr'
       rules = {
         'entities': None,
         'dataset_description':{'Name':dataset},
         'non-bids':{
           'path_analysis':
-          {'pattern':'sub-%entities.subject%/ses-%entities.session%/eeg-%entities.task%-%entities.run%.vhdr'}
+          {'pattern':pat}
         }
       }
     elif dataset=='lemon_bidscoin':
@@ -41,7 +43,7 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
 
 
     #CLEAN BIDS PATH
-    for dir in [bids_root,source_path]:
+    for dir in [bids_path,source_path]:
       try:
           shutil.rmtree(dir)
       except:
@@ -50,7 +52,8 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
     if dataset=='lemon_bidscoin':
       lemon_bidscoin_prepare(source_path)
     else:
-      pat = 'sub-%subject%/ses-%session%/eeg-%task%-%run%'
+      pat = _modify_entities_of_placeholder_pattern(rules['non-bids']['path_analysis']['pattern'],'cut')
+      pat = pat.replace('.vhdr','')
       try:
         shutil.rmtree(source_path)
       except:
@@ -75,10 +78,10 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
     with open(template_path,mode='w') as f:
         f.write(bidsmap)
 
-    bidsmapper(rawfolder=source_path,bidsfolder=bids_root,subprefix='sub-',sesprefix='ses-',bidsmapfile='bidsmap.yaml',templatefile= template_path,noedit=noedit)
+    bidsmapper(rawfolder=source_path,bidsfolder=bids_path,subprefix='sub-',sesprefix='ses-',bidsmapfile='bidsmap.yaml',templatefile= template_path,noedit=noedit)
 
     bidscoiner(rawfolder    = source_path,
-                bidsfolder   = bids_root)
+                bidsfolder   = bids_path)
 
 if __name__ == '__main__':
     noedit=False

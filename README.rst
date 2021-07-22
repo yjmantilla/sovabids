@@ -50,10 +50,12 @@ Fork this repo and run:
 
 .. code-block:: bash
 
-   git clone https://github.com/<gh-username>/sovabids
+   git clone https://github.com/<gh-username>/sovabids.git
    cd sovabids
    pip install -r requirements-dev.txt
-   pip install -e .
+
+Notice  that the requirements-dev.txt file already has the sovabids installation using editable mode.
+
 
 Basic Usage
 -----------
@@ -68,13 +70,13 @@ Use the sovapply entry-point to produce a mapping file from a source path, an ou
 
 .. code-block:: bash
 
-   sovapply source_path bids_root rules_path
+   sovapply source_path bids_path rules_path
 
 By default the mapping file made will have the following filepath:
 
 .. code-block:: text
 
-   bids_root/code/sovabids/mappings.yml
+   bids_path/code/sovabids/mappings.yml
 
 
 sovaconvert

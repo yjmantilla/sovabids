@@ -13,7 +13,7 @@ def convert_them(mappings_input):
 
     Parameters
     ----------
-    mappings_input : str
+    mappings_input : str|dict
         The path to the mapping file or the mapping dictionary.
     """
 

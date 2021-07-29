@@ -1,6 +1,9 @@
 import os
 import shutil
 import yaml
+from fastapi.testclient import TestClient
+from sovabids.sovarpc import app
+import json
 
 from bids_validator import BIDSValidator
 
@@ -10,7 +13,7 @@ from sovabids.dicts import deep_merge_N
 from sovabids.datasets import make_dummy_dataset,_modify_entities_of_placeholder_pattern
 from sovabids.convert import convert_them
 
-def dummy_dataset(pattern_type='custom',write=True,cli=False):
+def dummy_dataset(pattern_type='custom',write=True,mode='python'):
 
     # Getting current file path and then going to _data directory
     this_dir = os.path.dirname(__file__)
@@ -20,8 +23,8 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
     # Defining relevant conversion paths
     test_root = os.path.join(data_dir,'DUMMY')
     input_root = os.path.join(test_root,'DUMMY_SOURCE')
-    cli_str = '' if cli == False else '_cli'
-    bids_path = os.path.join(test_root,'DUMMY_BIDS'+'_'+pattern_type+cli_str)
+    mode_str = '_' + mode
+    bids_path = os.path.join(test_root,'DUMMY_BIDS'+'_'+pattern_type+mode_str)
 
     # PARAMS for making the dummy dataset
     DATA_PARAMS ={ 'PATTERN':'T%task%/S%session%/sub%subject%_%acquisition%_%run%',
@@ -38,6 +41,10 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
         'ROOT' : input_root
     }
 
+    if mode == 'rpc':
+        client = TestClient(app)
+    else:
+        client = None
 
     # Preparing directories
     dirs = [input_root,bids_path] #dont include test_root for saving multiple conversions
@@ -97,15 +104,42 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
 
     mappings_path=None
 
-    if not cli:
+    if mode=='python':
         # Loading the rules file (yes... kind of redundant but tests the io of the rules file)
         rules = load_rules(full_rules_path)
 
         file_mappings = apply_rules(source_path=input_root,bids_path=bids_path,rules_=rules)
-    else:
+    elif mode=='cli':
         os.system('sovapply '+input_root + ' '+ bids_path + ' ' + full_rules_path)
         mappings_path = os.path.join(bids_path,'code','sovabids','mappings.yml')
         file_mappings = load_rules(mappings_path)
+    elif mode=='rpc':
+        request=json.dumps({ #jsondumps important to avoid parse errors
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "load_rules",
+        "params": {
+        "rules_path": full_rules_path
+            }
+        })
+
+        response = client.post("/api/v1/sovabids/load_rules",data=request )
+        rules = json.loads(response.content.decode())['result']
+
+        request=json.dumps({ #jsondumps important to avoid parse errors
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "apply_rules",
+        "params": {
+        "source_path": input_root,
+        "bids_path": bids_path,
+        "rules_path": full_rules_path,
+        "mapping_path":''
+            }
+        })
+        response = client.post("/api/v1/sovabids/apply_rules",data=request )
+        file_mappings = json.loads(response.content.decode())['result']
+        mappings_path = os.path.join(bids_path,'code','sovabids','mappings.yml')
 
     individuals=file_mappings['Individual']
 
@@ -115,16 +149,29 @@ def dummy_dataset(pattern_type='custom',write=True,cli=False):
     for filepath in filepaths:
         assert validator.is_bids(filepath)
     if write:
-        if not cli:
+        if mode=='python':
             convert_them(file_mappings)
-        else:
+        elif mode=='cli':
             os.system('sovaconvert '+mappings_path)
+        elif mode=='rpc':
+            request=json.dumps({ #jsondumps important to avoid parse errors
+            "jsonrpc": "2.0",
+            "id": 0,
+            "method": "convert_them",
+            "params": {
+            "mapping_path": mappings_path
+                }
+            })
 
+            response = client.post("/api/v1/sovabids/convert_them",data=request)
+            print('okrpc')
 def test_dummy_dataset():
+    dummy_dataset('custom',write=True,mode='rpc')
+    dummy_dataset('regex',write=True,mode='rpc')
     dummy_dataset('custom',write=True)
     dummy_dataset('regex',write=True)
-    dummy_dataset('custom',write=True,cli=True)
-    dummy_dataset('regex',write=True,cli=True)
+    dummy_dataset('custom',write=True,mode='cli')
+    dummy_dataset('regex',write=True,mode='cli')
 
 if __name__ == '__main__':
     test_dummy_dataset()

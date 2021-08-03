@@ -1,0 +1,19 @@
+channels:
+  name:
+    '0': ECG_CHAN
+    '1': EOG_CHAN
+  type:
+    ECG_CHAN: ECG
+    EOG_CHAN: EOG
+dataset_description:
+  Authors:
+  - A1
+  - A2
+  Name: Dummy
+sidecar:
+  EEGReference: FCz
+  PowerLineFrequency: 50
+  SoftwareFilters:
+    Anti-aliasing filter:
+      Roll-off: 6dB/Octave
+      half-amplitude cutoff (Hz): 500

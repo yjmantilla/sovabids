@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block nav_rules %}active{% endblock %}
+
+{% block content %}
+    <div class="">
+        <form action="" method="POST">
+            <ul>
+                {% for k, v in files.items() %}
+                    <label>
+                        <li>
+                            <a href="/individual_rules/{{k}}">{{ v }}</a>
+                        </li>                    
+                    </label><br/>
+                    {% endfor %}
+            </ul>
+            <input name="form1" type="submit" value="Send">
+        </form>
+    </div>
+    <div class="">
+        <div>
+            <h2>Modificando archivo de reglas para el archivo {{ file }}</h2>
+        </div>
+        <div>
+            <form method="post" action="" enctype="multipart/form-data">
+                <dl>
+                    <p>
+                        <input type="file" id="file" class= "inputfile" name="file" required>
+                        <label  for = "file"> 
+                            seleccione el archivo de reglas o modifique el siguiente
+                        </label >
+                    </p>
+                </dl>
+                <p>
+                    <input name="form2" type="submit" value="Submit">
+                </p>
+            </form>
+        </div>
+        <div>
+            <form action="/individual_rules/{{ file }}" method="POST">
+                <textarea name="rules" id="" cols="100" rows="30"> {{ rules }} </textarea>
+                <input name="form3" type="submit" value="Send">
+            </form>
+            
+        </div>
+    </div>
+{% endblock %}

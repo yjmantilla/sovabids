@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block head %}
+	{{ super() }}
+	<link rel="stylesheet" href="{{ url_for('static', filename='upload_files.css') }}">
+{% endblock %}
+
+{% block nav_upload %}active{% endblock %}
+
+{% block content %}
+	<h2>Select file(s) to upload</h2>
+	<p>
+		{% with messages = get_flashed_messages() %}
+		{% if messages %}
+			<ul class=flashes>
+			{% for message in messages %}
+			<li>{{ message }}</li>
+			{% endfor %}
+			</ul>
+		{% endif %}
+		{% endwith %}
+	</p>
+	<form method="post" action="" enctype="multipart/form-data">
+		<dl>
+			<p>
+				<input type="file" id="file" class= "inputfile" name="files[]" multiple="true" autocomplete="off" required>
+				<label  for = "file"> 
+					
+					seleccione los archivos
+				</label >
+			</p>
+		</dl>
+		<p>
+			<input type="submit" value="Submit">
+		</p>
+	</form>
+{% endblock %}

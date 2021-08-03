@@ -1,5 +1,8 @@
 # test files
 
+front/app/media/
+front/app/uploads/
+
 src/
 _data/
 _temp/

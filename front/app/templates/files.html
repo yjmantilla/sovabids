@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block nav_exclude %}active{% endblock %}
+
+{% block content %}
+    Archivos que serán formateados al BIDS
+   
+    <form action="/load-rules" method="POST">
+        <ul>
+            {% for file in filenames %}
+             <li>{{ file }}</li>
+            {% endfor %}
+        </ul>
+        <input type="submit" value="Send">
+    </form>
+
+{% endblock %}

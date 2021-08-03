@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block nav_rules %}active{% endblock %}
+
+{% block content %}
+    <form method="post" action="" enctype="multipart/form-data">
+        <dl>
+            <p>
+                <input type="file" id="file" class= "inputfile" name="file" required>
+                <label  for = "file"> 
+                    seleccione el archivo de reglas
+                </label >
+            </p>
+        </dl>
+        <p>
+            <input type="submit" value="Submit">
+        </p>
+    </form>
+    <form method="post" action="/edit-rules" enctype="multipart/form-data">
+        <dl>
+            <p>
+                <textarea name="rules" id="" cols="100" rows="30"> {{ rules }} </textarea>
+            </p>
+        </dl>
+        <p>
+            <input type="submit" value="Submit">
+        </p>
+    </form>
+
+{% endblock %}

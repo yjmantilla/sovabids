@@ -175,6 +175,7 @@ def test_dummy_dataset():
     dummy_dataset('custom',write=True,mode='cli')
     dummy_dataset('regex',write=True,mode='cli')
 
+#TODO: A test for incremental conversion
 if __name__ == '__main__':
     test_dummy_dataset()
     print('ok')

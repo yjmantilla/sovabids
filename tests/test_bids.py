@@ -108,12 +108,14 @@ def dummy_dataset(pattern_type='custom',write=True,mode='python'):
         # Loading the rules file (yes... kind of redundant but tests the io of the rules file)
         rules = load_rules(full_rules_path)
 
-        file_mappings = apply_rules(source_path=input_root,bids_path=bids_path,rules_=rules)
+        file_mappings = apply_rules(source_path=input_root,bids_path=bids_path,rules=rules)
     elif mode=='cli':
         os.system('sovapply '+input_root + ' '+ bids_path + ' ' + full_rules_path)
         mappings_path = os.path.join(bids_path,'code','sovabids','mappings.yml')
         file_mappings = load_rules(mappings_path)
     elif mode=='rpc':
+
+        # Load Rules
         request=json.dumps({ #jsondumps important to avoid parse errors
         "jsonrpc": "2.0",
         "id": 0,
@@ -123,24 +125,81 @@ def dummy_dataset(pattern_type='custom',write=True,mode='python'):
             }
         })
 
-        response = client.post("/api/v1/sovabids/load_rules",data=request )
+        response = client.post("/api/sovabids/load_rules",data=request )
         rules = json.loads(response.content.decode())['result']
 
+        # Save Rules
+        request = json.dumps({
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "save_rules",
+        "params": {
+            "rules": rules,
+            "path": full_rules_path+'.bkp'
+        }
+        })
+        response = client.post("/api/sovabids/save_rules",data=request )
+
+        # Get Files
+        request = json.dumps({
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "get_files",
+        "params": {
+            "rules": rules,
+            "path": input_root
+        }
+        })
+        response = client.post("/api/sovabids/get_files",data=request )
+        filelist = json.loads(response.content.decode())['result']
+
+        # Preview Single File
+
+        request=json.dumps({ #jsondumps important to avoid parse errors
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "apply_rules_to_single_file",
+        "params": {
+        "file": filelist[0],
+        "bids_path": bids_path+'.preview',
+        "rules": rules,
+        "write":False,
+        "preview":True
+            }
+        })
+        response = client.post("/api/sovabids/apply_rules_to_single_file",data=request )
+        single_file = json.loads(response.content.decode())
+        print(single_file)
+
+        # Get Mappings
         request=json.dumps({ #jsondumps important to avoid parse errors
         "jsonrpc": "2.0",
         "id": 0,
         "method": "apply_rules",
         "params": {
-        "source_path": input_root,
+        "file_list": filelist,
         "bids_path": bids_path,
-        "rules_path": full_rules_path,
+        "rules": rules,
         "mapping_path":''
             }
         })
-        response = client.post("/api/v1/sovabids/apply_rules",data=request )
+        response = client.post("/api/sovabids/apply_rules",data=request )
         file_mappings = json.loads(response.content.decode())
         file_mappings=file_mappings['result']
         mappings_path = os.path.join(bids_path,'code','sovabids','mappings.yml')
+
+        # Save Mappings
+        request = json.dumps({
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "save_mappings",
+        "params": {
+            "general": file_mappings['General'],
+            "individual":file_mappings['Individual'],
+            "path": mappings_path+'.bkp'
+        }
+        })
+        response = client.post("/api/sovabids/save_mappings",data=request )
 
     individuals=file_mappings['Individual']
 
@@ -160,11 +219,12 @@ def dummy_dataset(pattern_type='custom',write=True,mode='python'):
             "id": 0,
             "method": "convert_them",
             "params": {
-            "mapping_path": mappings_path
+            "general": file_mappings['General'],
+            "individual":file_mappings['Individual']
                 }
             })
+            response = client.post("/api/sovabids/convert_them",data=request)
 
-            response = client.post("/api/v1/sovabids/convert_them",data=request)
             print('okrpc')
     return individuals
 def test_dummy_dataset():

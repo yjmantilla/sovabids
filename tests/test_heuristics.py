@@ -10,7 +10,7 @@ def test_from_io_example():
     sourcepath=mappings[0]['IO']['source']
     targetpath=mappings[0]['IO']['target']
     answer=mappings[0]['non-bids']['path_analysis']['pattern']
-    pattern = from_io_example(sourcepath,targetpath)
+    pattern = from_io_example(sourcepath,targetpath)['pattern']
     assert pattern == answer
 
 if __name__ == '__main__':

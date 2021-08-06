@@ -1,64 +1,88 @@
-# apply_rules
-# load_rules
-# save_rules
-# apply_rules_to_single_file
-# convert
-# save_mappings
-# get_files
+"""
+- [x] apply_rules
+- [x] load_rules
+- [x] save_rules
+- [x] apply_rules_to_single_file
+- [x] convert
+- [x] save_mappings
+- [x] get_files
+"""
 
 
 import fastapi_jsonrpc as jsonrpc
-from numpy import source
-from pydantic import BaseModel
-from fastapi import Body
+from pydantic import BaseModel, errors
+from typing import List, Optional
 import sovabids.rules as ru
 import sovabids.convert as co
+import sovabids.files as fi
 
 app = jsonrpc.API()
 
-api_v1 = jsonrpc.Entrypoint('/api/v1/sovabids')
-
-
-class MyError(jsonrpc.BaseError):
-    CODE = 5000
-    MESSAGE = 'My error'
-
-    class DataModel(BaseModel):
-        details: str
+api = jsonrpc.Entrypoint('/api/sovabids')
 
 class RulesError(jsonrpc.BaseError):
+    CODE = 5000
+    MESSAGE = 'Error loading the rules.'
+
+    class DataModel(BaseModel):
+        details: str
+
+class ApplyError(jsonrpc.BaseError):
     CODE = 5100
-    MESSAGE = 'Error with the rules'
+    MESSAGE = 'Error applying rules.'
+
+    class DataModel(BaseModel):
+        details: str
+
+class ConvertError(jsonrpc.BaseError):
+    CODE = 5200
+    MESSAGE = 'Error converting  files.'
+
+    class DataModel(BaseModel):
+        details: str
+
+class SaveError(jsonrpc.BaseError):
+    CODE = 5300
+    MESSAGE = 'Error saving file.'
+
+    class DataModel(BaseModel):
+        details: str
+
+class FileListError(jsonrpc.BaseError):
+    CODE = 5400
+    MESSAGE = 'Error getting the filelist.'
 
     class DataModel(BaseModel):
         details: str
 
 
-@api_v1.method(errors=[MyError])
+@api.method(errors=[ApplyError])
 def apply_rules(
-    source_path: str = Body(..., example='123'),
-    bids_path: str = Body(..., example='123'),
-    rules_path: str = Body(..., example='123'),
-    mapping_path: str = Body(..., example='123')
+    file_list: List[str],
+    bids_path: str,
+    rules: dict,
+    mapping_path: str
 ) -> dict:
     try:
-        data = ru.apply_rules(source_path=source_path,bids_path=bids_path,rules_=rules_path,mapping_path=mapping_path)
+        mappings = ru.apply_rules(source_path=file_list,bids_path=bids_path,rules=rules,mapping_path=mapping_path)
     except:
-        raise MyError(data={'details': 'error'})
-    return data
+        raise ApplyError(data={'details': 'error'})
+    return mappings
 
-@api_v1.method(errors=[MyError])
+@api.method(errors=[ConvertError])
 def convert_them(
-    mapping_path: str = Body(..., example='123')
+    general  : dict,
+    individual: List[dict]
 ) -> None:
     try:
-        co.convert_them(mappings_input=mapping_path)
+        data = {'General':general,'Individual':individual}
+        co.convert_them(mappings_input=data)
     except:
-        raise MyError(data={'details': 'error'})
+        raise ConvertError(data={'details': 'error'})
 
-@api_v1.method(errors=[RulesError])
+@api.method(errors=[RulesError])
 def load_rules(
-    rules_path: str = Body(..., example='123'),
+    rules_path: str,
 ) -> dict:
     try:
         rules = ru.load_rules(rules_path)
@@ -66,16 +90,57 @@ def load_rules(
         raise RulesError(data={'details': 'error'})
     return rules
 
-@api_v1.method(errors=[MyError])
+@api.method(errors=[ApplyError])
 def apply_rules_to_single_file(
-    data: str = Body(..., example='123'),
-) -> str:
-    if data == 'error':
-        raise MyError(data={'details': 'error'})
-    else:
-        return data
+    file:str,
+    rules:dict,
+    bids_path:str,
+    write:bool=False,
+    preview:bool=False
+) -> dict:
+    try:
+        mapping,preview=ru.apply_rules_to_single_file(file,rules,bids_path,write,preview)
+    except:
+        raise ApplyError(data={'details': 'error'})
+    return {'mapping':mapping,'preview':preview}
 
-app.bind_entrypoint(api_v1)
+@api.method(errors=[SaveError])
+def save_rules(
+    rules:dict,
+    path:str
+    ) -> None:
+    try:
+        fi._write_yaml(path,rules)
+    except:
+        raise SaveError(data={'details': 'error'})
+    return
+
+@api.method(errors=[SaveError])
+def save_mappings(
+    path:str,
+    general:dict,
+    individual:list
+    ) -> None:
+    try:
+        data = {'General':general,'Individual':individual}
+        fi._write_yaml(path,data)
+    except:
+        raise SaveError(data={'details': 'error'})
+    return
+
+@api.method(errors=[FileListError])
+def get_files(
+    path:str,
+    rules:dict
+    ) -> list:
+    try:
+        filelist = ru.get_files(path,rules)
+    except:
+        raise FileListError(data={'details': 'error'})
+    return filelist
+
+
+app.bind_entrypoint(api)
 
 
 if __name__ == '__main__':

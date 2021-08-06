@@ -2,7 +2,7 @@ import os
 import re
 from werkzeug.utils import secure_filename
 import json
-
+from sovabids.settings import SUPPORTED_EXTENSIONS # This should be deprecated in the future, all should go through the endpoints
 import yaml
 
 from flask import Flask, flash, request, redirect, render_template, session
@@ -28,7 +28,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config["CACHE_TYPE"] = "null"
 
 # Allowed extension you can set your own
-ALLOWED_EXTENSIONS = set(['cnt', 'set', 'fdt', 'txt'])
+ALLOWED_EXTENSIONS = set([x.replace('.','') for x in SUPPORTED_EXTENSIONS]) # This should be an endpoint
 
 
 def allowed_file(filename):
@@ -91,9 +91,6 @@ def load_rules():
     if request.method == 'POST':
         data = load_files()
         return render_template("load_rules.html", rules=data)
-        
-
-            
             # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
     return render_template("load_rules.html")

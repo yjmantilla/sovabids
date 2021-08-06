@@ -142,7 +142,9 @@ def get_files(
 
 app.bind_entrypoint(api)
 
+def main(entry='sovarpc:app',port=5000,debug=False):
+    import uvicorn
+    uvicorn.run(entry, port=port, debug=debug, access_log=False)
 
 if __name__ == '__main__':
-    import uvicorn
-    uvicorn.run('sovarpc:app', port=5000, debug=True, access_log=False)
+    main(port=5100)

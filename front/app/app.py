@@ -3,11 +3,22 @@ import re
 from werkzeug.utils import secure_filename
 import json
 from sovabids.settings import SUPPORTED_EXTENSIONS # This should be deprecated in the future, all should go through the endpoints
+#from sovabids.sovarpc import main as main_sovabids
+import urllib.parse as urlp
 import yaml
+import posixpath
 
 from flask import Flask, flash, request, redirect, render_template, session
 # from flask.sesions import Sesions
 
+
+
+# importing the requests library
+import requests
+  
+# api-endpoint
+SOVABIDS_URL = posixpath.join("http://127.0.0.1:5100",'api','sovabids')
+  
 
 app=Flask(__name__)
 # Sesions(app)
@@ -26,7 +37,9 @@ if not os.path.isdir(UPLOAD_FOLDER):
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config["CACHE_TYPE"] = "null"
-
+# session['filelist'] = []
+# session['mappings'] = []
+# session['rules'] = {}
 # Allowed extension you can set your own
 ALLOWED_EXTENSIONS = set([x.replace('.','') for x in SUPPORTED_EXTENSIONS]) # This should be an endpoint
 
@@ -50,7 +63,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def allowed_file_rules(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'yaml'
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ['yaml','txt','yml']
 
 def load_files():
     if 'file' not in request.files:
@@ -87,7 +100,10 @@ def upload_file():
         # https://developer.mozilla.org/en-US/docs/Web/API/File/webkitRelativePath
         # https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
         for file in files:
-            if file and allowed_file(file.filename):
+            if file :#and allowed_file(file.filename):
+                    #accept files, since some eeg formats need sidecars...
+                    #we could include all possible sidecar formats too but may mess up stuff
+                    # keep like this for now
                 #app.logger.info(file.__dict__)
                 #useful when cannot debug https://stackoverflow.com/questions/2675028/list-attributes-of-an-object
                 fileparts = splitall(file.filename)
@@ -97,7 +113,7 @@ def upload_file():
                 abs_nested_dir = os.path.join(app.config['UPLOAD_FOLDER'],rel_nested_dir)
                 os.makedirs(abs_nested_dir,exist_ok=True)
                 file.save(os.path.join(abs_nested_dir, filename))
-                filenames.append(os.path.join(rel_nested_dir,filename))
+                filenames.append(os.path.join(rel_nested_dir,filename).replace('\\','/'))
         return render_template('exclude_files.html', filenames=filenames)
 
     else:
@@ -106,12 +122,38 @@ def upload_file():
 @app.route("/exclude", methods=['POST', 'GET'])
 def exclude():
     if request.method == "POST":
-        filenames = os.listdir(app.config['UPLOAD_FOLDER'])
-        exclude = request.form.getlist('records')
-        for filename in filenames:
-            if filename not in exclude:
-                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        filenames = os.listdir(app.config['UPLOAD_FOLDER'])
+
+        data = {                
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "get_files",
+        "params": {
+            "rules": {'non-bids':{'eeg_extension':'.vhdr'}},
+            "path": app.config['UPLOAD_FOLDER'].replace('\\','/')
+            }
+        }
+        
+        #app.logger.info('sovarequest:{}'.format(data))
+        # sending get request and saving the response as response object
+        urltail='get_files'
+        sovaurl=posixpath.join(SOVABIDS_URL,'get_files')#urlp.urljoin(SOVABIDS_URL,urltail)
+        response = requests.post(url = sovaurl, data = json.dumps(data))
+        #app.logger.info('sovaurl:{}'.format(sovaurl))
+
+        filelist = json.loads(response.content.decode())['result']
+        filelist = [x.replace('\\','/').replace(app.config['UPLOAD_FOLDER'].replace('\\','/')+'/','') for x in filelist]
+        #app.logger.info('filelist : {}'.format(filelist))
+        #filelist = os.listdir(app.config['UPLOAD_FOLDER'])
+        include = request.form.getlist('records')
+        # for filename in filenames:
+        #     if filename not in include:
+        #         os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        #filenames = os.listdir(app.config['UPLOAD_FOLDER'])
+        #app.logger.info('include: {}'.format(include))
+
+        filenames = [x for x in filelist if x in include]
+        #app.logger.info('finalist : {}'.format(filenames))
+        session['filelist']=filenames
         return render_template('files.html', filenames=filenames)
     else:
         return render_template('exclude_files.html')
@@ -121,8 +163,6 @@ def load_rules():
     if request.method == 'POST':
         data = load_files()
         return render_template("load_rules.html", rules=data)
-            # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
     return render_template("load_rules.html")
 
 @app.route("/edit-rules", methods=['POST', 'GET'])
@@ -134,8 +174,7 @@ def edit_rules():
 @app.route("/individual_rules", methods=['POST', 'GET'])
 @app.route("/individual_rules/<key>", methods=['POST', 'GET'])
 def individual_rules(key=None):
-    filenames = os.listdir(app.config['UPLOAD_FOLDER'])
-    files = dict(enumerate(filenames))
+    files = dict(enumerate(session.get('filelist',[])))
     if key:
         rules = json.dumps(session['general_rules'], indent=4)
         if request.method == 'POST':
@@ -160,4 +199,10 @@ def individual_rules(key=None):
 
 
 if __name__ == "__main__":
+    #from multiprocessing import Process
+    #p = Process(target=main_sovabids, args=('app:main_sovabids',5100,))
+    #p.start()
+    #p.join()
+    # sovabids must be running on another terminal (couldnt get multiprocess to run)
+    # http://127.0.0.1:5100
     app.run(host='127.0.0.1',port=5000,debug=True,threaded=True)

@@ -16,9 +16,9 @@ app.secret_key = "secret key"
 # app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # Get current path
-path = os.getcwd()
+path = os.path.dirname(os.path.realpath(__file__))#os.getcwd()
 # file Upload
-UPLOAD_FOLDER = os.path.join(path, 'uploads')
+UPLOAD_FOLDER = os.path.join(path, '_uploads')
 
 # Make directory if uploads is not exists
 if not os.path.isdir(UPLOAD_FOLDER):
@@ -30,6 +30,21 @@ app.config["CACHE_TYPE"] = "null"
 # Allowed extension you can set your own
 ALLOWED_EXTENSIONS = set([x.replace('.','') for x in SUPPORTED_EXTENSIONS]) # This should be an endpoint
 
+def splitall(path):
+    """https://www.oreilly.com/library/view/python-cookbook/0596001673/ch04s16.html"""
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path: # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -58,16 +73,31 @@ def index():
 @app.route('/upload', methods=['POST', 'GET'])
 def upload_file():
     if request.method == 'POST':
+        #print(request.files)
         if 'files[]' not in request.files:
-            flash('No file part')
+            flash('No Files')
             return redirect(request.url)
         files = request.files.getlist('files[]')
         filenames = []
+        #https://stackoverflow.com/questions/5826286/how-do-i-use-google-chrome-11s-upload-folder-feature-in-my-own-code/5849341#5849341
+        #https://stackoverflow.com/questions/3590058/does-html5-allow-drag-drop-upload-of-folders-or-a-folder-tree
+        # Some comments say it wont get all the files?
+        # https://stackoverflow.com/a/53058574
+        # https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Releases/50#files_and_directories
+        # https://developer.mozilla.org/en-US/docs/Web/API/File/webkitRelativePath
+        # https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
         for file in files:
             if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                filenames.append(filename)
+                #app.logger.info(file.__dict__)
+                #useful when cannot debug https://stackoverflow.com/questions/2675028/list-attributes-of-an-object
+                fileparts = splitall(file.filename)
+                filename = fileparts.pop()# filename is the last, after this fileparts wont have the filename
+                filename = secure_filename(filename)
+                rel_nested_dir = os.path.join(*fileparts)
+                abs_nested_dir = os.path.join(app.config['UPLOAD_FOLDER'],rel_nested_dir)
+                os.makedirs(abs_nested_dir,exist_ok=True)
+                file.save(os.path.join(abs_nested_dir, filename))
+                filenames.append(os.path.join(rel_nested_dir,filename))
         return render_template('exclude_files.html', filenames=filenames)
 
     else:

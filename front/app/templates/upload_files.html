@@ -23,7 +23,9 @@
 	<form method="post" action="" enctype="multipart/form-data">
 		<dl>
 			<p>
-				<input type="file" id="file" class= "inputfile" name="files[]" multiple="true" autocomplete="off" required>
+				<!-- <input type="file" id="file" class= "inputfile" name="files[]" multiple="true" autocomplete="off" required> -->
+				<input type="file" id="file" name="files[]" webkitdirectory directory multiple/>
+
 				<label  for = "file"> 
 					
 					Select the files to convert

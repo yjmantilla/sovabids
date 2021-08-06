@@ -1,7 +1,7 @@
 # test files
 
 front/app/media/
-front/app/uploads/
+front/app/_uploads/
 
 src/
 _data/

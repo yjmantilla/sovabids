@@ -13,7 +13,7 @@ from pandas import read_csv
 from traceback import format_exc
 
 from sovabids.settings import NULL_VALUES,SUPPORTED_EXTENSIONS
-from sovabids.files import get_files
+from sovabids.files import _get_files
 from sovabids.dicts import deep_merge_N
 from sovabids.parsers import parse_from_regex,parse_from_placeholder
 from sovabids.bids import update_dataset_description
@@ -53,6 +53,46 @@ def get_info_from_path(path,rules_):
     rules = deep_merge_N([rules,patterns_extracted])
     return rules
 
+def get_files(source_path,rules):
+    """Recursively scan the directory for valid files, returning a list with the full-paths to each.
+    
+    The valid files are given by the 'non-bids.eeg_extension' rule. See the "Rules File Schema".
+
+    Parameters
+    ----------
+
+    source_path : str
+        The path we want to obtain the files from.
+    rules : str|dict
+        The path to the rules file, or the rules dictionary.
+
+    Returns
+    -------
+
+    filepaths : list of str
+        A list containing the path to each valid file in the source_path.
+    """
+    rules_ = load_rules(rules)
+
+    if isinstance(source_path,str):
+
+        # Generate all files
+        try:
+            extensions = rules_['non-bids']['eeg_extension']
+        except:
+            extensions = deepcopy(SUPPORTED_EXTENSIONS)
+
+        if isinstance(extensions,str):
+            extensions = [extensions]
+
+        # append dot to extensions if missing
+        extensions = [x if x[0]=='.' else '.'+x for x in extensions]
+
+        filepaths = _get_files(source_path)
+        filepaths = [x for x in filepaths if os.path.splitext(x)[1] in extensions]
+    else:
+        raise ValueError('The source_path should be str.')
+    return filepaths
 def load_rules(rules_):
     """Load rules if given a path, bypass if given a dict.
 
@@ -74,7 +114,7 @@ def load_rules(rules_):
     return deepcopy(rules_)
 
 def apply_rules_to_single_file(f,rules_,bids_path,write=False,preview=False,logger=None):
-    """Apply rule to a single file.
+    """Apply rules to a single file.
 
     Parameters
     ----------
@@ -161,7 +201,7 @@ def apply_rules_to_single_file(f,rules_,bids_path,write=False,preview=False,logg
                 max_samples = min(10,raw.last_samp)
                 tmax = max_samples/raw.info['sfreq']
                 raw.crop(tmax=tmax)
-                orig_files = get_files(bids_path.root)
+                orig_files = _get_files(bids_path.root)
                 write_raw_bids(raw, bids_path=bids_path,overwrite=True,format='BrainVision',allow_preload=True,verbose=False)
             else:
             # These lines are taken from mne_bids.write
@@ -246,7 +286,7 @@ def apply_rules_to_single_file(f,rules_,bids_path,write=False,preview=False,logg
     
     # CLEAN FILES IF NOT WRITE
     if not write and preview:
-        new_files = get_files(bids_path.root)
+        new_files = _get_files(bids_path.root)
         new_files = list(set(new_files)-set(orig_files))
         for filename in new_files:
             if os.path.exists(filename): os.remove(filename)
@@ -260,8 +300,9 @@ def apply_rules(source_path,bids_path,rules_,mapping_path=''):
     Parameters
     ----------
 
-    source_path : str
-        The path with the files we want to convert to bids.
+    source_path : str | list of str
+        If str, the path with the files we want to convert to bids.
+        If list of str with the paths of the files we want to convert (ie the output of get_files).
     bids_path : str
         The path we want the converted files in.
     rules_ : str|dict
@@ -277,20 +318,13 @@ def apply_rules(source_path,bids_path,rules_,mapping_path=''):
         A dictionary following: {'General': rules given,'Individual':list of mapping dictionaries for each file}
     """
     rules_ = load_rules(rules_)
-    # Generate all files
-    try:
-        extensions = rules_['non-bids']['eeg_extension']
-    except:
-        extensions = deepcopy(SUPPORTED_EXTENSIONS)
 
-    if isinstance(extensions,str):
-        extensions = [extensions]
-
-    # append dot to extensions if missing
-    extensions = [x if x[0]=='.' else '.'+x for x in extensions]
-
-    filepaths = get_files(source_path)
-    filepaths = [x for x in filepaths if os.path.splitext(x)[1] in extensions]
+    if isinstance(source_path,str):
+        filepaths = get_files(source_path,rules_)
+    elif isinstance(source_path,list) and len(source_path)!= 0 and isinstance(source_path[0],str):
+        filepaths = deepcopy(source_path)
+    else:
+        raise ValueError('The source_path should be either str or a non-empty list of str.')
 
     #%% BIDS CONVERSION
     all_mappings = []

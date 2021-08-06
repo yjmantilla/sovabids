@@ -3,7 +3,7 @@
 import os
 from pandas import read_csv
 import shutil
-from sovabids.files import download,get_files
+from sovabids.files import download,_get_files
 from sovabids.misc import get_num_digits
 from sovabids.parsers import parse_from_regex
 import mne
@@ -38,7 +38,7 @@ def lemon_prepare():
 
     # Generate all filepaths
 
-    filepaths = get_files(root_path)
+    filepaths = _get_files(root_path)
 
 
     # Label Correction
@@ -69,7 +69,7 @@ def lemon_prepare():
             if not new in not_tars_ids: # skip already prepared files
                 shutil.unpack_archive(file,root_path)
                 olddir = os.path.join(root_path,old)
-                subject_files = get_files(olddir)
+                subject_files = _get_files(olddir)
                 for subfile in subject_files:   # fix sub-id
                     new_path = subfile.replace(old,new)
                     dir,_ = os.path.split(new_path)
@@ -99,7 +99,7 @@ def lemon_bidscoin_prepare(src_path):
 
     os.makedirs(bidscoin_input_path,exist_ok=True)
 
-    files = get_files(root_path)
+    files = _get_files(root_path)
     files = [x for x in files if x.split('.')[-1] in ['eeg','vmrk','vhdr'] ]
 
     files_out = []

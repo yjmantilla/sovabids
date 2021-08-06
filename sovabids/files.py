@@ -2,7 +2,7 @@
 import os
 import requests
 
-def get_files(root_path):
+def _get_files(root_path):
     """Recursively scan the directory for files, returning a list with the full-paths to each.
     
     Parameters

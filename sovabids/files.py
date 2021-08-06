@@ -1,7 +1,7 @@
 """Module with file utilities."""
 import os
 import requests
-
+import yaml
 def _get_files(root_path):
     """Recursively scan the directory for files, returning a list with the full-paths to each.
     
@@ -22,6 +22,23 @@ def _get_files(root_path):
         for name in files:
             filepaths.append(os.path.join(root, name))
     return filepaths
+
+def _write_yaml(path,dictionary):
+    """Write a yaml file based on the dictionary to the specified path.
+
+    Parameters
+    ----------
+    path : str
+        Full path to the yaml file to be written.
+    dictionary : dict
+        The dictionary to be written.
+    """
+    outputfolder,outputname = os.path.split(path)
+    os.makedirs(outputfolder,exist_ok=True)
+    full_path = os.path.join(outputfolder,outputname)
+
+    with open(full_path, 'w') as outfile:
+        yaml.dump(dictionary, outfile, default_flow_style=False)
 
 
 

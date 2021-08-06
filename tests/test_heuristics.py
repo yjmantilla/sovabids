@@ -1,8 +1,8 @@
 from sovabids.heuristics import from_io_example
 try:
-    from .test_bids import dummy_dataset
-except ImportError:
     from test_bids import dummy_dataset
+except ImportError:
+    from .test_bids import dummy_dataset
 
 
 def test_from_io_example():

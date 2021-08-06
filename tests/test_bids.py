@@ -138,7 +138,8 @@ def dummy_dataset(pattern_type='custom',write=True,mode='python'):
             }
         })
         response = client.post("/api/v1/sovabids/apply_rules",data=request )
-        file_mappings = json.loads(response.content.decode())['result']
+        file_mappings = json.loads(response.content.decode())
+        file_mappings=file_mappings['result']
         mappings_path = os.path.join(bids_path,'code','sovabids','mappings.yml')
 
     individuals=file_mappings['Individual']
@@ -165,6 +166,7 @@ def dummy_dataset(pattern_type='custom',write=True,mode='python'):
 
             response = client.post("/api/v1/sovabids/convert_them",data=request)
             print('okrpc')
+    return individuals
 def test_dummy_dataset():
     dummy_dataset('custom',write=True,mode='rpc')
     dummy_dataset('regex',write=True,mode='rpc')

@@ -1,3 +1,7 @@
+"""Heuristics Module
+
+Functions should return a dictionary.
+"""
 from sovabids.parsers import parse_path_pattern_from_entities
 from sovabids.parsers import parse_entities_from_bidspath
 
@@ -13,9 +17,11 @@ def from_io_example(sourcepath,targetpath):
 
     Returns
     -------
-    str :
-        The path pattern in placeholder format.
+    dict :
+        {
+            'pattern': The path pattern in placeholder format.
+        }
     """
     bids_entities=parse_entities_from_bidspath(targetpath)
     pattern = parse_path_pattern_from_entities(sourcepath,bids_entities)
-    return pattern 
+    return {'pattern':pattern}

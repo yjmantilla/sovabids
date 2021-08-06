@@ -5,9 +5,10 @@ from bidscoin.bidsmapper import bidsmapper
 import os
 import shutil
 from sovabids.schemas import get_sova2coin_bidsmap
-from sovabids.files import get_files
+from sovabids.files import _get_files
 from sovabids.settings import REPO_PATH
-from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset,_modify_entities_of_placeholder_pattern
+from sovabids.parsers import _modify_entities_of_placeholder_pattern
+from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset
 import yaml
 
 def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
@@ -62,7 +63,7 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
       make_dummy_dataset(DATASET=dataset+'_input',NSUBS=3,NTASKS=2,NSESSIONS=2,NACQS=1,NRUNS=2,PATTERN=pat,ROOT=source_path)
 
 
-    files = get_files(source_path)
+    files = _get_files(source_path)
     any_vhdr = Path([x for x in files if '.vhdr' in x][0])
     any_not_vhdr = Path([x for x in files if '.vhdr' not in x][0])
 

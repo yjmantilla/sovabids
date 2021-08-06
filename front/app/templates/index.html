@@ -2,12 +2,31 @@
 {% set active_page = "index" %}
 
 {% block content %}
-<p>
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. In auctor nunc ac elit ultrices convallis. Donec ac maximus odio. Suspendisse ac ornare purus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Ut at lectus quis elit consectetur sagittis. Aenean et ante semper, semper dui sit amet, egestas turpis. Aenean elementum nulla in velit posuere, ut efficitur lectus ultrices.
-
-Aliquam scelerisque velit nec est maximus, sit amet ultricies enim vulputate. In a egestas lacus. Suspendisse hendrerit consequat lectus ac scelerisque. Nunc tempus purus sit amet risus convallis, a feugiat mauris hendrerit. Nam feugiat accumsan est nec suscipit. Phasellus eget arcu euismod odio scelerisque bibendum. Pellentesque fermentum interdum orci, sed pharetra nibh imperdiet sit amet. Nullam consequat blandit turpis in tempus. Quisque ante ipsum, laoreet eleifend sem sed, egestas accumsan justo. In varius urna lorem, sed ornare purus aliquam eget. Nunc scelerisque nibh porta, luctus massa vitae, finibus nibh. Maecenas vitae elit porta, feugiat orci id, finibus tellus. Sed feugiat metus quis dapibus interdum.
-
-Ut sagittis scelerisque ipsum, at mollis libero posuere sit amet. Nullam lacinia sit amet dui et tincidunt. Nullam quam nisl, dignissim blandit nisl vel, tempor pretium quam. Sed in metus mattis, efficitur nisl non, hendrerit sapien. Etiam purus lectus, cursus sit amet quam quis, molestie mattis lorem. Maecenas tincidunt nulla ac viverra mollis. Curabitur cursus nec risus ac tincidunt. Aliquam sed scelerisque ante, at varius nisl. Vivamus scelerisque, orci sit amet sagittis elementum, leo purus vulputate elit, non bibendum metus ligula ac lectus. Cras tortor metus, imperdiet id lectus a, vehicula aliquam elit.
-</p>
+<h1 id="sovabids">sovabids</h1>
+<p><a href="https://sovabids.readthedocs.io/">Visit the documentation</a></p>
+<ul>
+<li>sovabids is a python package for automating eeg2bids conversion.</li>
+<li><dl>
+sovabids can be used through:
+<dd><ol style="list-style-type: lower-alpha">
+<li>its python API</li>
+<li>its CLI entry points.</li>
+<li>its JSON-RPC entry points (needs a server running the backend).</li>
+</ol>
+</dd>
+</dl></li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<dl>
+<dt>The main elements of sovabids are:</dt>
+<dd><ul>
+<li>A source path with the original dataset.</li>
+<li>A bids path that will be the output path of the conversion.</li>
+<li>A rules file that configures how the conversion is done from the general perspective.</li>
+<li>A mapping file that encodes how the conversion is performed to each individual file of the dataset.</li>
+</ul>
+</dd>
+</dl>
+<p><img src="https://mermaid.ink/svg/eyJjb2RlIjoiZ3JhcGggTFJcbiAgICBTPlwiU291cmNlIHBhdGhcIl1cbiAgICBCPlwiQmlkcyBwYXRoXCJdXG4gICAgUj5cIlJ1bGVzIGZpbGVcIl1cbiAgICBBUigoXCJBcHBseSBSdWxlc1wiKSlcbiAgICBNPlwiTWFwcGluZ3MgZmlsZVwiXVxuICAgIENUKChcIkNvbnZlcnQgVGhlbVwiKSlcbiAgICBPWyhcIkNvbnZlcnRlZCBkYXRhc2V0XCIpXVxuICAgIFMgLS0-IEFSXG4gICAgQiAtLT4gQVJcbiAgICBSIC0tPiBBUlxuICAgIEFSIC0tPiBNXG4gICAgTSAtLT4gQ1RcbiAgICBDVCAtLT4gT1xuICAiLCJtZXJtYWlkIjp7InRoZW1lIjoiZm9yZXN0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2UsImF1dG9TeW5jIjp0cnVlLCJ1cGRhdGVEaWFncmFtIjpmYWxzZX0" alt="image" /></p>
 
 {% endblock %}

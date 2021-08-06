@@ -19,7 +19,10 @@ sovabids
 
 * sovabids is a python package for automating eeg2bids conversion. 
 
-* sovabids can be used through its python API or through its cli entry points.
+* sovabids can be used through: 
+   a. its python API
+   b. its CLI entry points.
+   c. its JSON-RPC entry points (needs a server running the backend).
 
 Architecture
 ------------

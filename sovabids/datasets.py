@@ -123,14 +123,15 @@ def lemon_bidscoin_prepare(src_path):
 def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%run%',
     DATASET = 'DUMMY',
     NSUBS = 2,
+    NSESSIONS = 2,
     NTASKS = 2,
     NACQS = 2,
     NRUNS = 2,
-    NSESSIONS = 2,
     NCHANNELS = 2,
     SFREQ = 200,
     STOP = 10,
     NUMEVENTS = 10,
+    PREFIXES = {'subject':'SU','session':'SE','task':'TA','acquisition':'AC','run':'RU'},
     ROOT=None):
     """Create a dummy dataset given some parameters.
     
@@ -143,14 +144,14 @@ def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%r
         Name of the dataset.
     NSUBS : int, optional
         Number of subjects.
+    NSESSIONS : int, optional
+        Number of sessions.
     NTASKS : int, optional
         Number of tasks.
     NACQS : int, optional
         Number of acquisitions.
     NRUNS : int, optional
         Number of runs.
-    NSESSIONS : int, optional
-        Number of sessions.
     NCHANNELS : int, optional
         Number of channels.
     SFREQ : float, optional
@@ -159,6 +160,9 @@ def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%r
         Time duration of the data in seconds.
     NUMEVENTS : int, optional
         Number of events along the duration.
+    PREFIXES : dict, optional
+        Dictionary with the following keys:'subject', 'session', 'task' and 'acquisition'.
+        The values are the corresponding prefix. RUN is not present because it has to be a number.
     ROOT : str, optional
         Path where the files will be generated.
         If None, the _data subdir will be used.
@@ -174,19 +178,19 @@ def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%r
 
 
     sub_zeros = get_num_digits(NSUBS)
-    subs = [ str(x).zfill(sub_zeros) for x in range(NSUBS)]
+    subs = [ PREFIXES['subject']+ str(x).zfill(sub_zeros) for x in range(NSUBS)]
 
     task_zeros = get_num_digits(NTASKS)
-    tasks = [ str(x).zfill(task_zeros) for x in range(NTASKS)]
+    tasks = [ PREFIXES['task']+str(x).zfill(task_zeros) for x in range(NTASKS)]
 
     run_zeros = get_num_digits(NRUNS)
-    runs = [ str(x).zfill(run_zeros) for x in range(NRUNS)]
+    runs = [str(x).zfill(run_zeros) for x in range(NRUNS)]
 
     ses_zeros = get_num_digits(NSESSIONS)
-    sessions = [ str(x).zfill(ses_zeros) for x in range(NSESSIONS)]
+    sessions = [ PREFIXES['session']+str(x).zfill(ses_zeros) for x in range(NSESSIONS)]
 
     acq_zeros = get_num_digits(NACQS)
-    acquisitions = [ str(x).zfill(acq_zeros) for x in range(NACQS)]
+    acquisitions = [ PREFIXES['acquisition']+str(x).zfill(acq_zeros) for x in range(NACQS)]
 
     # Create some dummy metadata
     n_channels = NCHANNELS

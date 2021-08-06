@@ -1,7 +1,6 @@
 """Module with parser utilities."""
 import re
 from copy import deepcopy
-from sovabids.datasets import _modify_entities_of_placeholder_pattern
 from sovabids.misc import flat_paren_counter
 from sovabids.dicts import deep_merge_N,nested_notation_to_tree
 
@@ -137,6 +136,34 @@ def parse_entity_from_bidspath(path,entity,mode='r2l'):
     value = re.search('%s(.*?)%s' % ('-', '_'), little_path,).group(1)
 
     return value
+
+def _modify_entities_of_placeholder_pattern(pattern,mode='append'):
+    """Convert between sovabids entities pattern notation and the shorter notation.
+    
+    The shorter notation is:
+    %dataset%, %task%, %session%, %subject%, %run%, %acquisition%
+    
+    Parameters
+    ----------
+    string : str
+        The pattern string to convert.
+    mode : str
+        Whether to append 'entities' or cut it. One of {'append','cut'}
+
+    Returns
+    -------
+    str
+        The converted pattern string.
+    """
+    if mode == 'append':
+        for keyword in ['%task%','%session%','%subject%','%run%','%acquisition%']:
+            pattern = pattern.replace(keyword,'%entities.'+keyword[1:])
+        pattern = pattern.replace('%dataset%','%dataset_description.Name%')
+    elif mode == 'cut':
+        for keyword in ['%task%','%session%','%subject%','%run%','%acquisition%']:
+            pattern = pattern.replace('%entities.'+keyword[1:],keyword)
+        pattern = pattern.replace('%dataset_description.Name%','%dataset%')
+    return pattern
 
 def parse_entities_from_bidspath(targetpath,entities=['sub','ses','task','acq','run'],mode='r2l'):
     """Get the bids entities from a bidspath.

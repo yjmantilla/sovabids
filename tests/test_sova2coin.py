@@ -7,7 +7,8 @@ import shutil
 from sovabids.schemas import get_sova2coin_bidsmap
 from sovabids.files import get_files
 from sovabids.settings import REPO_PATH
-from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset,_modify_entities_of_placeholder_pattern
+from sovabids.parsers import _modify_entities_of_placeholder_pattern
+from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset
 import yaml
 
 def test_sova2coin(dataset='dummy_bidscoin',noedit=True):

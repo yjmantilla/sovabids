@@ -7,10 +7,10 @@ import json
 
 from bids_validator import BIDSValidator
 
-from sovabids.parsers import placeholder_to_regex
+from sovabids.parsers import placeholder_to_regex,_modify_entities_of_placeholder_pattern
 from sovabids.rules import apply_rules,load_rules
 from sovabids.dicts import deep_merge_N
-from sovabids.datasets import make_dummy_dataset,_modify_entities_of_placeholder_pattern
+from sovabids.datasets import make_dummy_dataset
 from sovabids.convert import convert_them
 
 def dummy_dataset(pattern_type='custom',write=True,mode='python'):

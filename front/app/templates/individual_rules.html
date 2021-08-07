@@ -14,30 +14,31 @@
                     </label><br/>
                     {% endfor %}
             </ul>
-            <input name="form1" type="submit" value="Send">
+            <!-- <input name="form1" type="submit" value="Send"> -->
         </form>
     </div>
     <div class="">
         <div>
             <h2>Modifying rules file: {{ file }}</h2>
         </div>
-        <div>
-            <form method="post" action="" enctype="multipart/form-data">
-                <dl>
+        <!-- <div> -->
+            <!-- <form method="post" action="" enctype="multipart/form-data"> -->
+                <!-- <dl>
                     <p>
                         <input type="file" id="file" class= "inputfile" name="file" required>
                         <label  for = "file"> 
-                            Select the rules file or modify the following one:
+                            Modify the following mapping:
                         </label >
                     </p>
-                </dl>
-                <p>
+                </dl> -->
+                <!-- <p>
                     <input name="form2" type="submit" value="Submit">
-                </p>
-            </form>
-        </div>
+                </p> -->
+            <!-- </form> -->
+        <!-- </div> -->
         <div>
-            <form action="/individual_rules/{{ file }}" method="POST">
+            <!-- see https://stackoverflow.com/a/10644186/14068216 -->
+            <form method="POST">
                 <textarea name="rules" id="" cols="100" rows="30"> {{ rules }} </textarea>
                 <input name="form3" type="submit" value="Send">
             </form>

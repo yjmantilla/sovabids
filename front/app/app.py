@@ -30,12 +30,16 @@ app.secret_key = "secret key"
 path = os.path.dirname(os.path.realpath(__file__))#os.getcwd()
 # file Upload
 UPLOAD_FOLDER = os.path.join(path, '_uploads')
-
+CONV_FOLDER = os.path.join(path, '_convert')
+TEMP_FOLDER = os.path.join(path, '_temp')
 # Make directory if uploads is not exists
-if not os.path.isdir(UPLOAD_FOLDER):
-    os.mkdir(UPLOAD_FOLDER)
+for x in [UPLOAD_FOLDER,CONV_FOLDER,TEMP_FOLDER]:
+    if not os.path.isdir(x):
+        os.mkdir(x)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['CONV_FOLDER'] = CONV_FOLDER
+app.config['TEMP_FOLDER'] = TEMP_FOLDER
 app.config["CACHE_TYPE"] = "null"
 # session['filelist'] = []
 # session['mappings'] = []
@@ -165,6 +169,7 @@ def exclude():
         #app.logger.info('sovaurl:{}'.format(sovaurl))
 
         filelist = json.loads(response.content.decode())['result']
+        
         filelist = [x.replace('\\','/').replace(app.config['UPLOAD_FOLDER'].replace('\\','/')+'/','') for x in filelist]
         #app.logger.info('filelist : {}'.format(filelist))
         #filelist = os.listdir(app.config['UPLOAD_FOLDER'])
@@ -193,6 +198,32 @@ def load_rules():
 def edit_rules():
     if request.method == 'POST':
         session['general_rules'] = eval(request.form.get('rules'))
+
+        #Make mappings
+        urltail='apply_rules'
+
+        data = {
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": urltail,
+        "params": {
+            "file_list":[os.path.join(app.config['UPLOAD_FOLDER'],x) for x in session.get('filelist',[])],
+            "rules": session.get('general_rules',{}),
+            "bids_path": app.config['TEMP_FOLDER'].replace('\\','/'),
+            "mapping_path":''
+            }
+        }
+        
+        app.logger.info('sovarequest:{}'.format(data))
+        # sending get request and saving the response as response object
+        sovaurl=posixpath.join(SOVABIDS_URL,urltail)#urlp.urljoin(SOVABIDS_URL,urltail)
+        response = requests.post(url = sovaurl, data = json.dumps(data))
+        #app.logger.info('sovaurl:{}'.format(sovaurl))
+
+        result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
+        #app.logger.info('sovaresponse:{}'.format(result))
+        session['mappings'] = result['Individual']
+
         return redirect('individual_rules')
 
 @app.route("/individual_rules", methods=['POST', 'GET'])
@@ -202,10 +233,11 @@ def individual_rules(key=None):
     if key:
         rules = json.dumps(session['general_rules'], indent=4)
         if request.method == 'POST':
-            if "form2" in request.form:
-                data = eval(load_files())
-                rules = json.dumps(data, indent=4)
+            # if "form2" in request.form:
+            #     data = eval(load_files())
+            #     rules = json.dumps(data, indent=4)
             if "form3" in request.form:
+                # see https://stackoverflow.com/a/10644186/14068216
                 ind_rules = session.get('ind_rules', [])
                 rules = eval(request.form.get('rules'))
                 data = {'file': key, 'rules': rules}
@@ -213,10 +245,12 @@ def individual_rules(key=None):
                     ind_rules.append(data)
                 session['ind_rules'] = ind_rules
                 print(session['ind_rules'])
+                session['mappings'][int(key)] = rules
+                app.logger.info('edition:{}'.format(session['mappings'][int(key)]))
                 return render_template("individual_rules.html", files=files)
 
-        return render_template("individual_rules.html", files=files, file=files[int(key)], rules=rules) 
-      
+        #return render_template("individual_rules.html", files=files, file=files[int(key)], rules=rules) 
+        return render_template("individual_rules.html", files=files, file=files[int(key)], rules=json.dumps(session.get('mappings',[])[int(key)], indent=4))
     return render_template("individual_rules.html", files=files)
     
 

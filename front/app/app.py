@@ -223,6 +223,7 @@ def edit_rules():
         result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
         #app.logger.info('sovaresponse:{}'.format(result))
         session['mappings'] = result['Individual']
+        session['template'] = result['General']
 
         return redirect('individual_rules')
 
@@ -254,7 +255,33 @@ def individual_rules(key=None):
     return render_template("individual_rules.html", files=files)
     
 
+@app.route("/convert", methods=['POST', 'GET'])
+def convert():
+    if request.method == 'POST':
+        urltail='convert_them'
 
+        data = {
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": urltail,
+        "params": {
+            "general":session.get('template',{}) ,
+            "individual": session.get('mappings',[]),
+            }
+        }
+        
+        app.logger.info('sovarequest:{}'.format(data))
+        # sending get request and saving the response as response object
+        sovaurl=posixpath.join(SOVABIDS_URL,urltail)#urlp.urljoin(SOVABIDS_URL,urltail)
+        response = requests.post(url = sovaurl, data = json.dumps(data))
+        #app.logger.info('sovaurl:{}'.format(sovaurl))
+
+        result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
+        app.logger.info('sovaconvert:{}'.format(result))
+        
+        #data = load_files()
+        return render_template("ready.html")
+    return render_template("convert.html")
 
 if __name__ == "__main__":
     #from multiprocessing import Process

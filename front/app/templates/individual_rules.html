@@ -37,10 +37,21 @@
             <!-- </form> -->
         <!-- </div> -->
         <div>
-            <!-- see https://stackoverflow.com/a/10644186/14068216 -->
+            <!-- see https://stackoverflow.com/a/10644186/14068216 , it works for saving the edition-->
             <form method="POST">
                 <textarea name="rules" id="" cols="100" rows="30"> {{ rules }} </textarea>
                 <input name="form3" type="submit" value="Send">
+            </form>
+            
+        </div>
+        <div>
+            <div>
+                <h2>Ready?</h2>
+            </div>
+    
+            <!-- see https://stackoverflow.com/a/10644186/14068216 , it works for saving the edition-->
+            <form  action="/convert" method="GET">
+                <input name="next" type="submit" value="Next">
             </form>
             
         </div>

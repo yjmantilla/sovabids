@@ -78,7 +78,7 @@ def load_files():
     if file and allowed_file_rules(file.filename):
         app.logger.info('rule file:{}'.format(file))
         filename = secure_filename(file.filename)
-        fpath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        fpath = os.path.join(app.config['TEMP_FOLDER'], filename)
         file.save(fpath)
         data = {                
         "jsonrpc": "2.0",
@@ -209,7 +209,7 @@ def edit_rules():
         "params": {
             "file_list":[os.path.join(app.config['UPLOAD_FOLDER'],x) for x in session.get('filelist',[])],
             "rules": session.get('general_rules',{}),
-            "bids_path": app.config['TEMP_FOLDER'].replace('\\','/'),
+            "bids_path": app.config['CONV_FOLDER'].replace('\\','/'),
             "mapping_path":''
             }
         }

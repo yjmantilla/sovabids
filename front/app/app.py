@@ -72,10 +72,34 @@ def load_files():
     file = request.files.get('file')
 
     if file and allowed_file_rules(file.filename):
+        app.logger.info('rule file:{}'.format(file))
         filename = secure_filename(file.filename)
-        file = open(filename)
-        data = yaml.load(file, Loader=yaml.FullLoader)
-        data =json.dumps(data, indent=4)
+        fpath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(fpath)
+        data = {                
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "load_rules",
+        "params": {
+            "rules_path": fpath}
+        }
+        
+
+        app.logger.info('sovarequest:{}'.format(data))
+        # sending get request and saving the response as response object
+        sovaurl=posixpath.join(SOVABIDS_URL,'load_rules')#urlp.urljoin(SOVABIDS_URL,urltail)
+        response = requests.post(url = sovaurl, data = json.dumps(data))
+        #app.logger.info('sovaurl:{}'.format(sovaurl))
+
+        app.logger.info('sovaresponse:{}'.format(response))
+
+        rules = json.loads(response.content.decode())
+        rules = rules['result']
+        data = json.dumps(rules, indent=4)
+        # filename = secure_filename(file.filename)
+        # file = open(filename)
+        # data = yaml.load(file, Loader=yaml.FullLoader)
+        # data =json.dumps(data, indent=4)
         return data
 
 

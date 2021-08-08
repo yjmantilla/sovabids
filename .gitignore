@@ -2,6 +2,9 @@
 
 front/app/media/
 front/app/_uploads/
+front/app/_convert/
+front/app/uploads/
+
 
 src/
 _data/

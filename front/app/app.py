@@ -8,13 +8,15 @@ import urllib.parse as urlp
 import yaml
 import posixpath
 
-from flask import Flask, flash, request, redirect, render_template, session
+from flask import Flask, flash, request, redirect, render_template, session, jsonify, make_response
 # from flask.sesions import Sesions
 
 
 
 # importing the requests library
 import requests
+
+from download_zip import download_files
   
 # api-endpoint
 SOVABIDS_URL = posixpath.join("http://127.0.0.1:5100",'api','sovabids')
@@ -282,6 +284,29 @@ def convert():
         #data = load_files()
         return render_template("ready.html")
     return render_template("convert.html")
+
+@app.route("/download", methods=["GET"])
+def download():
+    files = getListOfFiles(app.config['CONV_FOLDER'])
+    return download_files(files)
+    # return make_response(jsonify({'data': files}))
+
+def getListOfFiles(dirName):
+    # create a list of file and sub directories 
+    # names in the given directory 
+    listOfFile = os.listdir(dirName)
+    allFiles = list()
+    # Iterate over all the entries
+    for entry in listOfFile:
+        # Create full path
+        fullPath = os.path.join(dirName, entry)
+        # If entry is a directory then get the list of files in this directory 
+        if os.path.isdir(fullPath):
+            allFiles = allFiles + getListOfFiles(fullPath)
+        else:
+            allFiles.append(fullPath)
+                
+    return allFiles
 
 if __name__ == "__main__":
     #from multiprocessing import Process

@@ -119,7 +119,7 @@ def save_rules(
 def save_mappings(
     path:str,
     general:dict,
-    individual:list
+    individual:List[dict]
     ) -> None:
     try:
         data = {'General':general,'Individual':individual}

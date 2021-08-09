@@ -260,6 +260,29 @@ def individual_rules(key=None):
 @app.route("/convert", methods=['POST', 'GET'])
 def convert():
     if request.method == 'POST':
+        # save edited mappings
+        urltail='save_mappings'
+
+        data = {
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": urltail,
+        "params": {
+            "general":session.get('template',{}) ,
+            "individual": session.get('mappings',[]),
+            "path": os.path.join(app.config['CONV_FOLDER'].replace('\\','/'),'code','sovabids','mappings.yml')
+            }
+        }
+        
+        app.logger.info('sovarequest:{}'.format(data))
+        # sending get request and saving the response as response object
+        sovaurl=posixpath.join(SOVABIDS_URL,urltail)#urlp.urljoin(SOVABIDS_URL,urltail)
+        response = requests.post(url = sovaurl, data = json.dumps(data))
+        #app.logger.info('sovaurl:{}'.format(sovaurl))
+
+        result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
+
+
         urltail='convert_them'
 
         data = {

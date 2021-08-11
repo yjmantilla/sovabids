@@ -126,7 +126,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,lo
     bids_path : str
         Path to the bids directory
     write : bool, optional
-        Whether to write output or not.
+        Whether to write the converted files to disk or not.
     preview : bool, optional
         Whether to return a dictionary with a "preview" of the conversion.
         This dict will have the same schema as the "Mapping File Schema" but may have flat versions of its fields.
@@ -296,7 +296,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,lo
         del rules__['dataset_description']
     return mapping,preview
 def apply_rules(source_path,bids_path,rules,mapping_path=''):
-    """Apply rules to all the accepted files in a source path.
+    """Apply rules to a set of files.
 
     Parameters
     ----------
@@ -315,8 +315,11 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
     Returns
     -------
 
-    mapping_data : dict
-        A dictionary following: {'General': rules given,'Individual':list of mapping dictionaries for each file}
+    dict :
+        A dictionary following: {
+                                    'General': rules given,
+                                    'Individual':list of mapping dictionaries for each file
+                                }
     """
     rules_ = load_rules(rules)
 

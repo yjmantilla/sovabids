@@ -9,12 +9,20 @@ from sovabids.loggers import setup_logging
 from sovabids.settings import SECTION_STRING
 
 def convert_them(mappings_input):
-    """Converts eeg files to bids according to the mapping given.
+    """Convert eeg files to bids according to the mappings given.
 
     Parameters
     ----------
     mappings_input : str|dict
-        The path to the mapping file or the mapping dictionary.
+        The path to the mapping file or the mapping dictionary:
+            {
+                'General': dict with the general rules,
+                'Individual':  list of dicts with the individual mappings of each file.
+            }
+    
+    Returns
+    -------
+    None
     """
 
     # Loading Mappings

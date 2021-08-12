@@ -207,7 +207,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python'):
     validator = BIDSValidator()
     filepaths = [x['IO']['target'].replace(bids_path,'') for x in individuals]
     for filepath in filepaths:
-        assert validator.is_bids(filepath)
+        assert validator.is_bids(filepath),'{} is not a valid bids path'.format(filepath)
     if write:
         if mode=='python':
             convert_them(file_mappings)
@@ -229,11 +229,11 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python'):
     return individuals
 def test_dummy_dataset():
     dummy_dataset('placeholder',write=True)
-    # dummy_dataset('regex',write=True)
-    # dummy_dataset('placeholder',write=True,mode='cli')
-    # dummy_dataset('regex',write=True,mode='cli')
-    # dummy_dataset('placeholder',write=True,mode='rpc')
-    # dummy_dataset('regex',write=True,mode='rpc')
+    dummy_dataset('regex',write=True)
+    dummy_dataset('placeholder',write=True,mode='cli')
+    dummy_dataset('regex',write=True,mode='cli')
+    dummy_dataset('placeholder',write=True,mode='rpc')
+    dummy_dataset('regex',write=True,mode='rpc')
 
 #TODO: A test for incremental conversion
 if __name__ == '__main__':

@@ -13,7 +13,7 @@ from sovabids.dicts import deep_merge_N
 from sovabids.datasets import make_dummy_dataset
 from sovabids.convert import convert_them
 
-def dummy_dataset(pattern_type='custom',write=True,mode='python'):
+def dummy_dataset(pattern_type='placeholder',write=True,mode='python'):
 
     # Getting current file path and then going to _data directory
     this_dir = os.path.dirname(__file__)
@@ -228,12 +228,12 @@ def dummy_dataset(pattern_type='custom',write=True,mode='python'):
             print('okrpc')
     return individuals
 def test_dummy_dataset():
-    dummy_dataset('custom',write=True,mode='rpc')
-    dummy_dataset('regex',write=True,mode='rpc')
-    dummy_dataset('custom',write=True)
-    dummy_dataset('regex',write=True)
-    dummy_dataset('custom',write=True,mode='cli')
-    dummy_dataset('regex',write=True,mode='cli')
+    dummy_dataset('placeholder',write=True)
+    # dummy_dataset('regex',write=True)
+    # dummy_dataset('placeholder',write=True,mode='cli')
+    # dummy_dataset('regex',write=True,mode='cli')
+    # dummy_dataset('placeholder',write=True,mode='rpc')
+    # dummy_dataset('regex',write=True,mode='rpc')
 
 #TODO: A test for incremental conversion
 if __name__ == '__main__':

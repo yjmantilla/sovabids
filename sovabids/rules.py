@@ -34,9 +34,9 @@ def get_info_from_path(path,rules):
 
     See the Rules File Schema documentation for the expected schema of the dictionary.
     """
-    rules__ = deepcopy(rules)
+    rules_copy = deepcopy(rules)
     patterns_extracted = {}
-    non_bids_rules = rules__.get('non-bids',{})
+    non_bids_rules = rules_copy.get('non-bids',{})
     if 'path_analysis' in non_bids_rules:
         path_analysis = non_bids_rules['path_analysis']
         pattern = path_analysis.get('pattern','')
@@ -49,9 +49,9 @@ def get_info_from_path(path,rules):
             patterns_extracted = parse_from_placeholder(path,pattern,encloser,matcher)
     if 'ignore' in patterns_extracted:
         del patterns_extracted['ignore']
-    # this what needed because using rules__.update(patterns_extracted) replaced it all
-    rules__ = deep_merge_N([rules__,patterns_extracted])
-    return rules__
+    # this what needed because using rules_copy.update(patterns_extracted) replaced it all
+    rules_copy = deep_merge_N([rules_copy,patterns_extracted])
+    return rules_copy
 
 def get_files(source_path,rules):
     """Recursively scan the directory for valid files, returning a list with the full-paths to each.
@@ -144,28 +144,28 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,lo
     """
     f = file
     if not isinstance(rules,dict):
-        rules__ = load_rules(rules)
+        rules_copy = load_rules(rules)
     else:
-        rules__ = deepcopy(rules) #otherwise the deepmerge wont update the values for a new file
+        rules_copy = deepcopy(rules) #otherwise the deepmerge wont update the values for a new file
     # Upon reading RAW MNE makes the assumptions
     raw = read_raw(f,preload=False)#not write)
 
     # First get info from path
 
-    rules__ = get_info_from_path(f,rules__)
+    rules_copy = get_info_from_path(f,rules_copy)
 
     # Apply Rules
-    assert 'entities' in rules__
-    entities = rules__['entities'] # this key has the same fields as BIDSPath constructor argument
+    assert 'entities' in rules_copy
+    entities = rules_copy['entities'] # this key has the same fields as BIDSPath constructor argument
 
-    if 'sidecar' in rules__:
-        sidecar = rules__['sidecar']
+    if 'sidecar' in rules_copy:
+        sidecar = rules_copy['sidecar']
         if "PowerLineFrequency" in sidecar and sidecar['PowerLineFrequency'] not in NULL_VALUES:
             raw.info['line_freq'] = sidecar["PowerLineFrequency"]  # specify power line frequency as required by BIDS
         # Should we try to infer the line frequency automatically from the psd?
 
-    if 'channels' in rules__:
-        channels = rules__['channels']
+    if 'channels' in rules_copy:
+        channels = rules_copy['channels']
         if "name" in channels:
             raw.rename_channels(channels['name'])
         if "type" in channels: # We overwrite whatever channel types we can on the files
@@ -176,8 +176,8 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,lo
             types = {key:_get_ch_type_mapping(fro='bids',to='mne').get(val,None) for key,val in types.items() }
             valid_types = {k: v for k, v in types.items() if v is not None}
             raw.set_channel_types(valid_types)
-    if 'non-bids' in rules__:
-        non_bids = rules__['non-bids']
+    if 'non-bids' in rules_copy:
+        non_bids = rules_copy['non-bids']
         if "code_execution" in non_bids:
             if isinstance(non_bids["code_execution"],str):
                 non_bids["code_execution"] = [non_bids["code_execution"]]
@@ -220,10 +220,10 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,lo
                 bids_path = bids_path.update(
                     datatype=datatype, suffix=datatype, extension=ext)
 
-        update_dataset_description(rules__.get('dataset_description',{}),bids_path.root,do_not_create=write)
-        rules__['IO']={}
-        rules__['IO']['target'] = bids_path.fpath.__str__()
-        rules__['IO']['source'] = f
+        update_dataset_description(rules_copy.get('dataset_description',{}),bids_path.root,do_not_create=write)
+        rules_copy['IO']={}
+        rules_copy['IO']['target'] = bids_path.fpath.__str__()
+        rules_copy['IO']['source'] = f
 
         # POST-PROCESSING. For stuff easier to overwrite in the files rather than in the raw object
         # Rules that need to be applied to the result of mne-bids
@@ -234,7 +234,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,lo
                 sidecar_path = bids_path.copy().update(datatype='eeg',suffix='eeg', extension='.json')
                 with open(sidecar_path.fpath) as f:
                     sidecarjson = json.load(f)
-                    sidecar = rules__.get('sidecar',{})
+                    sidecar = rules_copy.get('sidecar',{})
                     #TODO Validate the sidecar rules so as not to include dangerous stuff??
                     sidecarjson.update(sidecar)
                     sidecarjson.update({'RecordingDuration':real_times}) # needed if preview,since we crop
@@ -248,7 +248,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,lo
             channels_path = bids_path.copy().update(datatype='eeg',suffix='channels', extension='.tsv')
             try:
                 channels_table = read_csv (channels_path.fpath, sep = '\t',dtype=str,keep_default_na=False,na_filter=False,na_values=[],true_values=[],false_values=[])
-                channels_rules = rules__.get('channels',{})
+                channels_rules = rules_copy.get('channels',{})
                 if 'type' in channels_rules: # types are post since they are not saved in vhdr (are they in edf??)
                     for ch_name,ch_type in channels_rules['type'].items():
                         channels_table.loc[(channels_table.name==str(ch_name)),'type'] = ch_type
@@ -266,8 +266,8 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,lo
             if os.path.isfile(daset_path):
                 with open(daset_path) as f:
                     #dasetjson = json.load(f)
-                    #daset = rules__.get('dataset_description',{}) #TODO more work needed to overwrite, specifically fields which arent pure strings like authors
-                    #TODO Validate the sidecar rules__ so as not to include dangerous stuff??
+                    #daset = rules_copy.get('dataset_description',{}) #TODO more work needed to overwrite, specifically fields which arent pure strings like authors
+                    #TODO Validate the sidecar rules_copy so as not to include dangerous stuff??
                     #dasetjson.update(daset)
                     # maybe include an overwrite rule
                     #if write:
@@ -277,8 +277,8 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,lo
                 dasetjson =''
     if preview:
         preview = {
-            'IO' : rules__.get('IO',{}),
-            'entities':rules__.get('entities',{}),
+            'IO' : rules_copy.get('IO',{}),
+            'entities':rules_copy.get('entities',{}),
             'dataset_description':dasetjson,
             'sidecar':sidecarjson,
             'channels':channels,
@@ -291,9 +291,9 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,lo
         new_files = list(set(new_files)-set(orig_files))
         for filename in new_files:
             if os.path.exists(filename): os.remove(filename)
-    mapping = rules__
-    if 'dataset_description' in rules__:
-        del rules__['dataset_description']
+    mapping = rules_copy
+    if 'dataset_description' in rules_copy:
+        del rules_copy['dataset_description']
     return mapping,preview
 def apply_rules(source_path,bids_path,rules,mapping_path=''):
     """Apply rules to a set of files.
@@ -333,8 +333,8 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
     #%% BIDS CONVERSION
     all_mappings = []
     for f in filepaths:
-        rules__,_ = apply_rules_to_single_file(f,rules_,bids_path,write=False,preview=False) #TODO There should be a way to control how verbose this is
-        all_mappings.append(rules__)
+        rules_copy,_ = apply_rules_to_single_file(f,rules_,bids_path,write=False,preview=False) #TODO There should be a way to control how verbose this is
+        all_mappings.append(rules_copy)
     
     outputfolder,outputname = os.path.split(mapping_path)
     if outputname == '':

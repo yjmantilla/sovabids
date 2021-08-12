@@ -1,6 +1,33 @@
 """Module with dictionary utilities."""
 
 import collections
+from functools import reduce
+def deep_get(dictionary, keys, default=None,sep='.'):
+    """Safe nested dictionary getter.
+
+    Parameters
+    ----------
+    dictionary: dict
+        The dictionary from which to get the value.
+    keys: str
+        The nested keys using sep as separator.
+        Ie: 'person.name.lastname' if `sep`='.'
+    default: object
+        The default value to return if the key is not found
+    sep : str, optional
+        The separator to indicate nesting/branching/hierarchy.
+
+    Returns
+    -------
+
+    object:
+        The value of the required key. `default` if the key is not found.
+
+    Notes
+    -----
+    Taken from https://stackoverflow.com/a/46890853/14068216
+    """
+    return reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default, keys.split(sep), dictionary)
 
 def deep_merge_N(l):
     """Merge the list of dictionaries, such that the latest one has the greater precedence.

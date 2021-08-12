@@ -29,7 +29,7 @@ def setup_logging(log_file=None, debug=False):
     Returns
     -------
     logging.logger:
-        The logger. None if no log_file provided.
+        The logger.
 
     
     Notes

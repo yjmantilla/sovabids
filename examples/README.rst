@@ -11,14 +11,10 @@ If you plan to run these examples you should install sovabids in the following w
 Installation for using examples
 -------------------------------
 
-To preserve that folder structure is advised to install sovabids in editable mode:
+To be able to run all examples the easiest is to install sovabids in the 'advanced-usage' mode,
+this helps to preserve that folder structure of the repository and install any additional dependencies needed for the examples.
 
-.. code-block:: bash
-
-   git clone https://github.com/yjmantilla/sovabids.git
-   cd sovabids
-   pip install -e .
-
+See the `introduction section of the docs <https://sovabids.readthedocs.io/en/latest/README.html#installation-for-advanced-usage>`_ for the installation instructions.
 
 .. contents:: Contents
    :local:

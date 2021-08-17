@@ -46,8 +46,21 @@ Installation
    cd sovabids
    pip install .
 
-Installation for development
-----------------------------
+Installation for advanced usage
+-------------------------------
+
+Run
+
+.. code-block:: bash
+
+   git clone https://github.com/yjmantilla/sovabids.git
+   cd sovabids
+   pip install -r requirements-dev.txt
+
+Notice  that the requirements-dev.txt file already has the sovabids installation using editable mode.
+
+Installation for developers
+---------------------------
 
 Fork this repo and run:
 

@@ -11,6 +11,8 @@ using both the preliminary GUI tool.
 
 * Download the Lemon dataset if you have not already done so.
 
+If you need to download the files, you can use:
+
 .. code-block:: bash
 
     python -c 'from sovabids.datasets import lemon_prepare; lemon_prepare()'
@@ -19,9 +21,10 @@ This will download the lemon dataset inside the '_data' subfolder of the cloned 
 
 * Run front/app/app.py in a terminal (the front folder is the one in the root of the cloned sovabids repository.)
 
-In example, run:
+Assuming you are at the root of the sovabids cloned repository, you can use:
 
 .. code-block:: bash
+
     python front/app/app.py
 
 

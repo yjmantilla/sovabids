@@ -6,7 +6,7 @@ import posixpath
 from flask import Flask, flash, request, redirect, render_template, session, jsonify, make_response
 import requests
 from download_zip import download_files
-
+import shutil
 # api-endpoint
 SOVABIDS_URL = posixpath.join("http://127.0.0.1:5100",'api','sovabids')
   
@@ -24,6 +24,15 @@ UPLOAD_FOLDER = os.path.join(path, '_uploads')
 CONV_FOLDER = os.path.join(path, '_convert')
 TEMP_FOLDER = os.path.join(path, '_temp')
 # Make directory if uploads is not exists
+
+# Clean server dirs
+dirs = [UPLOAD_FOLDER,CONV_FOLDER,TEMP_FOLDER]
+for dir in dirs:
+    try:
+        shutil.rmtree(dir)
+    except:
+        pass
+
 for x in [UPLOAD_FOLDER,CONV_FOLDER,TEMP_FOLDER]:
     if not os.path.isdir(x):
         os.mkdir(x)

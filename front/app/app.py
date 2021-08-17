@@ -321,16 +321,20 @@ def getListOfFiles(dirName):
     return allFiles
 
 
-if __name__ == "__main__":
-    from sovabids.sovarpc import main as back
-    from sovabids.sovarpc import app as sovapp
+from sovabids.sovarpc import main as back
+from sovabids.sovarpc import app as sovapp
 
-    import threading
+import threading
 
-    def front(app):
-        app.run(host='127.0.0.1',port=5000)#debug=True,threaded=True)
+def front(app):
+    app.run(host='127.0.0.1',port=5000)#debug=True,threaded=True)
 
+def main():
     t1 = threading.Thread(target=front,args=(app,))
     t2 = threading.Thread(target=back,args=(sovapp,5100))
     t1.start()
     t2.start()
+
+if __name__ == "__main__":
+    main()
+

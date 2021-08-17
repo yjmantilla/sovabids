@@ -69,10 +69,10 @@ bids_path= os.path.abspath(os.path.join(REPO_PATH,'_data','lemon_bids')) # The o
 rules_path = os.path.abspath(os.path.join(REPO_PATH,'examples','lemon_example_rules.yml')) # The rules file that setups the rule for conversion
 mapping_path = os.path.abspath(os.path.join(bids_path,'code','sovabids','mappings.yml')) # The mapping file that will hold the results of applying the rules to each file
 
-print('source_path:',source_path)
-print('bids_path:', bids_path)
-print('rules_path:',rules_path)
-print('mapping_path:',mapping_path)
+print('source_path:',source_path.replace(REPO_PATH,''))
+print('bids_path:', bids_path.replace(REPO_PATH,''))
+print('rules_path:',rules_path.replace(REPO_PATH,''))
+print('mapping_path:',mapping_path.replace(REPO_PATH,''))
 
 #%%
 # Cleaning the output directory
@@ -177,10 +177,10 @@ bids_path= os.path.abspath(os.path.join(REPO_PATH,'_data','lemon_bids_cli')) # T
 rules_path = os.path.abspath(os.path.join(REPO_PATH,'examples','lemon_example_rules.yml')) # The rules file that setups the rule for conversion
 mapping_path = os.path.abspath(os.path.join(bids_path,'code','sovabids','mappings.yml')) # The mapping file that will hold the results of applying the rules to each file
 
-print('source_path:',source_path)
-print('bids_path:', bids_path)
-print('rules_path:',rules_path)
-print('mapping_path:',mapping_path)
+print('source_path:',source_path.replace(REPO_PATH,''))
+print('bids_path:', bids_path.replace(REPO_PATH,''))
+print('rules_path:',rules_path.replace(REPO_PATH,''))
+print('mapping_path:',mapping_path.replace(REPO_PATH,''))
 
 try:
     shutil.rmtree(bids_path)

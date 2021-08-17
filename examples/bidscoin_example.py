@@ -93,11 +93,11 @@ code_path = os.path.join(bids_path,'code','bidscoin')
 rules_path = os.path.join(code_path,'rules.yml')
 template_path = os.path.join(code_path,'template.yml')
 bidsmap_path  = os.path.join( code_path,'bidsmap.yaml')
-print('source_path:',source_path)
-print('bids_path:', bids_path)
-print('rules_path:',rules_path)
-print('template_path:',template_path)
-print('bidsmap_path:',bidsmap_path)
+print('source_path:',source_path.replace(data_dir,''))
+print('bids_path:', bids_path.replace(data_dir,''))
+print('rules_path:',rules_path.replace(data_dir,''))
+print('template_path:',template_path.replace(data_dir,''))
+print('bidsmap_path:',bidsmap_path.replace(data_dir,''))
 
 #%%
 # Cleaning the output directory

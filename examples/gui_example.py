@@ -5,7 +5,7 @@ GUI example with LEMON dataset
 ===============================
 
 This example illustrates the use of ``sovabids`` on the `LEMON dataset <http://fcon_1000.projects.nitrc.org/indi/retro/MPI_LEMON.html>`_
-using both the preliminary GUI tool.
+using the preliminary GUI tool.
 
 * Install Sovabids in advanced-usage mode (`see here <https://sovabids.readthedocs.io/en/latest/README.html#installation-for-advanced-usage>`_)
 
@@ -50,7 +50,7 @@ You will need to wait while the files are copied to the server. Since these are 
 
 .. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_4_deselect.png
 
-Here we won't skip any files. Notice though that there are non-eeg files (.csv and tar.gz ) mixed in there. Sovabids will skipp them automatically.
+Here we won't skip any files. Notice though that there are non-eeg files (.csv and tar.gz ) mixed in there. Sovabids will skip them automatically.
 
 Click Send.
 

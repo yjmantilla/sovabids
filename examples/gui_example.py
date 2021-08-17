@@ -39,7 +39,7 @@ This is an introductory page of the GUI.
 
 Click 'Choose Files', select the lemon folder (inside the _data subdirectory) and click submit.
 
-.. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_3_click_upload.png
+.. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_3_upload.png
 
 You will need to wait while the files are copied to the server. Since these are heavy eegs, it will take a bit.
 

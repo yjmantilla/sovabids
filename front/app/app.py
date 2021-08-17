@@ -26,6 +26,8 @@ TEMP_FOLDER = os.path.join(path, '_temp')
 # Make directory if uploads is not exists
 
 # Clean server dirs
+# TODO: This cleaning should probably be done everytime a new dataset is uploaded
+# that is, upon a request gui/upload as a post is made
 dirs = [UPLOAD_FOLDER,CONV_FOLDER,TEMP_FOLDER]
 for dir in dirs:
     try:

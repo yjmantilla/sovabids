@@ -1,23 +1,12 @@
 import os
-import re
 from werkzeug.utils import secure_filename
 import json
 from sovabids.settings import SUPPORTED_EXTENSIONS # This should be deprecated in the future, all should go through the endpoints
-#from sovabids.sovarpc import main as main_sovabids
-import urllib.parse as urlp
-import yaml
 import posixpath
-
 from flask import Flask, flash, request, redirect, render_template, session, jsonify, make_response
-# from flask.sesions import Sesions
-
-
-
-# importing the requests library
 import requests
-
 from download_zip import download_files
-  
+
 # api-endpoint
 SOVABIDS_URL = posixpath.join("http://127.0.0.1:5100",'api','sovabids')
   
@@ -93,7 +82,7 @@ def load_files():
 
         app.logger.info('sovarequest:{}'.format(data))
         # sending get request and saving the response as response object
-        sovaurl=posixpath.join(SOVABIDS_URL,'load_rules')#urlp.urljoin(SOVABIDS_URL,urltail)
+        sovaurl=posixpath.join(SOVABIDS_URL,'load_rules')
         response = requests.post(url = sovaurl, data = json.dumps(data))
         #app.logger.info('sovaurl:{}'.format(sovaurl))
 
@@ -166,7 +155,7 @@ def exclude():
         #app.logger.info('sovarequest:{}'.format(data))
         # sending get request and saving the response as response object
         urltail='get_files'
-        sovaurl=posixpath.join(SOVABIDS_URL,'get_files')#urlp.urljoin(SOVABIDS_URL,urltail)
+        sovaurl=posixpath.join(SOVABIDS_URL,'get_files')
         response = requests.post(url = sovaurl, data = json.dumps(data))
         #app.logger.info('sovaurl:{}'.format(sovaurl))
 
@@ -218,7 +207,7 @@ def edit_rules():
         
         app.logger.info('sovarequest:{}'.format(data))
         # sending get request and saving the response as response object
-        sovaurl=posixpath.join(SOVABIDS_URL,urltail)#urlp.urljoin(SOVABIDS_URL,urltail)
+        sovaurl=posixpath.join(SOVABIDS_URL,urltail)
         response = requests.post(url = sovaurl, data = json.dumps(data))
         #app.logger.info('sovaurl:{}'.format(sovaurl))
 
@@ -276,7 +265,7 @@ def convert():
         
         app.logger.info('sovarequest:{}'.format(data))
         # sending get request and saving the response as response object
-        sovaurl=posixpath.join(SOVABIDS_URL,urltail)#urlp.urljoin(SOVABIDS_URL,urltail)
+        sovaurl=posixpath.join(SOVABIDS_URL,urltail)
         response = requests.post(url = sovaurl, data = json.dumps(data))
         #app.logger.info('sovaurl:{}'.format(sovaurl))
 
@@ -297,7 +286,7 @@ def convert():
         
         app.logger.info('sovarequest:{}'.format(data))
         # sending get request and saving the response as response object
-        sovaurl=posixpath.join(SOVABIDS_URL,urltail)#urlp.urljoin(SOVABIDS_URL,urltail)
+        sovaurl=posixpath.join(SOVABIDS_URL,urltail)
         response = requests.post(url = sovaurl, data = json.dumps(data))
         #app.logger.info('sovaurl:{}'.format(sovaurl))
 
@@ -331,11 +320,17 @@ def getListOfFiles(dirName):
                 
     return allFiles
 
+
 if __name__ == "__main__":
-    #from multiprocessing import Process
-    #p = Process(target=main_sovabids, args=('app:main_sovabids',5100,))
-    #p.start()
-    #p.join()
-    # sovabids must be running on another terminal (couldnt get multiprocess to run)
-    # http://127.0.0.1:5100
-    app.run(host='127.0.0.1',port=5000,debug=True,threaded=True)
+    from sovabids.sovarpc import main as back
+    from sovabids.sovarpc import app as sovapp
+
+    import threading
+
+    def front(app):
+        app.run(host='127.0.0.1',port=5000)#debug=True,threaded=True)
+
+    t1 = threading.Thread(target=front,args=(app,))
+    t2 = threading.Thread(target=back,args=(sovapp,5100))
+    t1.start()
+    t2.start()

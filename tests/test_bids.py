@@ -226,7 +226,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python'):
             response = client.post("/api/sovabids/convert_them",data=request)
 
             print('okrpc')
-    return individuals
+    return file_mappings
 def test_dummy_dataset():
     dummy_dataset('placeholder',write=True)
     dummy_dataset('regex',write=True)

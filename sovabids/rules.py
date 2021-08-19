@@ -21,6 +21,7 @@ from sovabids.parsers import parse_from_regex,parse_from_placeholder
 from sovabids.bids import update_dataset_description
 from sovabids.loggers import setup_logging
 from sovabids.settings import SECTION_STRING
+from sovabids.heuristics import from_io_example
 
 import logging
 LOGGER = logging.getLogger(__name__)
@@ -44,8 +45,18 @@ def get_info_from_path(path,rules):
     rules_copy = deepcopy(rules)
     patterns_extracted = {}
 
+    # Check first if we have an example-based conversion
+    target = deep_get(rules_copy,'non-bids.path_analysis.target',None)
+    source = deep_get(rules_copy,'non-bids.path_analysis.source',None)
+
+    if target is not None and source is not None:
+        # Example based path pattern
+        pattern = from_io_example(source,target).get('pattern',None)
+        rules_copy = deep_merge_N([rules_copy,{'non-bids':{'path_analysis':{'pattern':pattern}}}])
+
     pattern = deep_get(rules_copy,'non-bids.path_analysis.pattern',None)
     if pattern is None: # No path_patten rule
+        LOGGER.warning(f"Warning.No path pattern found.")
         return rules_copy
     else:
         fields = deep_get(rules_copy,'non-bids.path_analysis.fields',None)

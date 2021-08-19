@@ -28,7 +28,7 @@ def apply_rules(
     Parameters
     ----------
 
-    source_path : list of str
+    file_list : list of str
         List of str with the paths of the files we want to convert (ie the output of get_files).
     bids_path : str
         The path we want the converted files in.
@@ -93,12 +93,12 @@ def convert_them(
 def load_rules(
     rules_path: str,
 ) -> dict:
-    """Load rules if given a path.
+    """Load rules from a path.
 
     Parameters
     ----------
     
-    rules : str
+    rules_path : str
         The path to the rules file.
 
     Returns
@@ -213,12 +213,13 @@ def save_mappings(
 
     Parameters
     ----------
+
+    path : str
+        The full-path (including filename) where to save the mappings as yaml.
     general: dict
         The general rules dictionary.
     individual: list of dict
         A list containing the mapping dictionary of each file.
-    path : str
-        The full-path (including filename) where to save the mappings as yaml.
 
     Returns
     -------

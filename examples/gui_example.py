@@ -7,10 +7,13 @@ GUI example with LEMON dataset
 This example illustrates the use of ``sovabids`` on the `LEMON dataset <http://fcon_1000.projects.nitrc.org/indi/retro/MPI_LEMON.html>`_
 using the preliminary GUI tool.
 
-* Install Sovabids in advanced-usage mode (`see here <https://sovabids.readthedocs.io/en/latest/README.html#installation-for-advanced-usage>`_)
+Install Sovabids in advanced-usage mode
+---------------------------------------
+(`see here <https://sovabids.readthedocs.io/en/latest/README.html#installation-for-advanced-usage>`_)
 
-* Download the Lemon dataset if you have not already done so.
-
+Download the Lemon dataset 
+-----------------------------
+(if you have not already done so)
 If you need to download the files, you can use:
 
 .. code-block:: bash
@@ -19,7 +22,9 @@ If you need to download the files, you can use:
 
 This will download the lemon dataset inside the '_data' subfolder of the cloned sovabids repository.
 
-* Run front/app/app.py in a terminal (the front folder is the one in the root of the cloned sovabids repository.)
+Run front/app/app.py in a terminal 
+----------------------------------
+(the front folder is the one in the root of the cloned sovabids repository.)
 
 Assuming you are at the root of the sovabids cloned repository, you can use:
 
@@ -28,17 +33,22 @@ Assuming you are at the root of the sovabids cloned repository, you can use:
     python front/app/app.py
 
 
-* Go to your browser at http://127.0.0.1:5000/ , you will see
+Go to your browser at http://127.0.0.1:5000/ 
+---------------------------------------------
+
+You will see:
 
 .. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_1_intro.png
 
 This is an introductory page of the GUI.
 
-* Click Upload Files
+Click Upload Files
+-------------------
 
 .. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_2_click_upload.png
 
-* Choose Files
+Choose Files
+--------------
 
 Click 'Choose Files', select the lemon folder (inside the _data subdirectory) and click submit.
 
@@ -46,7 +56,8 @@ Click 'Choose Files', select the lemon folder (inside the _data subdirectory) an
 
 You will need to wait while the files are copied to the server. Since these are heavy eegs, it will take a bit.
 
-* Deselect any files you want to skip:
+Deselect any files you want to skip
+------------------------------------
 
 .. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_4_deselect.png
 
@@ -54,14 +65,16 @@ Here we won't skip any files. Notice though that there are non-eeg files (.csv a
 
 Click Send.
 
-* Confirm detected eegs.
+Confirm detected eegs
+------------------------
 
 Sovabids will show the individual eegs found. Notice that since this is a brainvision dataset, sovabids lists the main files of this format (the .vhdr files) since the other ones (.eeg and .vmrk) are sidecars.
 
 .. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_5_detected.png
 
 
-* The rules files
+The rules files
+-----------------
 
 A suitable rules file is already at examples/lemon_example_rules.yml, you can upload that one.
 
@@ -82,7 +95,8 @@ Once ready, scroll down to find another submit and click it to continue.
 .. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_9_submit_rules.png
 
 
-* Edit individual mappings
+Edit individual mappings
+--------------------------
 
 You will now see a list of the eeg files, for each you can edit its mapping. At first you will see an empty text pane since no eeg file is chosen.
 
@@ -113,7 +127,8 @@ Once the mappings are ready, click next:
 .. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_16_mappings_ready.png
 
 
-* Proceed to the conversion
+Proceed to the conversion
+--------------------------
 
 Click on the button:
 
@@ -121,7 +136,8 @@ Click on the button:
 
 Once clicked it will take a while before the program finishes (a feedback information of the progress is not yet implemented on this preliminary GUI).
 
-* Save your conversion
+Save your conversion
+------------------------
 
 When the files are ready you will see:
 
@@ -135,7 +151,8 @@ When the download is ready, navigate to the chosen folder and decompress the fil
 
 .. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_20_converted_files.png
 
-* Inspect the sovabids logs and mappings
+Inspect the sovabids logs and mappings
+---------------------------------------
 
 Inside the code/sovabids subdirectory you will see the mappings and log files.
 

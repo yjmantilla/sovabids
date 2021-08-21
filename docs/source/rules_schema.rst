@@ -296,7 +296,98 @@ path_analysis
 
 Is used to infer information from the path. Any of the fields from the previous objects are supported as long they consist of a single simple value (anything that is a single number or string). The pattern is applied to every file that has the *eeg_extension* mentioned before.
 
-There are two ways to do the *path_analysis*, by a *regex pattern* or by a *placeholder pattern*.
+There are 3 ways to do the *path_analysis*, by *paired example*, by a *regex pattern* , or  by a *placeholder pattern*.
+
+paired example
+""""""""""""""
+
+This is the easiest way to use the *path_analysis* functionality. The idea is to provide a *(source,target)* example.
+
+The *source* would be the filepath of any of the files you want to convert.
+
+The *target* would be the filepath of where you expect the file to go following the bids standard.
+
+The schema we want to arrive at is :
+
+.. code-block:: yaml
+    
+    non-bids:
+        path_analysis:
+            source: source_path example
+            target: target_path example
+
+This will be explained better with an example, suppose this is the source filepath example you want to use: 
+
+.. code-block:: text
+
+    data/lemon/V001/resting/010002.vhdr
+
+You fabricate by yourself where do you want it to go following the bids standard:
+
+.. code-block:: text
+
+    data_bids/sub-010002/ses-001/eeg/sub-010002_ses-001_task-resting_eeg.vhdr
+
+Sovabids will try to infer the pattern from this example.
+
+.. warning::
+
+    Notice that we expect you to input a valid bids file as a target. That means the target you provide does follow the bids standard.
+
+.. warning::
+
+    Use the forward-slash as the path separator (``/``) in your path strings regardless of the symbol your OS uses. This is to avoid problems when reading strings. This applies to all of the modes of *path_analysis* :
+    paired example, regex patterns and placeholder patterns.
+
+So your *path_analysis* object is wrote in the *Rules File* as:
+
+.. code-block:: yaml
+    
+    non-bids:
+        path_analysis:
+            source : data/lemon/V001/resting/010002.vhdr
+            target : data_bids/sub-010002/ses-001/eeg/sub-010002_ses-001_task-resting_eeg.vhdr
+
+.. warning::
+
+    Examples and ambiguity:
+
+
+    Notice the provided (source,target) pair is not ambiguous. This means that the values for each bids entity only appear once in the provided strings.
+
+    An example of an ambiguous pair would be:
+
+    .. code-block:: text
+
+        source='data/lemon/session001/taskT001/010002.vhdr'
+        target='data_bids/sub-010002/ses-001/eeg/sub-010002_ses-001_task-T001_eeg.vhdr'
+
+    Here session '001' is contained inside task 'T001' so sovabids has trouble finding the pattern.
+
+    sovabids developers are planning to include the possibility of giving a list of (source,target) pairs to resolve ambiguity automatically.
+    But for now, this is not yet included.
+
+    Do note that the (source,target) example pair is fictional, you can give a non-ambiguous example you imagined by yourself. It does not have to be a real file.
+
+    Following the previous ambiguous example:
+
+    .. code-block:: text
+
+        source='data/lemon/session001/taskT001/010002.vhdr'
+        target='data_bids/sub-010002/ses-001/eeg/sub-010002_ses-001_task-T001_eeg.vhdr'
+
+
+    You could give the following fictional non-ambiguous example: 
+
+    .. code-block:: text
+
+        source='data/lemon/session009/taskT001/010002.vhdr'
+        target='data_bids/sub-010002/ses-009/eeg/sub-010002_ses-009_task-T001_eeg.vhdr'
+    
+    Where since 009 is not found in any other part of the string, it is non ambiguous.
+    
+    The session 009 may not actually exist on the dataset but for our purposes that does not matter.
+    We just care about finding a naming pattern here.
 
 regex pattern
 """""""""""""
@@ -349,10 +440,6 @@ Now you make your regex using capture groups and the forward-slash as the path s
 
 .. tip::
     The capture group (.+) is recommended. The dot will match any character (except line terminators) and the plus sign will match it 1 to unlimited times. Basically it will try to match the longest strings it can given the pattern you gave.
-
-.. warning::
-
-    Use the forward-slash as the path separator (``/``) in your pattern regardless of the symbol your OS uses. This is to avoid problems when reading strings. This applies both to regex patterns and placeholder patterns.
 
 .. warning::
     We need to escape the forward slash in the regex pattern so ``/`` becomes ``\/``.

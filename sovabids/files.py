@@ -23,22 +23,29 @@ def _get_files(root_path):
             filepaths.append(os.path.join(root, name))
     return filepaths
 
-def _write_yaml(path,dictionary):
+def _write_yaml(dictionary,path=None):
     """Write a yaml file based on the dictionary to the specified path.
 
     Parameters
     ----------
-    path : str
-        Full path to the yaml file to be written.
     dictionary : dict
         The dictionary to be written.
-    """
-    outputfolder,outputname = os.path.split(path)
-    os.makedirs(outputfolder,exist_ok=True)
-    full_path = os.path.join(outputfolder,outputname)
+    path : str | None
+        Full path to the yaml file to be written. If None, no file will be written.
 
-    with open(full_path, 'w') as outfile:
-        yaml.dump(dictionary, outfile, default_flow_style=False)
+    Returns
+    -------
+
+    str :
+        The dump version of the generated yaml document.
+    """
+    if path is not None:
+        outputfolder,outputname = os.path.split(path)
+        os.makedirs(outputfolder,exist_ok=True)
+        full_path = os.path.join(outputfolder,outputname)
+        with open(full_path, 'w') as outfile:
+            yaml.dump(dictionary, outfile, default_flow_style=False)
+    return yaml.dump(dictionary, default_flow_style=False)
 
 
 

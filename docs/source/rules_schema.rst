@@ -330,15 +330,6 @@ You fabricate by yourself where do you want it to go following the bids standard
 
 Sovabids will try to infer the pattern from this example.
 
-.. warning::
-
-    Notice that we expect you to input a valid bids file as a target. That means the target you provide does follow the bids standard.
-
-.. warning::
-
-    Use the forward-slash as the path separator (``/``) in your path strings regardless of the symbol your OS uses. This is to avoid problems when reading strings. This applies to all of the modes of *path_analysis* :
-    paired example, regex patterns and placeholder patterns.
-
 So your *path_analysis* object is wrote in the *Rules File* as:
 
 .. code-block:: yaml
@@ -347,6 +338,15 @@ So your *path_analysis* object is wrote in the *Rules File* as:
         path_analysis:
             source : data/lemon/V001/resting/010002.vhdr
             target : data_bids/sub-010002/ses-001/eeg/sub-010002_ses-001_task-resting_eeg.vhdr
+
+.. warning::
+
+    Notice that we expect you to input a valid bids file as a target. That means the target you provide does follow the bids standard.
+
+.. warning::
+
+    Use the forward-slash as the path separator (``/``) in your path strings regardless of the symbol your OS uses. This is to avoid problems when reading strings. This applies to all of the modes of *path_analysis* :
+    paired example, regex patterns and placeholder patterns.
 
 .. warning::
 

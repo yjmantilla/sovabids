@@ -26,7 +26,7 @@ sovabids
 
 .. warning::
 
-   Currently meeg2bids conversion is not supported, but this is a targeted feature.
+   Currently meg2bids conversion is not supported, but this is a targeted feature.
 
 Architecture
 ------------

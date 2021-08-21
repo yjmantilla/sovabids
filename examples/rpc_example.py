@@ -296,3 +296,16 @@ result = make_request(method,params)
 print_dir_tree(bids_path)
 
 print('LEMON CONVERSION FINISHED!')
+
+#%%
+# The ideal GUI for the designed API
+# ----------------------------------
+# Here is the GUI schematic we had in mind when we designed the API
+#  
+# .. image:: https://user-images.githubusercontent.com/36543115/125894264-9e1bd421-41e2-444b-adcb-ecf11e81d1a0.png
+#    :alt: Ideal GUI
+#  
+# .. warning::
+# 
+#    The only difference is that apply_rules will receive a list of the paths of the files we want to convert rather than a single input directory path
+#

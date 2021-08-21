@@ -198,7 +198,7 @@ def save_rules(
     """
 
     try:
-        fi._write_yaml(path,rules)
+        fi._write_yaml(rules,path)
     except:
         raise SaveError(data={'details': traceback.format_exc()})
     return
@@ -236,7 +236,7 @@ def save_mappings(
 
     try:
         data = {'General':general,'Individual':individual}
-        fi._write_yaml(path,data)
+        fi._write_yaml(data,path)
     except:
         raise SaveError(data={'details': traceback.format_exc()})
     return

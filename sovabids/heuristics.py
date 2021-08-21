@@ -10,6 +10,8 @@ from bids_validator import BIDSValidator
 def from_io_example(sourcepath,targetpath):
     """Get the path pattern from a source-target mapping example.
     
+    The name of the function means "from input-output example", as one provides an input and output pair of (source,target) paths.
+    
     Parameters
     ----------
     sourcepath : str

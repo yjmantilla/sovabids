@@ -24,6 +24,10 @@ sovabids
    b. its CLI entry points.
    c. its JSON-RPC entry points (needs a server running the backend).
 
+.. warning::
+
+   Currently meeg2bids conversion is not supported, but this is a targeted feature.
+
 Architecture
 ------------
 

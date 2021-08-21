@@ -13,6 +13,7 @@
 import os
 import sys
 from datetime import date
+import sovabids
 # sys.path.insert(0, os.path.abspath('.'))
 
 curdir = os.path.dirname(__file__)
@@ -26,6 +27,9 @@ author = "sovabids developers"
 _today = date.today()
 copyright = f"2021-{_today.year}, sovabids developers. Last updated {_today.isoformat()}"
 
+# The short X.Y version
+version = sovabids.__version__
+release = version
 
 # -- General configuration ---------------------------------------------------
 

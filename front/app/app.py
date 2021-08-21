@@ -1,12 +1,15 @@
 import os
+from types import TracebackType
 from werkzeug.utils import secure_filename
 import json
 from sovabids.settings import SUPPORTED_EXTENSIONS # This should be deprecated in the future, all should go through the endpoints
+from sovabids.dicts import deep_get # This should be deprecated in the future, all should go through the endpoints
 import posixpath
 from flask import Flask, flash, request, redirect, render_template, session, jsonify, make_response
 import requests
 from download_zip import download_files
 import shutil
+import copy
 # api-endpoint
 SOVABIDS_URL = posixpath.join("http://127.0.0.1:5100",'api','sovabids')
   
@@ -48,6 +51,13 @@ app.config["CACHE_TYPE"] = "null"
 # session['rules'] = {}
 # Allowed extension you can set your own
 ALLOWED_EXTENSIONS = set([x.replace('.','') for x in SUPPORTED_EXTENSIONS]) # This should be an endpoint
+
+def handle_error(result):
+    details = deep_get(result,'error.data.details')
+    result_no_details = copy.deepcopy(result)
+    del result_no_details['error']['data']
+    data = json.dumps(result_no_details,indent=4)
+    return render_template("error.html", error=data,details=details)
 
 def splitall(path):
     """https://www.oreilly.com/library/view/python-cookbook/0596001673/ch04s16.html"""
@@ -98,6 +108,9 @@ def load_files():
         #app.logger.info('sovaurl:{}'.format(sovaurl))
 
         app.logger.info('sovaresponse:{}'.format(response))
+        result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
+        if 'error' in result:
+            return handle_error(result)
 
         rules = json.loads(response.content.decode())
         rules = rules['result']
@@ -170,6 +183,11 @@ def exclude():
         response = requests.post(url = sovaurl, data = json.dumps(data))
         #app.logger.info('sovaurl:{}'.format(sovaurl))
 
+        app.logger.info('sovaresponse:{}'.format(response))
+        result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
+        if 'error' in result:
+            return handle_error(result)
+
         filelist = json.loads(response.content.decode())['result']
         
         filelist = [x.replace('\\','/').replace(app.config['UPLOAD_FOLDER'].replace('\\','/')+'/','') for x in filelist]
@@ -221,12 +239,13 @@ def edit_rules():
         sovaurl=posixpath.join(SOVABIDS_URL,urltail)
         response = requests.post(url = sovaurl, data = json.dumps(data))
         #app.logger.info('sovaurl:{}'.format(sovaurl))
-
+        
         result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
+        if 'error' in result:
+            return handle_error(result)
         #app.logger.info('sovaresponse:{}'.format(result))
         session['mappings'] = result['Individual']
         session['template'] = result['General']
-
         return redirect('individual_rules')
 
 @app.route("/individual_rules", methods=['POST', 'GET'])
@@ -282,6 +301,9 @@ def convert():
 
         result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
 
+        app.logger.info('sovaresponse:{}'.format(response))
+        if 'error' in result:
+            return handle_error(result)
 
         urltail='convert_them'
 
@@ -303,7 +325,11 @@ def convert():
 
         result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
         app.logger.info('sovaconvert:{}'.format(result))
-        
+
+        app.logger.info('sovaresponse:{}'.format(response))
+        if 'error' in result:
+            return handle_error(result)
+
         #data = load_files()
         return render_template("ready.html")
     return render_template("convert.html")
@@ -338,7 +364,7 @@ from sovabids.sovarpc import app as sovapp
 import threading
 
 def front(app):
-    app.run(host='127.0.0.1',port=5000)#debug=True,threaded=True)
+    app.run(host='127.0.0.1',port=5000)#,debug=True)#,threaded=True)
 
 def main():
     t1 = threading.Thread(target=front,args=(app,))

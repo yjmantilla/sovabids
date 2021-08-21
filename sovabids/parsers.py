@@ -245,3 +245,22 @@ def parse_path_pattern_from_entities(sourcepath,bids_entities):
     path = path[start:]
     return  path
 
+def find_bidsroot(path):
+    """Get the bidsroot from an absolute path describing a bids file inside a subject subfolder.
+
+    Parameters
+    ----------
+    path : str
+        The absolute path to any bids file inside a sub- folder.
+
+    Returns
+    -------
+
+    str :
+        The bidsroot absolute path.
+    """
+    sub = parse_entities_from_bidspath(path,entities=['sub'],mode='r2l')
+    index = path.find(sub['sub'])
+    #We know the bids root is the path up until that index minus some stuff
+    bidsroot = path[:index-4] #remove sub- prefix
+    return bidsroot

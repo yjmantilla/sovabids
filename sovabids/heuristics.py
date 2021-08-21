@@ -29,6 +29,7 @@ def from_io_example(sourcepath,targetpath):
     # of the entities he expects on a dictionary
     # In example:  source = 'data/lemon/V001/resting/010002.vhdr'
     # target = {'subject':'010002','task':'resting','session':'001'}
+    # With the currently implemented functions this is rather trivial. Is just a matter of exposing it.
     validator = BIDSValidator()
     # Find the root since we need it relative to the bidspath for the validator to work
     try:

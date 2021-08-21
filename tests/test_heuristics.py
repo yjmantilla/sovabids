@@ -57,6 +57,18 @@ def test_from_io_example():
     with pytest.raises(AssertionError):
         from_io_example(source,target)
 
+    source='data/lemon/session001/taskT001/010002.vhdr'
+    target='data_bids/sub-010002/ses-001/eeg/sub-010002_ses-001_task-T001_eeg.vhdr'
+
+
+    with pytest.raises(ValueError):
+        from_io_example(source,target)
+
+    source='data/lemon/session009/taskT001/010002.vhdr'
+    target='data_bids/sub-010002/ses-009/eeg/sub-010002_ses-009_task-T001_eeg.vhdr'
+
+    pattern = from_io_example(source,target)
+    assert pattern['pattern'] == 'session%entities.session%/task%entities.task%/%entities.subject%.vhdr'
     print('hallelujah')
 
 if __name__ == '__main__':

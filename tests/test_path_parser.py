@@ -18,7 +18,7 @@ For debugging:
 In example:
 >>> test_eegthresh(rej_matrix_tuple())
 """
-from sovabids.parsers import parse_from_placeholder,parse_from_regex
+from sovabids.parsers import parse_from_placeholder,parse_from_regex,find_bidsroot
 
 def test_parse_from_regex():
     string = r'Y:\code\sovabids\_data\lemon2\sub-010002\ses-001\resting\sub-010002.vhdr'
@@ -97,8 +97,12 @@ def test_parse_from_placeholder():
     result = parse_from_placeholder(string,path_pattern,matcher=matcher)
     assert result['entities']['subject'] == '010002.vhdr'
 
-
+def test_find_bidsroot():
+    path = 'y:\code\sovabids\_data\DUMMY\DUMMY_BIDS_placeholder_python\sub-SU0\ses-SE0\eeg\sub-SU0_ses-SE0_task-TA0_acq-AC0_run-0_eeg.vhdr'
+    bidsroot=find_bidsroot(path)
+    assert bidsroot=='y:\\code\\sovabids\\_data\\DUMMY\\DUMMY_BIDS_placeholder_python\\'
 if __name__ == '__main__':
     test_parse_from_regex()
     test_parse_from_placeholder()
+    test_find_bidsroot()
     print('ok')

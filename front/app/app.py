@@ -311,7 +311,7 @@ def convert():
 @app.route("/download", methods=["GET"])
 def download():
     files = getListOfFiles(app.config['CONV_FOLDER'])
-    return download_files(files)
+    return download_files(files,os.path.join(app.config['TEMP_FOLDER'],'the_zip.zip'))
     # return make_response(jsonify({'data': files}))
 
 def getListOfFiles(dirName):

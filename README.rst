@@ -136,7 +136,7 @@ sovabids is developed with the help of the following entities:
    <br/>
    <img src="https://www.udea.edu.co/wps/wcm/connect/udea/eba017e2-87fb-40c7-b7d8-6bb7d0e008ae/Logo_GRUNECO_R.jpg?MOD=AJPERES&CACHEID=ROOTWORKSPACE.Z18_L8L8H8C0LODDC0A6SSS2AD2GO4-eba017e2-87fb-40c7-b7d8-6bb7d0e008ae-l-x54eU" width="250">
    <br/>
-   <img src="https://github.com/NeuroDesk/vnm/blob/master/nif.png" width="250">
+   <img src="https://github.com/NeuroDesk/vnm/raw/master/nif.png" width="250">
    <br/>
    <img src="https://www.incf.org/sites/default/files/INCF_logo_with_tagline.png" width="250">
 

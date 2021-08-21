@@ -18,7 +18,11 @@ For debugging:
 In example:
 >>> test_eegthresh(rej_matrix_tuple())
 """
-from sovabids.parsers import parse_from_placeholder,parse_from_regex,find_bidsroot
+from sovabids.parsers import parse_from_placeholder
+from sovabids.parsers import parse_from_regex
+from sovabids.parsers import find_bidsroot
+from sovabids.parsers import parse_path_pattern_from_entities
+import pytest
 
 def test_parse_from_regex():
     string = r'Y:\code\sovabids\_data\lemon2\sub-010002\ses-001\resting\sub-010002.vhdr'
@@ -101,8 +105,24 @@ def test_find_bidsroot():
     path = 'y:\code\sovabids\_data\DUMMY\DUMMY_BIDS_placeholder_python\sub-SU0\ses-SE0\eeg\sub-SU0_ses-SE0_task-TA0_acq-AC0_run-0_eeg.vhdr'
     bidsroot=find_bidsroot(path)
     assert bidsroot=='y:\\code\\sovabids\\_data\\DUMMY\\DUMMY_BIDS_placeholder_python\\'
+
+def test_parse_path_pattern_from_entities():
+    
+    # ambiguous
+    with pytest.raises(ValueError):
+        source='data/lemon/sessionV001/task001/010002.vhdr'
+        entities = {'sub':'010002','task':'001','ses':'V001'}
+        parse_path_pattern_from_entities(source,entities)
+
+    # non-ambiguous
+    source='data/lemon/sessionV001/task009/010002.vhdr'
+    entities = {'sub':'010002','task':'009','ses':'V001'}
+    pattern =parse_path_pattern_from_entities(source,entities)
+    assert pattern == 'session%entities.session%/task%entities.task%/%entities.subject%.vhdr'
+
 if __name__ == '__main__':
     test_parse_from_regex()
     test_parse_from_placeholder()
     test_find_bidsroot()
+    test_parse_path_pattern_from_entities()
     print('ok')

@@ -140,3 +140,11 @@ sovabids is developed with the help of the following entities:
    <br/>
    <img src="https://www.incf.org/sites/default/files/INCF_logo_with_tagline.png" width="250">
 
+What does sova means?
+---------------------
+
+sova is a contraction of 'eso va' which mean 'that goes' in spanish.
+
+Nevertheless the real usage by the original developers is just to convey the idea of :
+
+   we will make it happen, we dont know how, but we will

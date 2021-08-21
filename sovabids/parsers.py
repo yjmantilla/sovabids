@@ -233,7 +233,10 @@ def parse_path_pattern_from_entities(sourcepath,bids_entities):
         if pathcopy.count(val) > 1:
             raise ValueError('Ambiguity: The path has multiple instances of {}'.format(val))
         if pathcopy.count(val) < 1:
-            raise ValueError(f'There is no {val} in path. This may result from {val} being ambiguous with any of the following values {list(bids_entities.values())}')
+            superstrings = [x for x in bids_entities.values() if val in x and val!=x]
+            substrings = [x for x in bids_entities.values() if x in val and val!=x]
+            possible_ambiguity_with = set(superstrings+substrings)
+            raise ValueError(f'{val} seems to be ambiguous with any of the following values {possible_ambiguity_with}')
         path = path.replace(val,key_map[key])
         values[values.index(val)] = key_map[key]
     path = _modify_entities_of_placeholder_pattern(path)

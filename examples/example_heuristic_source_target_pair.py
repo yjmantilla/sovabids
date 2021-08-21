@@ -106,7 +106,8 @@ print('Ambiguous Example:\n\n',yaml_file)
 #%%
 # If your example is ambiguous, the function will raise an error.
 #
-
+# Notice the last bit of the message, it will hint you about what part of the example is suspected to have ambiguity.
+#
 from traceback import format_exc
 
 try:

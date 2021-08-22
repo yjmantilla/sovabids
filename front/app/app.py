@@ -10,6 +10,7 @@ import requests
 from download_zip import download_files
 import shutil
 import copy
+from collections.abc import Iterable
 # api-endpoint
 SOVABIDS_URL = posixpath.join("http://127.0.0.1:5100",'api','sovabids')
   
@@ -55,7 +56,8 @@ ALLOWED_EXTENSIONS = set([x.replace('.','') for x in SUPPORTED_EXTENSIONS]) # Th
 def handle_error(result):
     details = deep_get(result,'error.data.details')
     result_no_details = copy.deepcopy(result)
-    del result_no_details['error']['data']
+    if 'data' in result_no_details:
+        del result_no_details['error']['data']
     data = json.dumps(result_no_details,indent=4)
     return render_template("error.html", error=data,details=details)
 
@@ -109,7 +111,7 @@ def load_files():
 
         app.logger.info('sovaresponse:{}'.format(response))
         result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
-        if 'error' in result:
+        if isinstance(result,Iterable) and 'error' in result:
             return handle_error(result)
 
         rules = json.loads(response.content.decode())
@@ -185,7 +187,7 @@ def exclude():
 
         app.logger.info('sovaresponse:{}'.format(response))
         result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
-        if 'error' in result:
+        if isinstance(result,Iterable) and 'error' in result:
             return handle_error(result)
 
         filelist = json.loads(response.content.decode())['result']
@@ -241,7 +243,7 @@ def edit_rules():
         #app.logger.info('sovaurl:{}'.format(sovaurl))
         
         result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
-        if 'error' in result:
+        if isinstance(result,Iterable) and 'error' in result:
             return handle_error(result)
         #app.logger.info('sovaresponse:{}'.format(result))
         session['mappings'] = result['Individual']
@@ -302,9 +304,11 @@ def convert():
         result = json.loads(response.content.decode()).get('result',json.loads(response.content.decode()))
 
         app.logger.info('sovaresponse:{}'.format(response))
-        if 'error' in result:
-            return handle_error(result)
-
+        try:
+            if isinstance(result,Iterable) and 'error' in result:
+                return handle_error(result)
+        except:
+            pass
         urltail='convert_them'
 
         data = {
@@ -327,7 +331,7 @@ def convert():
         app.logger.info('sovaconvert:{}'.format(result))
 
         app.logger.info('sovaresponse:{}'.format(response))
-        if 'error' in result:
+        if isinstance(result,Iterable) and 'error' in result:
             return handle_error(result)
 
         #data = load_files()

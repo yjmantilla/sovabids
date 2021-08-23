@@ -375,6 +375,7 @@ def main():
     t2 = threading.Thread(target=back,args=(sovapp,5100))
     t1.start()
     t2.start()
+    t2.join()
 
 if __name__ == "__main__":
     main()

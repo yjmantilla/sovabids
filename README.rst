@@ -19,10 +19,19 @@ sovabids
 
 * sovabids is a python package for automating eeg2bids conversion. 
 
-* sovabids can be used through: 
-   a. its python API
-   b. its CLI entry points.
-   c. its JSON-RPC entry points (needs a server running the backend).
+* sovabids can be used through (click to see the examples): 
+   a. `its python API <https://sovabids.readthedocs.io/en/latest/auto_examples/lemon_example.html#using-the-python-api>`_ 
+   b. `its CLI entry points <https://sovabids.readthedocs.io/en/latest/auto_examples/lemon_example.html#using-the-cli-tool>`_
+   c. `its JSON-RPC entry points (needs a server running the backend) <https://sovabids.readthedocs.io/en/latest/auto_examples/rpc_example.html>`_
+   d. `its minimal web-app GUI <https://sovabids.readthedocs.io/en/latest/auto_examples/gui_example.html>`_
+
+.. note::
+
+   The advantage of the JSON-RPC way is that it can be used from other programming languages. 
+   
+   Limitation:
+   
+   Do notice that at the moment the files have to be on the same computer that runs the server.
 
 .. warning::
 

@@ -217,5 +217,5 @@ def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%r
                         dummy = dummy.replace('%acquisition%',acq)
                         path = [data_dir] +dummy.split('/')
                         fpath = os.path.join(*path)
-                        _write_raw_brainvision(raw,fpath,new_events)
+                        _write_raw_brainvision(raw,fpath,new_events,overwrite=True)
 

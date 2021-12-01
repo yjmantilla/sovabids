@@ -173,7 +173,7 @@ def exclude():
         "id": 0,
         "method": "get_files",
         "params": {
-            "rules": {'non-bids':{'eeg_extension':'.vhdr'}},
+            "rules": {},
             "path": app.config['UPLOAD_FOLDER'].replace('\\','/')
             }
         }

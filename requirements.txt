@@ -2,5 +2,4 @@ requests
 pybv
 pyyaml
 pandas
-mne_bids
 fastapi-jsonrpc

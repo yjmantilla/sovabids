@@ -13,5 +13,6 @@ flask
 uvicorn
 fastapi-jsonrpc
 versioneer
+git+https://github.com/yjmantilla/mne-bids.git@neuroscan
 git+https://github.com/yjmantilla/bidscoin.git@sovabids
 -e .

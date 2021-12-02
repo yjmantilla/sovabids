@@ -57,7 +57,7 @@ Installation
 
    git clone https://github.com/yjmantilla/sovabids.git
    cd sovabids
-   pip install .
+   pip install -r requirements-user.txt
 
 Installation for advanced usage
 -------------------------------

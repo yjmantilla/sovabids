@@ -1,6 +1,8 @@
 """Module with parser utilities."""
 import re
 from copy import deepcopy
+
+from numpy import mat
 from sovabids.misc import flat_paren_counter
 from sovabids.dicts import deep_merge_N,nested_notation_to_tree
 
@@ -87,6 +89,10 @@ def parse_from_regex(string,pattern,fields):
     if not num_fields == num_groups:
         return {}
     match = re.search(pattern,string)
+
+    if not hasattr(match, 'groups'):
+        raise AttributeError(f"Couldn't find fields in the string {string} using the pattern {pattern}. Recheck the pattern for errors.")
+
     if not num_groups == len(match.groups()):
         return {}
     

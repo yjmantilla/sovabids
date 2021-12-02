@@ -1,0 +1,2 @@
+git+https://github.com/yjmantilla/mne-bids.git@neuroscan
+.

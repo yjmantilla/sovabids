@@ -99,7 +99,12 @@ def parse_from_regex(string,pattern,fields):
     l = []
     
     for field,value in zip(fields,list(match.groups())):
-        d = nested_notation_to_tree(field,value)
+        if '_' in value or '-' in value:
+            value2 = value.replace('_','')
+            value2 = value2.replace('-','')
+            d = nested_notation_to_tree(field,value2)
+        else:
+            d = nested_notation_to_tree(field,value)        
         l.append(d)
     return deep_merge_N(l)
 

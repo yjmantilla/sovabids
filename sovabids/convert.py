@@ -52,9 +52,13 @@ def convert_them(mappings_input):
     num_files = len(mappings['Individual'])
     for i,mapping in enumerate(mappings['Individual']):
         input_file=deep_get(mapping,'IO.source',None)
-        LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {input_file}")
+        try:
 
-        apply_rules_to_single_file(input_file,mapping,bids_path,write=True)
+            LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {input_file}")
+
+            apply_rules_to_single_file(input_file,mapping,bids_path,write=True)
+        except:
+            LOGGER.info('Error for '+ input_file)
 
     LOGGER.info(f"Conversion Done!")
 

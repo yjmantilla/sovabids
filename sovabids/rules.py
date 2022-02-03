@@ -455,9 +455,14 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
     all_mappings = []
     num_files = len(filepaths)
     for i,f in enumerate(filepaths):
-        LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {f}")
-        map,_ = apply_rules_to_single_file(f,rules_copy,bids_path,write=False,preview=False) #TODO There should be a way to control how verbose this is
-        all_mappings.append(map)
+        try:
+            LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {f}")
+            map,_ = apply_rules_to_single_file(f,rules_copy,bids_path,write=False,preview=False) #TODO There should be a way to control how verbose this is
+            all_mappings.append(map)
+        except:
+            LOGGER.info('Error for '+f)
+            
+            
 
 
     LOGGER.info(f"Individual Mappings Done!")

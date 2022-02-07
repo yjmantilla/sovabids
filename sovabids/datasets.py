@@ -50,8 +50,9 @@ def lemon_prepare():
     tars = [x for x in filepaths if 'tar.gz' in x ]
 
     # SUBJECTS
-    old_ids = [parse_from_regex(x,'(sub-.*?).tar.gz',['id']) for x in tars]
-    old_ids = [x['id'] for x in old_ids]
+    # ignore field so that it doesnt get rid of - or _
+    old_ids = [parse_from_regex(x,'(sub-.*?).tar.gz',['ignore']) for x in tars]
+    old_ids = [x['ignore'] for x in old_ids]
     new_ids = [name_match.loc[(name_match.INDI_ID==x),'Initial_ID']._values[0] for x in old_ids]
 
     # EEG FILES

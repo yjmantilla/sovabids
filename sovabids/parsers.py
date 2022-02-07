@@ -41,6 +41,9 @@ def placeholder_to_regex(placeholder,encloser='%',matcher='(.+)'):
 def parse_from_placeholder(string,pattern,encloser='%',matcher='(.+)'):
     """Parse string from a placeholder pattern.
 
+    Danger: It will replace underscores and hyphens with an empty character in all fields
+    except for the ignore field. This to accomodate to the bids standard restrictions automatically.
+
     Parameters
     ----------
 
@@ -65,6 +68,9 @@ def parse_from_placeholder(string,pattern,encloser='%',matcher='(.+)'):
 def parse_from_regex(string,pattern,fields):
     """Parse string from regex pattern.
 
+    Danger: It will replace underscores and hyphens with an empty character in all fields
+    except for the ignore field. This to accomodate to the bids standard restrictions automatically.
+    
     Parameters
     ----------
     string : str
@@ -99,7 +105,12 @@ def parse_from_regex(string,pattern,fields):
     l = []
     
     for field,value in zip(fields,list(match.groups())):
-        d = nested_notation_to_tree(field,value)
+        if field != 'ignore' and ('_' in value or '-' in value):
+            value2 = value.replace('_','')
+            value2 = value2.replace('-','')
+            d = nested_notation_to_tree(field,value2)
+        else:
+            d = nested_notation_to_tree(field,value)        
         l.append(d)
     return deep_merge_N(l)
 

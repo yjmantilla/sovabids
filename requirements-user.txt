@@ -1,3 +1,3 @@
 bids_validator
-git+https://github.com/yjmantilla/mne-bids.git@neuroscan
+https://api.github.com/repos/mne-tools/mne-bids/zipball/main
 .

@@ -58,7 +58,8 @@ def test_parse_from_regex():
     path_pattern = '(.*?).vhdr'
     fields = 'entities.subject'
     result = parse_from_regex(string,path_pattern,fields)
-    assert result['entities']['subject'] == 'y:/code/sovabids/_data/lemon/sub-010002'
+    assert result['entities']['subject'] == 'y:/code/sovabids/data/lemon/sub010002'
+    # Notice replacement of '_' to '', expected as bids does not accept _,-
 
     path_pattern = 'sub-(.*)' # notice no "?",or use .+
     fields = 'entities.subject'
@@ -95,7 +96,8 @@ def test_parse_from_placeholder():
 
     path_pattern = '%entities.subject%.vhdr'
     result = parse_from_placeholder(string,path_pattern,matcher=matcher)
-    assert result['entities']['subject'] == 'y:/code/sovabids/_data/lemon/sub-010002'
+    assert result['entities']['subject'] == 'y:/code/sovabids/data/lemon/sub010002'
+    # Notice replacement of '_' to '', expected as bids does not accept _,-
 
     path_pattern = 'sub-%entities.subject%'
     result = parse_from_placeholder(string,path_pattern,matcher=matcher)

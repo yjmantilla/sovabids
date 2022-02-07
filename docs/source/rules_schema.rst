@@ -23,8 +23,8 @@ A typical rules file looks like this:
             - Bob
 
     sidecar : 
-        EEGReference : 50
-        PowerLineFrequency : FCz
+        EEGReference : FCz
+        PowerLineFrequency : 50
 
     channels : 
         name :
@@ -185,8 +185,8 @@ The sidecar object ends up looking something like the following:
 .. code-block:: yaml
 
     sidecar : 
-        EEGReference : 50
-        PowerLineFrequency : FCz
+        EEGReference : FCz
+        PowerLineFrequency : 50
 
 
 channels

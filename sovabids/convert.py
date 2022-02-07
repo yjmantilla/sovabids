@@ -39,7 +39,7 @@ def convert_them(mappings_input):
     
     # Getting input,output and log path
     bids_path = mappings['General']['IO']['target']
-    source_path = mappings['General']['IO']['target']
+    source_path = mappings['General']['IO']['source']
     log_file = os.path.join(bids_path,'code','sovabids','sovabids.log')
 
     # Setup the logging

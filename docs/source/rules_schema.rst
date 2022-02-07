@@ -338,6 +338,7 @@ You associate each of the properties you want to extract to the properties of th
 
 These have to be written in a property called *fields* and in the order as they appear in the regex pattern (from left to right).
 
+
 .. note::
 
     Notice sovabids uses dot notation to nest properties. That is ```field1.field2`` means that we get inside ``field1`` and then inside ``field2``.
@@ -372,6 +373,9 @@ So your *path_analysis* object is wrote in the *Rules File* as:
     Use the forward-slash as the path separator (``/``) in your path strings regardless of the symbol your OS uses. This is to avoid problems when reading strings. This applies to all of the modes of *path_analysis* :
     regex patterns, placeholder patterns and paired example.
 
+.. warning::
+    If the value extracted from a field includes hyphens or underscores (-,_) they will be deleted from the value so as to accomodate automatically to the bids standard.
+    The only way to bypass this is if the field is "ignore" (without the quotations).
 
 placeholder pattern
 """""""""""""""""""
@@ -426,6 +430,10 @@ Now you just need to set the pattern, remember we need to use forward-slash nota
 .. tip::
 
     You can use %ignore% if that part of the pattern varies but you don't care about its value.
+
+.. warning::
+    If the value extracted from a field includes hyphens or underscores (-,_) they will be deleted from the value so as to accomodate automatically to the bids standard.
+    The only way to bypass this is if the field is "ignore".
 
 The placeholder has two advanced configurations which define how the pattern is translated to a regex pattern:
 

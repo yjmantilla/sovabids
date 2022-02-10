@@ -57,7 +57,7 @@ def convert_them(mappings_input):
             LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {input_file}")
 
             apply_rules_to_single_file(input_file,mapping,bids_path,write=True)
-        except TheError:
+        except:
             LOGGER.exception(f'Error for {input_file}')
 
     LOGGER.info(f"Conversion Done!")

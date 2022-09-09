@@ -270,6 +270,9 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
                 bids_path = bids_path.copy()
                 bids_path = bids_path.update(
                     datatype=datatype, suffix=datatype, extension=ext)
+                if bids_path.datatype in ['eeg', 'ieeg']:
+                    if ext not in ['.vhdr', '.edf', '.bdf', '.EDF']:
+                        bids_path.update(extension='.vhdr')
                 ##################################################################
 
 

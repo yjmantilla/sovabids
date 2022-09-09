@@ -39,7 +39,7 @@ def convert_them(mappings_input):
     
     # Getting input,output and log path
     bids_path = mappings['General']['IO']['target']
-    source_path = mappings['General']['IO']['target']
+    source_path = mappings['General']['IO']['source']
     log_file = os.path.join(bids_path,'code','sovabids','sovabids.log')
 
     # Setup the logging
@@ -52,12 +52,15 @@ def convert_them(mappings_input):
     num_files = len(mappings['Individual'])
     for i,mapping in enumerate(mappings['Individual']):
         input_file=deep_get(mapping,'IO.source',None)
+        output_file=deep_get(mapping,'IO.target',None)
         try:
 
             LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {input_file}")
-
-            apply_rules_to_single_file(input_file,mapping,bids_path,write=True)
-        except:
+            if not os.path.isfile(output_file):
+                apply_rules_to_single_file(input_file,mapping,bids_path,write=True)
+            else:
+                LOGGER.info(f'{output_file} already existed. Skipping...')
+        except :
             LOGGER.exception(f'Error for {input_file}')
 
     LOGGER.info(f"Conversion Done!")

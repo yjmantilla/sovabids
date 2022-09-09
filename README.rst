@@ -37,6 +37,10 @@ sovabids
 
    Currently meg2bids conversion is not supported, but this is a targeted feature.
 
+.. tip::
+
+   By default sovabids will skip files already converted. If you want to overwrite previous conversions currently you need to delete the output folder (by yourself) and start sovabids over again.
+
 Architecture
 ------------
 

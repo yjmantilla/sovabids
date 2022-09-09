@@ -10,10 +10,10 @@ from bids_validator import BIDSValidator
 from sovabids.parsers import placeholder_to_regex,_modify_entities_of_placeholder_pattern
 from sovabids.rules import apply_rules,load_rules
 from sovabids.dicts import deep_merge_N
-from sovabids.datasets import make_dummy_dataset
+from sovabids.datasets import make_dummy_dataset,save_dummy_vhdr,save_dummy_cnt
 from sovabids.convert import convert_them
 
-def dummy_dataset(pattern_type='placeholder',write=True,mode='python'):
+def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.vhdr'):
 
     # Getting current file path and then going to _data directory
     this_dir = os.path.dirname(__file__)
@@ -24,20 +24,22 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python'):
     test_root = os.path.join(data_dir,'DUMMY')
     input_root = os.path.join(test_root,'DUMMY_SOURCE')
     mode_str = '_' + mode
-    bids_path = os.path.join(test_root,'DUMMY_BIDS'+'_'+pattern_type+mode_str)
+    bids_path = os.path.join(test_root,'DUMMY_BIDS'+'_'+pattern_type+mode_str+'_'+format.replace('.',''))
+
+    # Make example File
+    if format == '.vhdr':
+        example_fpath = save_dummy_vhdr(os.path.join(data_dir,'dummy.vhdr'))
+    elif format == '.cnt':
+        example_fpath = save_dummy_cnt(os.path.join(data_dir,'dummy.cnt'))
 
     # PARAMS for making the dummy dataset
-    DATA_PARAMS ={ 'PATTERN':'T%task%/S%session%/sub%subject%_%acquisition%_%run%',
+    DATA_PARAMS ={ 'EXAMPLE':example_fpath,
+        'PATTERN':'T%task%/S%session%/sub%subject%_%acquisition%_%run%',
         'DATASET' : 'DUMMY',
         'NSUBS' : 2,
         'NTASKS' : 2,
         'NRUNS' : 2,
         'NSESSIONS' : 2,
-        'NCHANNELS' : 32,
-        'NACQS' :2,
-        'SFREQ' : 200,
-        'STOP' : 10,
-        'NUMEVENTS' : 10,
         'ROOT' : input_root
     }
 
@@ -65,7 +67,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python'):
     FIXED_PATTERN =DATA_PARAMS.get('PATTERN',None)
 
     FIXED_PATTERN = _modify_entities_of_placeholder_pattern(FIXED_PATTERN,'append')
-    FIXED_PATTERN = FIXED_PATTERN + '.' + 'vhdr'
+    FIXED_PATTERN = FIXED_PATTERN + format
 
     # Making the rules dictionary
     data={
@@ -82,13 +84,13 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python'):
         },
     'non-bids':
         {
-        'eeg_extension':'.vhdr',
+        'eeg_extension':format,
         'path_analysis':{'pattern':FIXED_PATTERN},
         'code_execution':['print(\'some good code\')','print(raw.info)','print(some bad code)']
         },
     'channels':
-        {'name':{'0':'ECG_CHAN','1':'EOG_CHAN'},
-        'type':{'ECG_CHAN':'ECG','EOG_CHAN':'EOG'}}
+        {'name':{'1':'ECG_CHAN','2':'EOG_CHAN'}, #Note example vhdr and CNT have these channels
+        'type':{'ECG_CHAN':'ECG','EOG_CHAN':'EOG'}} # Names (keys) are after the rename of the previous line
     }
 
     if pattern_type == 'regex':
@@ -229,6 +231,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python'):
     return file_mappings
 def test_dummy_dataset():
     dummy_dataset('placeholder',write=True)
+    dummy_dataset('placeholder',write=True,format='.cnt') # Test cnt conversion
     dummy_dataset('regex',write=True)
     dummy_dataset('placeholder',write=True,mode='cli')
     dummy_dataset('regex',write=True,mode='cli')

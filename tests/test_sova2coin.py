@@ -8,7 +8,7 @@ from sovabids.schemas import get_sova2coin_bidsmap
 from sovabids.files import _get_files
 from sovabids.settings import REPO_PATH
 from sovabids.parsers import _modify_entities_of_placeholder_pattern
-from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset
+from sovabids.datasets import lemon_bidscoin_prepare,make_dummy_dataset,save_dummy_vhdr
 import yaml
 
 def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
@@ -59,8 +59,11 @@ def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
         shutil.rmtree(source_path)
       except:
         pass
+      
+      # Make example VHDR File
+      example_fpath = save_dummy_vhdr(os.path.join(data_dir,'dummy.vhdr'))
 
-      make_dummy_dataset(DATASET=dataset+'_input',NSUBS=3,NTASKS=2,NSESSIONS=2,NACQS=1,NRUNS=2,PATTERN=pat,ROOT=source_path)
+      make_dummy_dataset(EXAMPLE=example_fpath,DATASET=dataset+'_input',NSUBS=3,NTASKS=2,NSESSIONS=2,NACQS=1,NRUNS=2,PATTERN=pat,ROOT=source_path)
 
 
     files = _get_files(source_path)

@@ -1,5 +1,5 @@
 requests
-pybv
+pybv >= 0.7.3
 pyyaml
 pandas
 fastapi-jsonrpc

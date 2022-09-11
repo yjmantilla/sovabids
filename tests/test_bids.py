@@ -230,8 +230,8 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.v
             print('okrpc')
     return file_mappings
 def test_dummy_dataset():
-    dummy_dataset('placeholder',write=True)
     dummy_dataset('placeholder',write=True,format='.cnt') # Test cnt conversion
+    dummy_dataset('placeholder',write=True)
     dummy_dataset('regex',write=True)
     dummy_dataset('placeholder',write=True,mode='cli')
     dummy_dataset('regex',write=True,mode='cli')

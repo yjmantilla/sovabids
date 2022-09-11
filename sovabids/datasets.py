@@ -9,6 +9,8 @@ from sovabids.parsers import parse_from_regex
 import mne
 import numpy as np
 from mne_bids.write import _write_raw_brainvision
+import fileinput
+
 
 def lemon_prepare():
     """Download and prepare a few files of the LEMON dataset.
@@ -121,23 +123,24 @@ def lemon_bidscoin_prepare(src_path):
             print('already done, skipping...')
     print('finish')
 
-def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%run%',
+def make_dummy_dataset(EXAMPLE,
+    PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%run%',
     DATASET = 'DUMMY',
     NSUBS = 2,
     NSESSIONS = 2,
     NTASKS = 2,
     NACQS = 2,
     NRUNS = 2,
-    NCHANNELS = 2,
-    SFREQ = 200,
-    STOP = 10,
-    NUMEVENTS = 10,
     PREFIXES = {'subject':'SU','session':'SE','task':'TA','acquisition':'AC','run':'RU'},
-    ROOT=None):
+    ROOT=None,
+):
     """Create a dummy dataset given some parameters.
     
     Parameters
     ----------
+    EXAMPLE : str,PathLike|list , required
+        Path of the file to replicate as each file in the dummy dataset.
+        If a list, it is assumed each item is a file. All of these items are replicated.
     PATTERN : str, optional
         The pattern in placeholder notation using the following fields:
         %dataset%, %task%, %session%, %subject%, %run%, %acquisition%
@@ -153,20 +156,13 @@ def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%r
         Number of acquisitions.
     NRUNS : int, optional
         Number of runs.
-    NCHANNELS : int, optional
-        Number of channels.
-    SFREQ : float, optional
-        Samplinf frequency of the data.
-    STOP : float, optional
-        Time duration of the data in seconds.
-    NUMEVENTS : int, optional
-        Number of events along the duration.
     PREFIXES : dict, optional
         Dictionary with the following keys:'subject', 'session', 'task' and 'acquisition'.
         The values are the corresponding prefix. RUN is not present because it has to be a number.
     ROOT : str, optional
         Path where the files will be generated.
         If None, the _data subdir will be used.
+
     """
 
     if ROOT is None:
@@ -175,8 +171,6 @@ def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%r
     else:
         data_dir = ROOT
     os.makedirs(data_dir,exist_ok=True)
-
-
 
     sub_zeros = get_num_digits(NSUBS)
     subs = [ PREFIXES['subject']+ str(x).zfill(sub_zeros) for x in range(NSUBS)]
@@ -193,17 +187,6 @@ def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%r
     acq_zeros = get_num_digits(NACQS)
     acquisitions = [ PREFIXES['acquisition']+str(x).zfill(acq_zeros) for x in range(NACQS)]
 
-    # Create some dummy metadata
-    n_channels = NCHANNELS
-    sampling_freq = SFREQ  # in Hertz
-    info = mne.create_info(n_channels, sfreq=sampling_freq)
-
-    times = np.linspace(0, STOP, STOP*sampling_freq, endpoint=False)
-    data = np.zeros((NCHANNELS,times.shape[0]))
-
-    raw = mne.io.RawArray(data, info)
-    raw.set_channel_types({x:'eeg' for x in raw.ch_names})
-    new_events = mne.make_fixed_length_events(raw, duration=STOP//NUMEVENTS)
 
     for task in tasks:
         for session in sessions:
@@ -218,5 +201,116 @@ def make_dummy_dataset(PATTERN='T%task%/S%session%/sub%subject%_%acquisition%_%r
                         dummy = dummy.replace('%acquisition%',acq)
                         path = [data_dir] +dummy.split('/')
                         fpath = os.path.join(*path)
-                        _write_raw_brainvision(raw,fpath,new_events,overwrite=True)
+                        dirpath = os.path.join(*path[:-1])
+                        os.makedirs(dirpath,exist_ok=True)
+                        if isinstance(EXAMPLE,list):
+                            for ff in EXAMPLE:
+                                fname, ext = os.path.splitext(ff)
+                                shutil.copyfile(ff, fpath+ext)
+                                if 'vmrk' in ext or 'vhdr' in ext:
+                                    replace_brainvision_filename(fpath+ext,path[-1])
+                        else:
+                            fname, ext = os.path.splitext(EXAMPLE)
+                            shutil.copyfile(EXAMPLE, fpath+ext)
 
+def get_dummy_raw(NCHANNELS = 5,
+    SFREQ = 200,
+    STOP = 10,
+    NUMEVENTS = 10,
+):
+    """
+    Create a dummy MNE Raw file given some parameters.
+
+    Parameters
+    ----------
+    NCHANNELS : int, optional
+        Number of channels.
+    SFREQ : float, optional
+        Sampling frequency of the data.
+    STOP : float, optional
+        Time duration of the data in seconds.
+    NUMEVENTS : int, optional
+        Number of events along the duration.
+    """
+    # Create some dummy metadata
+    n_channels = NCHANNELS
+    sampling_freq = SFREQ  # in Hertz
+    info = mne.create_info(n_channels, sfreq=sampling_freq)
+
+    times = np.linspace(0, STOP, STOP*sampling_freq, endpoint=False)
+    data = np.zeros((NCHANNELS,times.shape[0]))
+
+    raw = mne.io.RawArray(data, info)
+    raw.set_channel_types({x:'eeg' for x in raw.ch_names})
+    new_events = mne.make_fixed_length_events(raw, duration=STOP//NUMEVENTS)
+
+    return raw,new_events
+
+def save_dummy_vhdr(fpath,dummy_args={}
+):
+    """
+    Save a dummy vhdr file.
+
+    Parameters
+    ----------
+    fpath : str, required
+        Path where to save the file.
+    kwargs : dict, optional
+        Dictionary with the arguments of the get_dummy_raw function.
+
+    Returns
+    -------
+    List with the Paths of the desired vhdr file, if those were succesfully created,
+    None otherwise.
+    """
+
+    raw,new_events = get_dummy_raw(**dummy_args)
+    _write_raw_brainvision(raw,fpath,new_events,overwrite=True)
+    eegpath =fpath.replace('.vhdr','.eeg')
+    vmrkpath = fpath.replace('.vhdr','.vmrk')
+    if all(os.path.isfile(x) for x in [fpath,eegpath,vmrkpath]):
+        return [fpath,eegpath,vmrkpath]
+    else:
+        return None
+
+def save_dummy_cnt(fpath,
+):
+    """
+    Save a dummy cnt file.
+
+    Parameters
+    ----------
+    fpath : str, required
+        Path where to save the file.
+
+    Returns
+    -------
+    Path of the desired file if the file was succesfully created,
+    None otherwise.
+    """
+    fname = 'scan41_short.cnt'
+    cnt_dict={'dataset_name': 'cnt_sample',
+    'archive_name': 'scan41_short.cnt',
+    'hash': 'md5:7ab589254e83e001e52bee31eae859db',
+    'url': 'https://github.com/mne-tools/mne-testing-data/blob/master/CNT/scan41_short.cnt?raw=true',
+    'folder_name': 'cnt_sample',
+    }
+    data_path = mne.datasets.fetch_dataset(cnt_dict)
+    shutil.copyfile(os.path.join(data_path,'scan41_short.cnt'), fpath) #copyfile overwrites by default
+    if os.path.isfile(fpath):
+        return fpath
+    else:
+        return None
+
+def replace_brainvision_filename(fpath,newname):
+    if '.eeg' in newname:
+        newname = newname.replace('.eeg','')
+    if '.vmrk' in newname:
+        newname = newname.replace('.vmrk','')
+    for line in fileinput.input(fpath, inplace=True):
+        if 'DataFile' in line:
+            print(f'DataFile={newname}.eeg'.format(fileinput.filelineno(), line))
+        elif 'MarkerFile' in line:
+            print(f'MarkerFile={newname}.vmrk'.format(fileinput.filelineno(), line))
+        else:
+            print('{}'.format(line), end='')

@@ -45,7 +45,7 @@ The connection of sovabids and bidscoin is through a plugin called **sova2coin**
 
 
 .. warning::
-    If you didn't install sovabids in 'advanced-usage' mode ( `see here <https://sovabids.readthedocs.io/en/latest/README.html#installation-for-advanced-usage>`_ ), you will probably need to install bidscoin:
+    If you didn't install sovabids in 'gui-usage' mode ( `see here <https://sovabids.readthedocs.io/en/latest/README.html>`_ ), you will probably need to install bidscoin:
 
     Install our `bidscoin branch <https://github.com/yjmantilla/bidscoin/tree/sovabids>`_
     

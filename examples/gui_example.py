@@ -9,7 +9,7 @@ using the preliminary GUI tool.
 
 Install Sovabids in gui-usage mode
 ---------------------------------------
-(`see here <https://sovabids.readthedocs.io/en/latest/README.html`_)
+(`see here <https://sovabids.readthedocs.io/en/latest/README.html>`_)
 
 Download the Lemon dataset 
 -----------------------------

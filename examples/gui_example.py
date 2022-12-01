@@ -7,9 +7,9 @@ GUI example with LEMON dataset
 This example illustrates the use of ``sovabids`` on the `LEMON dataset <http://fcon_1000.projects.nitrc.org/indi/retro/MPI_LEMON.html>`_
 using the preliminary GUI tool.
 
-Install Sovabids in advanced-usage mode
+Install Sovabids in gui-usage mode
 ---------------------------------------
-(`see here <https://sovabids.readthedocs.io/en/latest/README.html#installation-for-advanced-usage>`_)
+(`see here <https://sovabids.readthedocs.io/en/latest/README.html`_)
 
 Download the Lemon dataset 
 -----------------------------

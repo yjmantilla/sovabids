@@ -63,18 +63,17 @@ Installation
    cd sovabids
    pip install -r requirements-user.txt
 
-Installation for advanced usage
+Installation for GUI usage
 -------------------------------
 
-Run
+This will install sovabids for usage with an experimental web gui, and as an experimental plugin for bidscoin.
 
 .. code-block:: bash
 
    git clone https://github.com/yjmantilla/sovabids.git
    cd sovabids
-   pip install -r requirements-dev.txt
+   pip install -r requirements-gui.txt
 
-Notice  that the requirements-dev.txt file already has the sovabids installation using editable mode.
 
 Installation for developers
 ---------------------------

@@ -217,11 +217,14 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
             types = {key:_get_ch_type_mapping(fro='bids',to='mne').get(val,None) for key,val in types.items() }
             valid_types = {k: v for k, v in types.items() if v is not None} # invalid types for mne will be None,remove them
             raw.set_channel_types(valid_types)
-
+    #TODO: Document format option
+    output_format = 'BrainVision'
     # Non-bids section
     if 'non-bids' in rules_copy:
         non_bids = rules_copy['non-bids']
 
+        if 'format' in non_bids:
+            output_format = non_bids.get('format','BrainVision')
         if "code_execution" in non_bids:
             code_execution = non_bids.get('code_execution',None)
 
@@ -246,7 +249,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
         real_times = raw.times[-1] # Save real duration of the eeg, since it is lost if write is false
 
         if write:
-            write_raw_bids(raw, bids_path=bids_path,format='BrainVision',allow_preload=True,overwrite=True)
+            write_raw_bids(raw, bids_path=bids_path,format=output_format,allow_preload=True,overwrite=True)
         else:
             if preview:
                 # Crop the file for less computational cost
@@ -254,7 +257,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
                 tmax = max_samples/raw.info['sfreq']
                 raw.crop(tmax=tmax)
                 orig_files = _get_files(bids_path.root)
-                write_raw_bids(raw, bids_path=bids_path,overwrite=True,format='BrainVision',allow_preload=True,verbose=False)
+                write_raw_bids(raw, bids_path=bids_path,overwrite=True,format=output_format,allow_preload=True,verbose=False)
 
             else:
                 # Since write_raw_bids is not called we must run 

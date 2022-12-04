@@ -174,6 +174,10 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
     # Read file with MNE
     try:
         raw = read_raw(f,preload=False)#not write)
+        # TODO:Should we try to artificially past MNE-BIDS CHECK?
+        # Which checks that
+        # ext in ALLOWED_INPUT_EXTENSIONS?
+        # raw.filenames[0]=''.join(raw.filenames[0].split('.')[:-1])+'.set'
     except:
         raise IOError(f'MNE couldnt read {f} .')
 
@@ -242,7 +246,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
         real_times = raw.times[-1] # Save real duration of the eeg, since it is lost if write is false
 
         if write:
-            write_raw_bids(raw, bids_path=bids_path,overwrite=True)
+            write_raw_bids(raw, bids_path=bids_path,format='BrainVision',allow_preload=True,overwrite=True)
         else:
             if preview:
                 # Crop the file for less computational cost

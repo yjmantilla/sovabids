@@ -5,5 +5,6 @@ fastapi-jsonrpc
 pybv >= 0.7.3
 httpx
 mne-bids
+pyyaml
 git+https://github.com/yjmantilla/bidscoin.git@sovabids
 .

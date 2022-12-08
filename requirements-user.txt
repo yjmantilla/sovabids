@@ -1,4 +1,5 @@
 bids_validator
 pybv >= 0.7.3
 mne-bids
+pyyaml
 .

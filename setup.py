@@ -1,7 +1,7 @@
 import setuptools
 import versioneer
 
-REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines()][:-1]
+REQUIREMENTS = [i.strip() for i in open("requirements-user.txt").readlines()][:-1] # ignore last "."
 
 
 # Give setuptools a hint to complain if it's too old a version

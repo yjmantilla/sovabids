@@ -152,6 +152,21 @@ sovabids is developed with the help of the following entities:
    <br/>
    <img src="https://www.incf.org/sites/default/files/INCF_logo_with_tagline.png" width="250">
 
+
+
+Academic Works
+---------------
+
+* `Poster for the Big Data Neuroscience Workshop 2022 (Austin, Texas) <https://www.canva.com/design/DAFMDNgVuGU/UTEbbAYk0JG0d-JpdjQOQg/view?utm_content=DAFMDNgVuGU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton>`_
+
+* `Poster for OHBM 2022 Anual Meeting <https://www.canva.com/design/DAFBHD1bCs4/FNZLtwC78ip_5jt7bcAajw/view?utm_content=DAFBHD1bCs4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton>`_
+
+* `Video for OHBM 2022 Anual Meeting <https://youtu.be/7M7JLrl6KAk>`_
+
+* `Poster for the eResearch Australasia Conference 2021 <https://www.canva.com/design/DAErO4bo4uk/gnHqwkVFs2qP7U1FhlViVQ/view?utm_content=DAErO4bo4uk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink>`_
+
+
+
 What does sova means?
 ---------------------
 

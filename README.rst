@@ -2,7 +2,7 @@
    :target: https://app.codecov.io/gh/yjmantilla/sovabids
    :alt: codecov
 
-.. image:: https://img.shields.io/github/workflow/status/yjmantilla/sovabids/python-tests/main?label=tests
+.. image:: https://img.shields.io/github/actions/workflow/status/yjmantilla/sovabids/python-tests.yml?branch=main&label=tests
    :target: https://github.com/yjmantilla/sovabids/actions?query=workflow%3Apython-tests
    :alt: Python tests
 

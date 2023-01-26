@@ -20,7 +20,7 @@ def _get_files(root_path):
     filepaths = []
     for root, dirs, files  in os.walk(root_path, topdown=False):
         for name in files:
-            filepaths.append(os.path.join(root, name))
+            filepaths.append(os.path.join(root, name).replace('\\','/'))
     return filepaths
 
 def _write_yaml(dictionary,path=None):

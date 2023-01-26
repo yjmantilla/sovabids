@@ -5,6 +5,7 @@ from shutil import ReadError
 import yaml
 import argparse
 import logging
+import re
 
 from copy import deepcopy
 from mne_bids import write_raw_bids,BIDSPath
@@ -26,6 +27,10 @@ from sovabids.heuristics import from_io_example
 import logging
 LOGGER = logging.getLogger(__name__)
 
+def _regex_match(pattern,string):
+    match = re.search(pattern,string)
+    match = True if match else False
+    return match 
 def get_info_from_path(path,rules):
     """Parse information from a given path, given a set of rules.
 
@@ -96,6 +101,7 @@ def get_files(source_path,rules):
     if isinstance(source_path,str):
         # Generate all files
         extensions = deep_get(rules_copy,'non-bids.eeg_extension',None)
+        filters = deep_get(rules_copy,'non-bids.file_filter',[])
         if extensions is None:
             extensions = deepcopy(SUPPORTED_EXTENSIONS)
 
@@ -107,6 +113,12 @@ def get_files(source_path,rules):
 
         filepaths = _get_files(source_path)
         filepaths = [x for x in filepaths if os.path.splitext(x)[1] in extensions]
+        for filter_ in filters:
+            for key,val in filter_.items():
+                if key == 'include':
+                    filepaths = [x  for x in filepaths if _regex_match(val,x)]
+                if key == 'exclude':
+                    filepaths = [x  for x in filepaths if not _regex_match(val,x)]
     else:
         raise ValueError('The source_path should be str.')
     return filepaths
@@ -223,8 +235,10 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
     if 'non-bids' in rules_copy:
         non_bids = rules_copy['non-bids']
 
-        if 'format' in non_bids:
+        if 'format' in non_bids: # DEPRECATED BACKWARD COMPATIBLE
             output_format = non_bids.get('format','BrainVision')
+        if 'output_format' in non_bids:
+            output_format = non_bids.get('output_format','BrainVision')
         if "code_execution" in non_bids:
             code_execution = non_bids.get('code_execution',None)
 

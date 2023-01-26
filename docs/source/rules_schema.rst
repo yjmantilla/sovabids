@@ -568,6 +568,62 @@ So your *path_analysis* object is wrote in the *Rules File* as:
     The session 009 may not actually exist on the dataset but for our purposes that does not matter.
     We just care about finding a naming pattern here.
 
+output_format (EXPERIMENTAL)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sets up the output format by controlling the *format* parameter of *mne_bids.write_raw_bids*. Acceptable values are the ones supported by that function (currently 'auto' | 'BrainVision' | 'EDF' | 'FIF').
+
+.. code-block:: yaml
+    
+    non-bids:
+        output_format: 'BrainVision'
+
+file_filter (EXPERIMENTAL)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Used to ignore or only include certain files when sovabids is scanning the **source_path**.
+
+The schema of this property is:
+
+.. code-block:: yaml
+    
+    non-bids:
+        file_filter:
+            - include : regex string to use for inclusion
+            - exclude : regex string to use for exclusion
+
+This will be executed in the order of appearance. You may include various include/exclude stages. For example, if you have these files:
+
+.. code-block:: bash
+    01_eyesClosed.set
+    01_eyesClosed_PREP_preprocessed.set
+    01_eyesClosed_highpass.set
+    01_eyesOpen.set
+    01_eyesOpen_PREP_preprocessed.set
+    01_eyesOpen_highpass.set
+    02_eyesClosed.set
+    02_eyesClosed_PREP_preprocessed.set
+    02_eyesClosed_highpass.set
+    02_eyesOpen.set
+    02_eyesOpen_PREP_preprocessed.set
+    02_eyesOpen_highpass.set
+    03_eyesClosed.set
+    03_eyesClosed_PREP_preprocessed.set
+    03_eyesClosed_highpass.set
+    03_eyesOpen.set
+    03_eyesOpen_PREP_preprocessed.set
+    03_eyesOpen_highpass.set
+
+If you want to only convert raw eyesClosed files, you could use:
+
+.. code-block:: yaml
+    non-bids:
+        file_filter:
+            - include : eyesClosed
+            - exclude : _PREP
+            - exclude : _highpass
+
+
 code_execution
 ^^^^^^^^^^^^^^
 
@@ -607,6 +663,12 @@ Finally, we will have this *non-bids* object (if using the placeholder pattern o
             pattern : _data/%dataset_description.Name%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr
         code_execution:
             - print(raw.info)
+        file_filter:
+            - include : eyesClosed
+            - exclude : _PREP
+            - exclude : _highpass
+        output_format: 'BrainVision'
+
 
 .. _entitiesdoc: https://bids-specification.readthedocs.io/en/stable/99-appendices/09-entities.html
 

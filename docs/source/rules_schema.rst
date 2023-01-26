@@ -595,6 +595,7 @@ The schema of this property is:
 This will be executed in the order of appearance. You may include various include/exclude stages. For example, if you have these files:
 
 .. code-block:: bash
+
     01_eyesClosed.set
     01_eyesClosed_PREP_preprocessed.set
     01_eyesClosed_highpass.set
@@ -617,6 +618,7 @@ This will be executed in the order of appearance. You may include various includ
 If you want to only convert raw eyesClosed files, you could use:
 
 .. code-block:: yaml
+
     non-bids:
         file_filter:
             - include : eyesClosed

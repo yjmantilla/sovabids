@@ -17,7 +17,7 @@ from traceback import format_exc
 
 from sovabids.settings import NULL_VALUES,SUPPORTED_EXTENSIONS
 from sovabids.files import _get_files
-from sovabids.dicts import deep_merge_N,deep_get
+from sovabids.dicts import deep_merge_N,deep_get,nested_notation_to_tree
 from sovabids.parsers import parse_from_regex,parse_from_placeholder
 from sovabids.bids import update_dataset_description
 from sovabids.loggers import setup_logging
@@ -71,6 +71,18 @@ def get_info_from_path(path,rules):
             patterns_extracted = parse_from_placeholder(path,pattern,encloser,matcher)
         else: # is a regex pattern
             patterns_extracted = parse_from_regex(path,pattern,fields)
+    
+    # If operations between values extracted should be carried out, it should be here
+    postprocess = deep_get(rules_copy,'non-bids.path_analysis.operation',None)
+
+    if postprocess:
+        l=[]
+        for key,val in postprocess.items():
+            scoped_expression=val.replace('[',"patterns_extracted['").replace("]","']")
+            treated_value=eval(scoped_expression)
+            d = nested_notation_to_tree(key,treated_value.replace('-','').replace('_',''))
+            l.append(d)
+        patterns_extracted = deep_merge_N([patterns_extracted]+l)
     if 'ignore' in patterns_extracted:
         del patterns_extracted['ignore']
     # merge needed because using rules_copy.update(patterns_extracted) replaced it all

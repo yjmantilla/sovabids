@@ -65,7 +65,7 @@ def parse_from_placeholder(string,pattern,encloser='%',matcher='(.+)'):
     pattern,fields = placeholder_to_regex(pattern,encloser,matcher)
     return parse_from_regex(string,pattern,fields)
 
-def parse_from_regex(string,pattern,fields):
+def parse_from_regex(string,pattern,fields,invalid_replace=''):
     """Parse string from regex pattern.
 
     Danger: It will replace underscores and hyphens with an empty character in all fields
@@ -79,7 +79,8 @@ def parse_from_regex(string,pattern,fields):
         The regex pattern to use for parsing.
     fields : list of str
         List of fields in the same order as they appear in the regex pattern.
-
+    invalid_replace: str
+        String that will replace '-' and '_' that appear on extracted fields.
     Returns
     -------
 
@@ -106,8 +107,8 @@ def parse_from_regex(string,pattern,fields):
     
     for field,value in zip(fields,list(match.groups())):
         if field != 'ignore' and ('_' in value or '-' in value):
-            value2 = value.replace('_','')
-            value2 = value2.replace('-','')
+            value2 = value.replace('_',invalid_replace)
+            value2 = value2.replace('-',invalid_replace)
             d = nested_notation_to_tree(field,value2)
         else:
             d = nested_notation_to_tree(field,value)        

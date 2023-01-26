@@ -568,8 +568,71 @@ So your *path_analysis* object is wrote in the *Rules File* as:
     The session 009 may not actually exist on the dataset but for our purposes that does not matter.
     We just care about finding a naming pattern here.
 
+operation (EXPERIMENTAL)
+""""""""""""""""""""""""""""
+
+.. warning::
+    
+    This feature is experimental, is not well tested so it may not run correctly.
+
+This is an advance feature for weird cases where an operation between fields extract by pattern matching is necessary to produce a single bids field.
+
+For example, it is common to have subject grouping with numbering per subject, such as:
+
+    .. code-block:: text
+
+        Healthy_01_EyesOpen.set
+        Healthy_02_EyesOpen.set
+        Control_01_EyesOpen.set
+        Control_02_EyesOpen.set
+
+Lets says the result you want for subject Healthy-01 is:
+
+    .. code-block:: text
+
+        entities.subject = Healthy01
+        entities.task = EyesOpen
+
+To do this an operation procedure is introduced in the yaml as follows:
+
+.. code-block:: yaml
+    
+    non-bids:
+        path_analysis:
+            pattern : %a%_%b%_%entities.task%.set
+            operation :
+                entities.subject : "[a] + [b]"
+
+As you may notice, this introduces "field intermediaries" that we can operate on using python expressions.
+
+The field intermediaries you use should be alphanumeric strings, 1 or 2 characters long.
+
+Note that to express the operation needed you need to enclose the intermediary field within [].
+
+The fields you can use are any of those you define by placeholder or regex beforehand, as long as they dont have dots.
+
+You could express the configuration mentioned before using regex with:
+
+.. code-block:: yaml
+    
+    non-bids:
+        path_analysis:
+            pattern : (.+)_(.+)_(.+).set
+            fields :
+                - a
+                - b
+                - entities.task
+            operation :
+                entities.subject : "[a] + [b]"
+
+
 output_format (EXPERIMENTAL)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. warning::
+    
+    This feature is experimental, is not well tested so it may not run correctly.
+
 
 Sets up the output format by controlling the *format* parameter of *mne_bids.write_raw_bids*. Acceptable values are the ones supported by that function (currently 'auto' | 'BrainVision' | 'EDF' | 'FIF').
 
@@ -580,6 +643,10 @@ Sets up the output format by controlling the *format* parameter of *mne_bids.wri
 
 file_filter (EXPERIMENTAL)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. warning::
+    
+    This feature is experimental, is not well tested so it may not run correctly.
 
 Used to ignore or only include certain files when sovabids is scanning the **source_path**.
 

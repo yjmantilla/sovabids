@@ -26,12 +26,12 @@ authors:
     orcid: 0000-0001-8694-1474
     equal-contrib: false
     affiliation: 4
-  - name: Tom Johnstone
-    orcid: 0000-0001-8635-8158
-    equal-contrib: false
-    affiliation: "3, 4"
   - name: Oren Civier
     orcid: 0000-0003-0090-271X
+    equal-contrib: false
+    affiliation: "3, 4"
+- name: Tom Johnstone
+    orcid: 0000-0001-8635-8158
     equal-contrib: false
     affiliation: "3, 4"
 affiliations:

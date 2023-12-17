@@ -140,15 +140,15 @@ sovabids is developed with the help of the following entities:
 .. raw:: html
 
    <br/>
-   <img src="https://raw.githubusercontent.com/NeuroDesk/vnm/master/uq_logo.png" width="250">
+   <img src="https://www.neurodesk.org/static/docs/overview/uq_logo.png" width="250">
    <br/>
-   <img src="https://raw.githubusercontent.com/NeuroDesk/vnm/master/logo-long-full.svg" width="250">
+   <img src="https://www.neurodesk.org/static/docs/overview/swinburne_uni_logo.png" width="250">
    <br/>
    <img src="https://www.udea.edu.co/wps/wcm/connect/udea/2288a382-341c-41ee-9633-702a83d5ad2b/logosimbolo-horizontal-png.png?MOD=AJPERES&CVID=ljeSAX9" width="250">
    <br/>
    <img src="https://www.udea.edu.co/wps/wcm/connect/udea/eba017e2-87fb-40c7-b7d8-6bb7d0e008ae/Logo_GRUNECO_R.jpg?MOD=AJPERES&CACHEID=ROOTWORKSPACE.Z18_L8L8H8C0LODDC0A6SSS2AD2GO4-eba017e2-87fb-40c7-b7d8-6bb7d0e008ae-l-x54eU" width="250">
    <br/>
-   <img src="https://github.com/NeuroDesk/vnm/raw/master/nif.png" width="250">
+   <img src="https://www.neurodesk.org/static/docs/overview/nif.png" width="250">
    <br/>
    <img src="https://www.incf.org/sites/default/files/INCF_logo_with_tagline.png" width="250">
 

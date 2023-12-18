@@ -1,7 +1,7 @@
 pytest
 pytest-cov
 bids_validator
-sphinx>3
+sphinx>=4.0.0
 insegel
 furo
 sphinx_gallery
@@ -17,5 +17,6 @@ pybv >= 0.7.3
 pyyaml
 httpx
 mne-bids
+pydantic<=1.10.7
 git+https://github.com/yjmantilla/bidscoin.git@sovabids
 -e .

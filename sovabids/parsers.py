@@ -2,7 +2,6 @@
 import re
 from copy import deepcopy
 
-from numpy import mat
 from sovabids.misc import flat_paren_counter
 from sovabids.dicts import deep_merge_N,nested_notation_to_tree
 

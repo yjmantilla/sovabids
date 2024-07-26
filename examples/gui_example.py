@@ -76,7 +76,7 @@ Sovabids will show the individual eegs found. Notice that since this is a brainv
 The rules files
 -----------------
 
-A suitable rules file is already at examples/lemon_example_rules.yml, you can upload that one.
+A suitable rules file is already at examples/lemon_example_rules.yml within the cloned sovabids repositry, you can upload that one.
 
 Click Choose File, then in the popup window select the rules file, click open and then submit.
 

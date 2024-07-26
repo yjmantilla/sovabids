@@ -20,7 +20,7 @@ If you need to download the files, you can use:
 
     python -c 'from sovabids.datasets import lemon_prepare; lemon_prepare()'
 
-This will download the lemon dataset inside the '_data' subfolder of the cloned sovabids repository.
+This will download the lemon dataset to a '_data' subfolder that will be created in the installed packages folder.
 
 Run front/app/app.py in a terminal 
 ----------------------------------
@@ -50,7 +50,16 @@ Click Upload Files
 Choose Files
 --------------
 
-Click 'Choose Files', select the lemon folder (inside the _data subdirectory) and click submit.
+In a terminal, run the following command to find the installed packages folder:
+
+.. code-block:: bash
+
+    pip show sovabids
+
+The path to the installed packages folder is given in the 'Location:' field.
+
+
+Click 'Choose Files', go to the installed packages folder, click on the _data subfolder, and then select the lemon subfolder. Click submit.
 
 .. image:: https://github.com/yjmantilla/sovabids/raw/main/docs/source/_static/front_3_upload.png
 

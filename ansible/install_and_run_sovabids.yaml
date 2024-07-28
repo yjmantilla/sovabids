@@ -1,0 +1,38 @@
+- name: install SOVABIDS
+  hosts: myhosts
+  tasks:
+   - name: Ping my hosts
+     ansible.builtin.ping:
+
+   - name: Print message
+     ansible.builtin.debug:
+      msg: Hello world
+
+   - name: Install python3 as python
+     ansible.builtin.apt:
+      name: python-is-python3
+      update-cache: true
+     become: true
+
+   - name: Update repositories cache and install "pip" package
+     ansible.builtin.apt:
+      name: pip
+      update-cache: true
+     become: true
+
+   - name: Clone the sovabids repo
+     ansible.builtin.git:
+      repo: https://github.com/yjmantilla/sovabids.git
+      dest: src/sovabids
+
+   - name: Install sovabids requirements
+     ansible.builtin.pip:
+      requirements: ~/src/sovabids/requirements-gui.txt
+      chdir: ~/src/sovabids
+
+   - name: Test sovabids
+     ansible.builtin.pip:
+      name: pytest 
+
+   - name: Run flask
+     ansible.builtin.shell: cd /; nohup python ~/src/sovabids/front/app/app.py 1>/dev/null 2>&1 &

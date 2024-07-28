@@ -368,7 +368,8 @@ from sovabids.sovarpc import app as sovapp
 import threading
 
 def front(app):
-    app.run(host='127.0.0.1',port=5000)#,debug=True)#,threaded=True)
+    # use 0.0.0.0 instead of 127.0.0.1 so listens both on localhost and external network interface
+    app.run(host='0.0.0.0',port=5000)#,debug=True)#,threaded=True)
 
 def main():
     t1 = threading.Thread(target=front,args=(app,))

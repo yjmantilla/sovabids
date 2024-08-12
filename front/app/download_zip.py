@@ -20,7 +20,7 @@ def download_files(list_files,filename):
     #response['Content-Disposition'] = 'attachment; filename= "%s"' % filename
 
     # See https://stackoverflow.com/a/53390515/14068216
-    response = send_file(filename, mimetype="application/x-zip-compressed", attachment_filename=name, as_attachment=True)
+    response = send_file(filename, mimetype="application/x-zip-compressed", download_name=name, as_attachment=True)
     response.headers["x-filename"] = name
     response.headers["Access-Control-Expose-Headers"] = 'x-filename'
     # # ..and correct content-disposition

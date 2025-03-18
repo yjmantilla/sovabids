@@ -11,13 +11,13 @@ sphinx-autoapi
 myst-parser
 flask
 uvicorn
-fastapi==0.115.11
-fastapi-jsonrpc==3.2.1
+fastapi
+fastapi-jsonrpc
 versioneer
 pybv >= 0.7.3
 pyyaml
 httpx
 mne-bids
-pydantic<=1.10.7
+pydantic
 git+https://github.com/yjmantilla/bidscoin.git@sovabids
 -e .

@@ -40,6 +40,7 @@ extensions = [
     "myst_parser",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    'autoapi.extension', #see https://github.com/readthedocs/sphinx-autoapi/issues/422
     "sphinx.ext.viewcode",
 #    "sphinx.ext.intersphinx",
     #"numpydoc",
@@ -106,7 +107,5 @@ def setup(app):
    app.add_css_file('gallery.css')
 
 # Auto API
-extensions.append('autoapi.extension')
-
 autoapi_type = 'python'
 autoapi_dirs = ["../../sovabids"]

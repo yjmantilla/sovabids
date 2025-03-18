@@ -128,6 +128,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.v
         })
 
         response = client.post("/api/sovabids/load_rules",data=request )
+        print(request,'response',response.content.decode())
         rules = json.loads(response.content.decode())['result']
 
         # Save Rules

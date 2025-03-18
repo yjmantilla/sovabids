@@ -130,6 +130,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.v
         response = client.post("/api/sovabids/load_rules",data=request )
         rules = json.loads(response.content.decode())['result']
 
+        'working'
         # Save Rules
         request = json.dumps({
         "jsonrpc": "2.0",

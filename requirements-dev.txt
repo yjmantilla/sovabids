@@ -11,7 +11,7 @@ sphinx-autoapi
 myst-parser
 flask
 uvicorn
-fastapi-jsonrpc
+fastapi-jsonrpc==2.8.0
 versioneer
 pybv >= 0.7.3
 pyyaml

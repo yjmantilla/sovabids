@@ -1,7 +1,7 @@
 bids_validator
 flask
 uvicorn
-fastapi-jsonrpc
+fastapi-jsonrpc==2.8.0
 pybv >= 0.7.3
 httpx
 mne-bids

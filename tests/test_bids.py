@@ -141,6 +141,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.v
         }
         })
         response = client.post("/api/sovabids/save_rules",data=request )
+        print(request,'response',response.content.decode())
 
         # Get Files
         request = json.dumps({
@@ -153,6 +154,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.v
         }
         })
         response = client.post("/api/sovabids/get_files",data=request )
+        print(request,'response',response.content.decode())
         filelist = json.loads(response.content.decode())['result']
 
         # Preview Single File
@@ -170,6 +172,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.v
             }
         })
         response = client.post("/api/sovabids/apply_rules_to_single_file",data=request )
+        print(request,'response',response.content.decode())
         single_file = json.loads(response.content.decode())
         print(single_file)
 
@@ -186,6 +189,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.v
             }
         })
         response = client.post("/api/sovabids/apply_rules",data=request )
+        print(request,'response',response.content.decode())
         file_mappings = json.loads(response.content.decode())
         file_mappings=file_mappings['result']
         mappings_path = os.path.join(bids_path,'code','sovabids','mappings.yml')
@@ -202,6 +206,7 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.v
         }
         })
         response = client.post("/api/sovabids/save_mappings",data=request )
+        print(request,'response',response.content.decode())
 
     individuals=file_mappings['Individual']
 

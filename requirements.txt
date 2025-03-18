@@ -2,4 +2,5 @@ requests
 pybv >= 0.7.3
 pyyaml
 pandas
-fastapi-jsonrpc==2.8.0
+fastapi==0.115.11
+fastapi-jsonrpc==3.2.1

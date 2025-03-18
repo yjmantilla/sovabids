@@ -95,14 +95,17 @@ html_theme = 'furo'
 #html_static_path = ['_static'] #already done in the setup(app) section
 html_extra_path = ['_copyover']
 
+###################################################################################################
+# Seems like this is not needed anymore ###########################################################
 # Replace gallery.css for changing the highlight of the output cells in sphinx gallery
 # See:
 # https://github.com/sphinx-gallery/sphinx-gallery/issues/399
 # https://github.com/sphinx-doc/sphinx/issues/2090
 # https://github.com/sphinx-doc/sphinx/issues/7747
-def setup(app):
-   app.connect('builder-inited', lambda app: app.config.html_static_path.append('_static'))
-   app.add_css_file('gallery.css')
+# def setup(app):
+#    app.connect('builder-inited', lambda app: app.config.html_static_path.append('_static'))
+#    app.add_css_file('gallery.css')
+###################################################################################################
 
 # Auto API
 extensions += ['autoapi.extension']

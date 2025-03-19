@@ -10,6 +10,9 @@
    :target: https://sovabids.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
+.. image:: https://img.shields.io/badge/Preprint-Zenodo-orange
+  :target: https://doi.org/10.5281/zenodo.10292410
+
 sovabids
 ========
 

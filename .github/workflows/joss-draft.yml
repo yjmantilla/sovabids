@@ -17,6 +17,10 @@ jobs:
           paper-path: paper/paper.md
           output-type: pdf
 
+      # Print directory contents after generating the draft PDF
+      - name: List contents of paper/ after Draft PDF generation
+        run: ls -lah paper/
+
       # Upload the Draft PDF
       - name: Upload Draft PDF
         uses: actions/upload-artifact@v4
@@ -24,13 +28,17 @@ jobs:
           name: draft-paper
           path: paper/paper.pdf
 
-      # Generate Preprint PDF (Using Custom Action)
+      # Generate Preprint PDF
       - name: Build Preprint PDF
         uses: ./.github/actions/openjournals-pdf
         with:
           journal: joss
           paper-path: paper/paper.md
           output-type: preprint
+
+      # Print directory contents after generating the Preprint PDF
+      - name: List contents of paper/ after Preprint PDF generation
+        run: ls -lah paper/
 
       # Upload the Preprint PDF
       - name: Upload Preprint PDF

@@ -9,7 +9,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # WGenerate Draft PDF using inara (LaTeX is built-in)
+      # ✅ Generate Draft PDF using inara
       - name: Build Draft PDF
         uses: ./.github/actions/openjournals-pdf
         with:
@@ -17,14 +17,14 @@ jobs:
           paper-path: paper/paper.md
           output-type: pdf
 
-      # Upload the Draft PDF
+      # ✅ Upload the Draft PDF
       - name: Upload Draft PDF
         uses: actions/upload-artifact@v4
         with:
           name: draft-paper
           path: paper/paper.pdf
 
-      # Generate Preprint LaTeX File (`paper.preprint.tex`)
+      # ✅ Generate Preprint LaTeX File (`paper.preprint.tex`)
       - name: Build Preprint LaTeX File
         uses: ./.github/actions/openjournals-pdf
         with:
@@ -32,28 +32,13 @@ jobs:
           paper-path: paper/paper.md
           output-type: preprint
 
-      # Print files to verify `paper.preprint.tex` exists
+      # ✅ Print files to verify `paper.preprint.tex` exists
       - name: List contents of paper/
         run: ls -lah paper/
 
-      # Compile Preprint PDF using inara (Reusing Built-in LaTeX)
-      - name: Compile Preprint PDF
-        run: |
-          docker run --rm -v $(pwd)/paper:/data openjournals/inara:latest bash -c "
-          cd /data && \
-          pdflatex paper.preprint.tex && \
-          bibtex paper && \
-          pdflatex paper.preprint.tex && \
-          pdflatex paper.preprint.tex
-          "
-
-      # List final contents to check if `paper.preprint.pdf` exists
-      - name: List final contents of paper/
-        run: ls -lah paper/
-
-      # Upload the Preprint PDF
-      - name: Upload Preprint PDF
+      # ✅ Upload the Preprint LaTeX file (`paper.preprint.tex`)
+      - name: Upload Preprint LaTeX File
         uses: actions/upload-artifact@v4
         with:
-          name: preprint-paper
-          path: paper/paper.preprint.pdf
+          name: preprint-tex
+          path: paper/paper.preprint.tex

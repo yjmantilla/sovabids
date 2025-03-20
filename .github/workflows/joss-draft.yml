@@ -24,7 +24,7 @@ jobs:
           name: draft-paper
           path: paper/paper.pdf
 
-      # ✅ Generate Preprint (This creates `paper.preprint.tex`)
+      # ✅ Generate Preprint LaTeX File (This creates `paper.preprint.tex`)
       - name: Build Preprint (Generates .tex)
         uses: ./.github/actions/openjournals-pdf
         with:
@@ -32,23 +32,17 @@ jobs:
           paper-path: paper/paper.md
           output-type: preprint
 
-      # ✅ List contents of paper/ to verify the preprint `.tex` file exists
+      # ✅ Print files to check preprint `.tex` exists
       - name: List contents of paper/
         run: ls -lah paper/
 
-      # ✅ Install LaTeX Packages
-      - name: Install LaTeX
+      # ✅ Compile Preprint PDF using LaTeX Docker
+      - name: Compile Preprint PDF in LaTeX Docker
         run: |
-          sudo apt-get update
-          sudo apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra
+          docker run --rm -v $(pwd)/paper:/data texlive/texlive \
+          pdflatex -output-directory /data /data/paper.preprint.tex
 
-      # ✅ Compile Preprint PDF from LaTeX
-      - name: Compile Preprint PDF
-        run: |
-          pdflatex -output-directory paper paper/paper.preprint.tex
-          pdflatex -output-directory paper paper/paper.preprint.tex  # Run twice for proper formatting
-
-      # ✅ List contents of paper/ to check if `paper.preprint.pdf` was created
+      # ✅ List final contents of paper/ to check if `paper.preprint.pdf` exists
       - name: List final contents of paper/
         run: ls -lah paper/
 

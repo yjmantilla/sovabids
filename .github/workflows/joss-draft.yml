@@ -16,21 +16,22 @@ jobs:
           journal: joss
           paper-path: paper/paper.md
 
-      # Generate Preprint PDF using the Inara Docker Image
-      - name: Build Preprint PDF
-        run: |
-          docker run --rm -v $PWD:/data openjournals/inara:latest -o preprint paper/paper.md
-
-      # Upload the Draft PDF as an Artifact
+      # Upload the Draft PDF
       - name: Upload Draft PDF
         uses: actions/upload-artifact@v4
         with:
           name: draft-paper
-          path: paper/paper.pdf  # This should be the same directory as paper.md
+          path: paper/paper.pdf
 
-      # Upload the Preprint PDF as an Artifact
+      # Generate Preprint PDF
+      - name: Build Preprint PDF
+        run: |
+          docker run --rm -v $PWD:/data openjournals/inara:latest -o preprint paper/paper.md
+          mv paper/paper.pdf paper/paper-preprint.pdf  # Rename output for clarity
+
+      # Upload the Preprint PDF
       - name: Upload Preprint PDF
         uses: actions/upload-artifact@v4
         with:
           name: preprint-paper
-          path: paper/paper-preprint.pdf  # Ensure this matches the output filename
+          path: paper/paper-preprint.pdf

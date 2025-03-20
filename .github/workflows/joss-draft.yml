@@ -11,7 +11,7 @@ jobs:
 
       # Generate Draft PDF
       - name: Build Draft PDF
-        uses: ./github/actions/openjournals-pdf
+        uses: ./.github/actions/openjournals-pdf
         with:
           journal: joss
           paper-path: paper/paper.md
@@ -26,7 +26,7 @@ jobs:
 
       # Generate Preprint PDF (Using Custom Action)
       - name: Build Preprint PDF
-        uses: ./github/actions/openjournals-pdf
+        uses: ./.github/actions/openjournals-pdf
         with:
           journal: joss
           paper-path: paper/paper.md

@@ -9,7 +9,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Generate Draft PDF
+      # ✅ Generate Draft PDF
       - name: Build Draft PDF
         uses: ./.github/actions/openjournals-pdf
         with:
@@ -17,32 +17,44 @@ jobs:
           paper-path: paper/paper.md
           output-type: pdf
 
-      # Print directory contents after generating the draft PDF
-      - name: List contents of paper/ after Draft PDF generation
-        run: ls -lah paper/
-
-      # Upload the Draft PDF
+      # ✅ Upload the Draft PDF
       - name: Upload Draft PDF
         uses: actions/upload-artifact@v4
         with:
           name: draft-paper
           path: paper/paper.pdf
 
-      # Generate Preprint PDF
-      - name: Build Preprint PDF
+      # ✅ Generate Preprint (This creates `paper.preprint.tex`)
+      - name: Build Preprint (Generates .tex)
         uses: ./.github/actions/openjournals-pdf
         with:
           journal: joss
           paper-path: paper/paper.md
           output-type: preprint
 
-      # Print directory contents after generating the Preprint PDF
-      - name: List contents of paper/ after Preprint PDF generation
+      # ✅ List contents of paper/ to verify the preprint `.tex` file exists
+      - name: List contents of paper/
         run: ls -lah paper/
 
-      # Upload the Preprint PDF
+      # ✅ Install LaTeX Packages
+      - name: Install LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra
+
+      # ✅ Compile Preprint PDF from LaTeX
+      - name: Compile Preprint PDF
+        run: |
+          pdflatex -output-directory paper paper/paper.preprint.tex
+          pdflatex -output-directory paper paper/paper.preprint.tex  # Run twice for proper formatting
+
+      # ✅ List contents of paper/ to check if `paper.preprint.pdf` was created
+      - name: List final contents of paper/
+        run: ls -lah paper/
+
+      # ✅ Upload the Preprint PDF
       - name: Upload Preprint PDF
         uses: actions/upload-artifact@v4
         with:
           name: preprint-paper
-          path: paper/paper.pdf
+          path: paper/paper.preprint.pdf

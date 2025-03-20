@@ -9,12 +9,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Generate Draft PDF (Default Output)
+      # Generate Draft PDF
       - name: Build Draft PDF
-        uses: openjournals/openjournals-draft-action@master
+        uses: ./github/actions/openjournals-pdf
         with:
           journal: joss
           paper-path: paper/paper.md
+          output-type: pdf
 
       # Upload the Draft PDF
       - name: Upload Draft PDF
@@ -23,15 +24,17 @@ jobs:
           name: draft-paper
           path: paper/paper.pdf
 
-      # Generate Preprint PDF
+      # Generate Preprint PDF (Using Custom Action)
       - name: Build Preprint PDF
-        run: |
-          docker run --rm -v $PWD:/data openjournals/inara:latest -o preprint paper/paper.md
-          mv paper/paper.pdf paper/paper-preprint.pdf  # Rename output for clarity
+        uses: ./github/actions/openjournals-pdf
+        with:
+          journal: joss
+          paper-path: paper/paper.md
+          output-type: preprint
 
       # Upload the Preprint PDF
       - name: Upload Preprint PDF
         uses: actions/upload-artifact@v4
         with:
           name: preprint-paper
-          path: paper/paper-preprint.pdf
+          path: paper/paper.pdf

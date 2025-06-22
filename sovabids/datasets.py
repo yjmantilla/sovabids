@@ -213,6 +213,31 @@ def make_dummy_dataset(EXAMPLE,
                             fname, ext = os.path.splitext(EXAMPLE)
                             shutil.copyfile(EXAMPLE, fpath+ext)
 
+
+def generate_1_over_f_noise(n_channels, n_times, exponent=1.0, random_state=None):
+    rng = np.random.default_rng(random_state)
+    noise = np.zeros((n_channels, n_times))
+
+    freqs = np.fft.rfftfreq(n_times, d=1.0)  # d=1.0 assumes unit sampling rate
+    freqs[0] = freqs[1]  # avoid division by zero at DC
+
+    scale = 1.0 / np.power(freqs, exponent)
+
+    for ch in range(n_channels):
+        # Generate white noise in time domain
+        white = rng.standard_normal(n_times)
+        # Transform to frequency domain
+        white_fft = np.fft.rfft(white)
+        # Apply 1/f scaling
+        pink_fft = white_fft * scale
+        # Transform back to time domain
+        pink = np.fft.irfft(pink_fft, n=n_times)
+        # Normalize to zero mean, unit variance
+        pink = (pink - pink.mean()) / pink.std()
+        noise[ch, :] = pink
+
+    return noise
+
 def get_dummy_raw(NCHANNELS = 5,
     SFREQ = 200,
     STOP = 10,
@@ -238,7 +263,8 @@ def get_dummy_raw(NCHANNELS = 5,
     info = mne.create_info(n_channels, sfreq=sampling_freq)
 
     times = np.linspace(0, STOP, STOP*sampling_freq, endpoint=False)
-    data = np.zeros((NCHANNELS,times.shape[0]))
+    data = generate_1_over_f_noise(NCHANNELS, times.shape[0], exponent=1.0)
+    #np.zeros((NCHANNELS,times.shape[0]))
 
     raw = mne.io.RawArray(data, info)
     raw.set_channel_types({x:'eeg' for x in raw.ch_names})

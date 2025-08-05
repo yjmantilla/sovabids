@@ -219,7 +219,20 @@ def load_rules():
 @app.route("/edit-rules", methods=['POST', 'GET'])
 def edit_rules():
     if request.method == 'POST':
-        session['general_rules'] = eval(request.form.get('rules'))
+        # Security fix: Replace eval() with safe YAML parsing
+        import yaml
+        try:
+            rules_text = request.form.get('rules')
+            if rules_text:
+                session['general_rules'] = yaml.safe_load(rules_text)
+            else:
+                session['general_rules'] = {}
+        except yaml.YAMLError as e:
+            flash(f'Invalid YAML format: {e}')
+            return render_template("edit_rules.html")
+        except Exception as e:
+            flash(f'Error parsing rules: {e}')
+            return render_template("edit_rules.html")
 
         #Make mappings
         urltail='apply_rules'
@@ -263,7 +276,20 @@ def individual_rules(key=None):
             if "form3" in request.form:
                 # see https://stackoverflow.com/a/10644186/14068216
                 ind_rules = session.get('ind_rules', [])
-                rules = eval(request.form.get('rules'))
+                # Security fix: Replace eval() with safe YAML parsing
+                import yaml
+                try:
+                    rules_text = request.form.get('rules')
+                    if rules_text:
+                        rules = yaml.safe_load(rules_text)
+                    else:
+                        rules = {}
+                except yaml.YAMLError as e:
+                    flash(f'Invalid YAML format: {e}')
+                    return render_template("individual_rules.html", files=files)
+                except Exception as e:
+                    flash(f'Error parsing rules: {e}')
+                    return render_template("individual_rules.html", files=files)
                 data = {'file': key, 'rules': rules}
                 if data not in ind_rules:
                     ind_rules.append(data)

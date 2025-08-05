@@ -38,8 +38,7 @@ A typical rules file looks like this:
         eeg_extension : .vhdr
         path_analysis:
             pattern : _data/%dataset_description.Name%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr
-        code_execution:
-            - print(raw.info)
+        # code_execution: REMOVED for security reasons - use built-in transformations instead
 
 
 To understand the rules file you first need to know a bit of the `bids specification for eeg <eegdocs_>`_ . Mainly that it contains 6 major files:
@@ -693,31 +692,24 @@ If you want to only convert raw eyesClosed files, you could use:
             - exclude : _highpass
 
 
-code_execution
-^^^^^^^^^^^^^^
+code_execution (DEPRECATED - SECURITY RISK)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Is used to hold a **list of commands** you want to run for additional flexibility but at the cost of knowing a bit about the backend of this package. Mainly that mne eeg object is called "raw". This means you can manipulate the eeg object if you know how to use mne.
+.. danger::
 
-The schema of this property is:
-
-.. code-block:: yaml
+    **This feature has been removed for security reasons.**
     
-    non-bids:
-        code_execution:
-            - command1
-            - command2
-
-A useless but simple way to illustrate this is just to print the information of the eeg object when the code is executed. For this you just need to put the following:
-
-.. code-block:: yaml
+    The ``code_execution`` functionality allowed arbitrary Python code execution, which posed significant security risks including:
     
-    non-bids:
-        code_execution:
-            - print(raw.info)
+    - Remote code execution through malicious rule files
+    - System compromise and data exfiltration
+    - Privilege escalation attacks
+    
+    **Migration:** Use built-in transformation functions instead. Contact maintainers if you need specific functionality that was previously implemented through code execution.
 
-.. note::
+**Historical documentation (for reference only):**
 
-    Notice it is a **list** of commands, so each command has a (``-``); even if we execute only one command.
+Previously, this was used to hold a **list of commands** for additional flexibility at the cost of security. This functionality has been completely removed and will log a warning if encountered in rule files.
 
 The complete non-bids object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -730,8 +722,6 @@ Finally, we will have this *non-bids* object (if using the placeholder pattern o
         eeg_extension : .vhdr
         path_analysis:
             pattern : _data/%dataset_description.Name%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr
-        code_execution:
-            - print(raw.info)
         file_filter:
             - include : eyesClosed
             - exclude : _PREP

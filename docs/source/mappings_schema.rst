@@ -30,10 +30,7 @@ A typical mapping file looks like this:
         - A2
         Name: Dummy
     non-bids:
-        code_execution:
-        - print('some good code')
-        - print(raw.info)
-        - print(some bad code)
+        # code_execution: REMOVED for security reasons - use built-in transformations instead
         eeg_extension: .vhdr
         path_analysis:
         pattern: T%entities.task%/S%entities.session%/sub%entities.subject%_%entities.acquisition%_%entities.run%.vhdr
@@ -67,10 +64,7 @@ A typical mapping file looks like this:
         subject: '0'
         task: '0'
     non-bids:
-        code_execution:
-        - print('some good code')
-        - print(raw.info)
-        - print(some bad code)
+        # code_execution: REMOVED for security reasons - use built-in transformations instead
         eeg_extension: .vhdr
         path_analysis:
         pattern: T%entities.task%/S%entities.session%/sub%entities.subject%_%entities.acquisition%_%entities.run%.vhdr
@@ -103,10 +97,7 @@ A typical mapping file looks like this:
         subject: '0'
         task: '0'
     non-bids:
-        code_execution:
-        - print('some good code')
-        - print(raw.info)
-        - print(some bad code)
+        # code_execution: REMOVED for security reasons - use built-in transformations instead
         eeg_extension: .vhdr
         path_analysis:
         pattern: T%entities.task%/S%entities.session%/sub%entities.subject%_%entities.acquisition%_%entities.run%.vhdr

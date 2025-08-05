@@ -112,7 +112,9 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.v
 
         file_mappings = apply_rules(source_path=input_root,bids_path=bids_path,rules=rules)
     elif mode=='cli':
-        os.system('sovapply '+input_root + ' '+ bids_path + ' ' + full_rules_path)
+        # Security fix: Use subprocess with shell=False instead of os.system
+        import subprocess
+        subprocess.run(['sovapply', input_root, bids_path, full_rules_path], check=True)
         mappings_path = os.path.join(bids_path,'code','sovabids','mappings.yml')
         file_mappings = load_rules(mappings_path)
     elif mode=='rpc':
@@ -220,7 +222,9 @@ def dummy_dataset(pattern_type='placeholder',write=True,mode='python',format='.v
         if mode=='python':
             convert_them(file_mappings)
         elif mode=='cli':
-            os.system('sovaconvert '+mappings_path)
+            # Security fix: Use subprocess with shell=False instead of os.system
+            import subprocess
+            subprocess.run(['sovaconvert', mappings_path], check=True)
         elif mode=='rpc':
             request=json.dumps({ #jsondumps important to avoid parse errors
             "jsonrpc": "2.0",

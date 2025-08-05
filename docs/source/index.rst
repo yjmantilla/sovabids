@@ -6,6 +6,7 @@ Welcome to sovabids' documentation!
    :caption: Contents:
 
    README.rst
+   security_notice.rst
    rules_schema.rst
    mappings_schema.rst
    validation.rst

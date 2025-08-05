@@ -78,8 +78,11 @@ def get_info_from_path(path,rules):
     if postprocess:
         l=[]
         for key,val in postprocess.items():
-            scoped_expression=val.replace('[',"patterns_extracted['").replace("]","']")
-            treated_value=eval(scoped_expression)
+            # SECURITY FIX: Remove eval() for expression evaluation
+            # This functionality has been removed for security reasons
+            LOGGER.warning(f"Expression evaluation has been removed for security reasons. "
+                          f"Operation '{key}' will be ignored. Please use built-in transformation functions instead.")
+            continue
             d = nested_notation_to_tree(key,treated_value.replace('-','').replace('_',''))
             l.append(d)
         patterns_extracted = deep_merge_N([patterns_extracted]+l)
@@ -153,7 +156,7 @@ def load_rules(rules):
     if isinstance(rules,str):
         try:
             with open(rules,encoding="utf-8") as f:
-                return yaml.load(f,yaml.FullLoader)
+                return yaml.safe_load(f)
         except:
             raise IOError(f"Couldnt read {rules} file as a rule file.")
     elif isinstance(rules,dict):
@@ -251,23 +254,13 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
             output_format = non_bids.get('format','BrainVision')
         if 'output_format' in non_bids:
             output_format = non_bids.get('output_format','BrainVision')
+        # SECURITY FIX: Code execution functionality has been removed for security reasons
+        # If you need custom processing, please use the built-in transformation functions instead
         if "code_execution" in non_bids:
-            code_execution = non_bids.get('code_execution',None)
-
-            if isinstance(code_execution,str):
-                non_bids["code_execution"] = [non_bids["code_execution"]]
-
-            if isinstance(code_execution,list):
-                for command in non_bids["code_execution"]:
-                    try:
-                        exec(command)
-                    except:
-                        error_string = 'There was an error with the following command:\n'+command+'\ngiving the following traceback:\n'+format_exc()
-                        print(error_string)
-                        #maybe log errors here?
-                        #or should we raise an exception?
-            else:
-                raise ValueError(f'Expected code_execution to be str or list, got {type(code_execution)} instead')
+            LOGGER.warning("Code execution functionality has been removed for security reasons. "
+                          "This rule will be ignored. Please use built-in transformation functions instead.")
+            # Remove the code_execution key to prevent further processing
+            del non_bids["code_execution"]
 
         # remember the `entities` key fields must have the same parameters as the BIDSPath constructor argument
         bids_path = BIDSPath(**entities,root=bids_path)

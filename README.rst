@@ -40,6 +40,11 @@ sovabids
 
    Currently meg2bids conversion is not supported, but this is a targeted feature.
 
+.. danger::
+
+   **Security Update**: Code execution functionality has been removed for security reasons. 
+   See the `Security Notice <https://sovabids.readthedocs.io/en/latest/security_notice.html>`_ for details and migration guidance.
+
 .. tip::
 
    By default sovabids will skip files already converted. If you want to overwrite previous conversions currently you need to delete the output folder (by yourself) and start sovabids over again.

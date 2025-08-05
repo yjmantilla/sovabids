@@ -7,6 +7,8 @@ Welcome to sovabids' documentation!
 
    README.rst
    security_notice.rst
+   transformations.rst
+   transformation_examples.rst
    rules_schema.rst
    mappings_schema.rst
    validation.rst

@@ -707,9 +707,52 @@ code_execution (DEPRECATED - SECURITY RISK)
     
     **Migration:** Use built-in transformation functions instead. Contact maintainers if you need specific functionality that was previously implemented through code execution.
 
-**Historical documentation (for reference only):**
+**Migration to Secure Alternatives:**
 
-Previously, this was used to hold a **list of commands** for additional flexibility at the cost of security. This functionality has been completely removed and will log a warning if encountered in rule files.
+Use the new secure transformation system instead:
+
+1. **For string operations in path analysis:**
+
+   .. code-block:: yaml
+   
+       non-bids:
+           path_analysis:
+               operation:
+                   entities.subject: "[a] + [b]"  # String concatenation
+                   entities.session: "[prefix]_[session_num]"
+
+2. **For raw object processing:**
+
+   .. code-block:: yaml
+   
+       non-bids:
+           raw_functions:
+               - print_info              # Print raw object information
+               - drop_bad_channels       # Remove bad channels
+               - filter_line_noise_50hz  # Apply 50Hz notch filter
+               - resample_500hz          # Resample to 500Hz
+
+**Available Built-in Functions:**
+
+- ``print_info``: Print information about the raw object
+- ``drop_bad_channels``: Drop channels marked as bad
+- ``set_montage_standard_1020``: Set standard 10-20 montage
+- ``filter_line_noise_50hz``: Apply 50Hz notch filter
+- ``filter_line_noise_60hz``: Apply 60Hz notch filter  
+- ``resample_500hz``: Resample data to 500Hz
+- ``crop_to_10min``: Crop recording to first 10 minutes
+
+**Extending Functionality:**
+
+To add custom functions, fork the repository and add new functions to ``sovabids/transformations.py``:
+
+.. code-block:: python
+
+    @register_raw_function("my_custom_function")
+    def my_custom_function(raw: BaseRaw) -> BaseRaw:
+        \"\"\"Your custom processing function.\"\"\"
+        # Your safe processing code here
+        return raw
 
 The complete non-bids object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -722,6 +765,12 @@ Finally, we will have this *non-bids* object (if using the placeholder pattern o
         eeg_extension : .vhdr
         path_analysis:
             pattern : _data/%dataset_description.Name%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr
+            operation:
+                entities.subject: "[subject_prefix] + [subject_num]"  # String concatenation example
+        raw_functions:
+            - print_info              # Print raw object info
+            - drop_bad_channels       # Remove bad channels  
+            - filter_line_noise_50hz  # Apply 50Hz notch filter
         file_filter:
             - include : eyesClosed
             - exclude : _PREP

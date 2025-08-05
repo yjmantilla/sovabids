@@ -76,16 +76,28 @@ def get_info_from_path(path,rules):
     postprocess = deep_get(rules_copy,'non-bids.path_analysis.operation',None)
 
     if postprocess:
-        l=[]
-        for key,val in postprocess.items():
-            # SECURITY FIX: Remove eval() for expression evaluation
-            # This functionality has been removed for security reasons
-            LOGGER.warning(f"Expression evaluation has been removed for security reasons. "
-                          f"Operation '{key}' will be ignored. Please use built-in transformation functions instead.")
-            continue
-            d = nested_notation_to_tree(key,treated_value.replace('-','').replace('_',''))
-            l.append(d)
-        patterns_extracted = deep_merge_N([patterns_extracted]+l)
+        # Use safe transformations instead of eval
+        from sovabids.transformations import apply_safe_transformations
+        
+        # Create context with all available variables
+        context = deep_merge_N([rules_copy, patterns_extracted])
+        
+        try:
+            transformations = apply_safe_transformations(postprocess, context)
+            
+            l = []
+            for key, treated_value in transformations.items():
+                # Clean the value (remove special characters for BIDS compliance)
+                clean_value = str(treated_value).replace('-','').replace('_','')
+                d = nested_notation_to_tree(key, clean_value)
+                l.append(d)
+            
+            patterns_extracted = deep_merge_N([patterns_extracted] + l)
+            LOGGER.info(f"Applied {len(transformations)} safe transformations")
+            
+        except Exception as e:
+            LOGGER.error(f"Error applying transformations: {e}")
+            LOGGER.warning("Continuing without transformations")
     if 'ignore' in patterns_extracted:
         del patterns_extracted['ignore']
     # merge needed because using rules_copy.update(patterns_extracted) replaced it all
@@ -254,12 +266,28 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
             output_format = non_bids.get('format','BrainVision')
         if 'output_format' in non_bids:
             output_format = non_bids.get('output_format','BrainVision')
-        # SECURITY FIX: Code execution functionality has been removed for security reasons
-        # If you need custom processing, please use the built-in transformation functions instead
+        # Handle safe raw processing functions
+        if "raw_functions" in non_bids:
+            from sovabids.transformations import execute_safe_raw_functions, get_available_functions
+            
+            raw_functions = non_bids.get('raw_functions', [])
+            if isinstance(raw_functions, str):
+                raw_functions = [raw_functions]
+            
+            if isinstance(raw_functions, list):
+                LOGGER.info(f"Executing {len(raw_functions)} raw processing functions")
+                raw = execute_safe_raw_functions(raw_functions, raw)
+            else:
+                LOGGER.warning(f"raw_functions must be a string or list, got {type(raw_functions)}")
+        
+        # SECURITY FIX: Legacy code execution functionality has been removed for security reasons
         if "code_execution" in non_bids:
-            LOGGER.warning("Code execution functionality has been removed for security reasons. "
-                          "This rule will be ignored. Please use built-in transformation functions instead.")
-            # Remove the code_execution key to prevent further processing
+            from sovabids.transformations import get_available_functions
+
+            LOGGER.warning("Legacy code_execution functionality has been removed for security reasons. "
+                          "Use 'raw_functions' with predefined function names instead. "
+                          f"Available functions: {', '.join(get_available_functions())}")
+            # Remove the legacy key to prevent further processing
             del non_bids["code_execution"]
 
         # remember the `entities` key fields must have the same parameters as the BIDSPath constructor argument
@@ -284,13 +312,19 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
 
                 ################################################################
                 raw_fname = raw.filenames[0]
-                if '.ds' in os.path.dirname(raw.filenames[0]):
+                if raw.filenames[0] and '.ds' in os.path.dirname(raw.filenames[0]):
                     raw_fname = os.path.dirname(raw.filenames[0])
+                if not isinstance(raw_fname, str):
+                    raw_fname = f
+                    from pathlib import Path
+                    raw_fname = Path(raw_fname).as_posix()  # ensure it is a string
+
                 # point to file containing header info for multifile systems
                 raw_fname = raw_fname.replace('.eeg', '.vhdr')
                 raw_fname = raw_fname.replace('.fdt', '.set')
                 raw_fname = raw_fname.replace('.dat', '.lay')
                 _, ext = _parse_ext(raw_fname)
+
 
                 datatype = _handle_datatype(raw,None)
                 bids_path = bids_path.copy()

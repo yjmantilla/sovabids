@@ -73,9 +73,12 @@ The datasets generated in studies using electroencephalography are not only larg
 
 SOVABIDS addresses this challenge by enabling reproducible semi-automatic and interoperable conversion of EEG datasets into the BIDS standard, even by non-technical users. This democratizes access to BIDS compliance, enabling more EEG data to be shared and analyzed within the broader scientific community. Moreover, SOVABIDS facilitates the development of user-friendly graphical frontends, which further enhances its accessibility to a wider audience, including those who may not be familiar with programming or data structuring concepts. SOVABIDS leverages established EEG analysis tools, in particular MNE [@mne] for reading EEG data formats and MNE-BIDS [@mnebids] for BIDS compliant data saving. It also incorporates open-source best practices like automated testing and [streamlined documentation](https://sovabids.readthedocs.io/en/latest/autoapi/index.html) that includes [usage examples](https://sovabids.readthedocs.io/en/latest/auto_examples/index.html), ensuring continuous enhancement, and facilitating community usage and collaboration in maintaining and improving the software.
 
+
+# Research Impact Statement
+
 SOVABIDS is currently available on the Neurodesk platform [www.neurodesk.org](www.neurodesk.org) [@neurodesk]. It has been used in both academic research and published scientific studies, including a Master's thesis on EEG-based Alzheimer's risk classification [@vero], a Bachelor's thesis on web-based EEG processing tools [@luisa], and a peer-reviewed study focused on harmonizing EEG features across multiple recording sites [@alberto].
 
-# Core Features and Design Principles
+# Software Design
 
 Developing an EEG-to-BIDS conversion tool requires balancing usability, automation, reproducibility, and flexibility while ensuring compatibility with existing neuroimaging tools. SOVABIDS was designed with these challenges in mind, prioritizing accessibility for non-technical users, handling variations in EEG data structures, and enabling seamless integration with other software. The following five design principles guided its development:
 
@@ -124,5 +127,21 @@ The software architecture of [SOVABIDS](https://github.com/yjmantilla/sovabids/b
 # Acknowledgements
 
 The authors acknowledge the support from the 2021 Google Summer of Code program under the International Neuroinformatics Coordinating Facility (INCF) organization, and the funding provided by the Australian Research Data Commons (ARDC) to support the Australian Electrophysiology Data Analytics Platform (AEDAPT). The authors also acknowledge the facilities and the scientific and technical assistance of the National Imaging Facility, a National Collaborative Research Infrastructure Strategy (NCRIS) capability, at Swinburne Neuroimaging, Swinburne University of Technology, and at the Centre for Advanced Imaging, The University of Queensland.
+
+## AI Usage Disclosure
+
+The primary architecture and core functionality of this software were completed prior to December 2023. Generative AI tools were not used in the conceptual design, methodological decisions, or scientific development of the project.
+
+After March 2025, limited use of generative AI tools was made for maintenance and supporting tasks. The tools used were ChatGPT Codex (o4-mini) and ChatGPT (GPT-4.1).
+
+AI assistance was used for:
+- Updating and improving GitHub Actions continuous integration workflows
+- Enhancing and clarifying documentation
+- Assisting in the implementation of a utility function for generating random 1/f signals
+- Minor code refactoring and formatting improvements
+- Minor improvements on the paper
+
+All AI-assisted outputs were carefully reviewed, edited, tested, and validated by the authors. All core design decisions and scientific judgments were made by the human authors.
+
 
 # References

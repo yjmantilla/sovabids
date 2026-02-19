@@ -14,6 +14,7 @@ import yaml
 def test_sova2coin(dataset='dummy_bidscoin',noedit=True):
     data_dir = os.path.join(REPO_PATH,'_data')
     data_dir = os.path.abspath(data_dir)
+    os.makedirs(data_dir,exist_ok=True)
 
     source_path = os.path.abspath(os.path.join(data_dir,dataset+'_input'))
     bids_path= os.path.abspath(os.path.join(data_dir,dataset+'_output'))

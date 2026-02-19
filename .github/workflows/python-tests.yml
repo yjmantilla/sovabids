@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.8]
+        python-version: [3.11]
         node:  [18] # might need to update this manually?
     steps:
     - uses: actions/checkout@v2

@@ -270,7 +270,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
                 raise ValueError(f'Expected code_execution to be str or list, got {type(code_execution)} instead')
 
         # remember the `entities` key fields must have the same parameters as the BIDSPath constructor argument
-        bids_path = BIDSPath(**entities,root=bids_path)
+        bids_path = BIDSPath(**entities,root=bids_path,datatype='eeg',suffix='eeg')
 
         real_times = raw.times[-1] # Save real duration of the eeg, since it is lost if write is false
 
@@ -283,6 +283,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
                 tmax = max_samples/raw.info['sfreq']
                 raw.crop(tmax=tmax)
                 orig_files = _get_files(bids_path.root)
+
                 write_raw_bids(raw, bids_path=bids_path,overwrite=True,format=output_format,allow_preload=True,verbose=False)
 
             else:

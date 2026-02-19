@@ -3,4 +3,4 @@ pybv >= 0.7.3
 pyyaml
 pandas
 fastapi
-fastapi-jsonrpc
+fastapi-jsonrpc >= 3.4.2

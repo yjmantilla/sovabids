@@ -12,7 +12,7 @@ myst-parser
 flask
 uvicorn
 fastapi
-fastapi-jsonrpc
+fastapi-jsonrpc >= 3.4.2
 versioneer
 pybv >= 0.7.3
 pyyaml

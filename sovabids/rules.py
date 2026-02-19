@@ -6,6 +6,7 @@ import yaml
 import argparse
 import logging
 import re
+from pathlib import Path
 
 from copy import deepcopy
 from mne_bids import write_raw_bids,BIDSPath
@@ -292,6 +293,8 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
 
                 ################################################################
                 raw_fname = raw.filenames[0]
+                if isinstance(raw_fname,Path):
+                    raw_fname = raw_fname.__str__()
                 if '.ds' in os.path.dirname(raw.filenames[0]):
                     raw_fname = os.path.dirname(raw.filenames[0])
                 # point to file containing header info for multifile systems

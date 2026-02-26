@@ -55,13 +55,13 @@ affiliations:
     index: 9
 
 
-date: 05 August 2025
+date: 25 February 2026
 bibliography: paper.bib
 ---
 
 # Summary
 
-Electroencephalography (EEG) data are used in many fields, from neuroscience to clinical research, but it often comes in different formats and structures, making it hard to organize, share, or compare across studies. SOVABIDS is an open-source tool that helps researchers convert EEG data into the Brain Imaging Data Structure (BIDS) [@bids], a standard data structure that aligns with FAIR principles (Findability, Accessibility, Interoperability, and reusability). Specifically, BIDS ensures data consistency and interoperability, making it easier to analyze, share, and integrate EEG data across different tools, data repositories and research groups. Rather than manually renaming files or reorganizing folders, SOVABIDS allows users to define simple rules to automate the conversion (\autoref{fig:use} illustrates this conversion process). The tool is designed to be flexible and user-friendly, supporting customization without requiring advanced programming skills. It can be used as a Python package or as a command-line tool, and includes [comprehensive documentation](https://sovabids.readthedocs.io/en/latest/README.html) with [tutorials](https://sovabids.readthedocs.io/en/latest/auto_examples/index.html) to help users get started. SOVABIDS also integrates with other tools, making it suitable for both small research projects and large collaborative studies.
+Electroencephalography (EEG) data are used in many fields, from neuroscience to clinical research, but recordings are stored in a wide variety of formats and lab-specific folder structures, making them difficult to organize, share, or compare across studies. SOVABIDS is an open-source tool that helps researchers convert EEG data into the Brain Imaging Data Structure (BIDS) [@bids], a standard that promotes FAIR data practices (Findability, Accessibility, Interoperability, and Reusability) and is increasingly expected for data sharing and large-scale collaboration. Rather than manually renaming files or writing dataset-specific scripts, SOVABIDS allows users to define conversion rules in human-readable YAML configuration files, which are then applied automatically across all participants in a dataset (\autoref{fig:use} illustrates this process). The tool is usable as a Python package or command-line tool, and its API supports integration with graphical frontends for users who prefer a visual interface. Comprehensive documentation and tutorials are available at [sovabids.readthedocs.io](https://sovabids.readthedocs.io/en/latest/README.html).
 
 ![Illustration of the EEG to BIDS conversion. The left side shows raw EEG files with participant-specific naming conventions (for example, P1_S0_EC.cnt), where P1 and P2 represent participants, S0 and S1 indicate sessions, and EC (Eyes Closed) and EO (Eyes Open) refer to tasks. These raw files are converted into the BIDS format, shown on the right, where data are systematically organized into subject (sub-), session (ses-), and modality (eeg) folders. Each EEG recording is saved in standardized BIDS-compliant formats, including .edf for EEG signals and .tsv/.json for metadata. \label{fig:use}](main-use.png)
 
@@ -69,66 +69,75 @@ Electroencephalography (EEG) data are used in many fields, from neuroscience to 
 
 Electroencephalography is a widely used neuroimaging technique that provides high temporal resolution for studying brain activity. Its applications span numerous fields, including cognitive neuroscience, clinical diagnostics, brain-computer interfaces, and neuroengineering. With the increasing volume and complexity of EEG data, ensuring reproducibility, standardization, and interoperability has become a growing priority in the field. The Brain Imaging Data Structure for EEG (EEG-BIDS) [@eegbids] provides a consistent framework for organizing EEG datasets, facilitating data sharing [@openneuro], large-scale collaborations, cross-study comparisons, and promoting FAIR data practices [@fairdata] across a wide range of research applications from fundamental cognitive neuroscience to large-scale clinical neuroimaging.
 
-The datasets generated in studies using electroencephalography are not only large and complex, but also vary widely due to the multitude of formats used by different hardware vendors. Thus, despite the advantages of BIDS, the conversion of EEG datasets to the BIDS standard can be challenging, especially for researchers who are not well-versed in technical data manipulation, and those from smaller or less well-resourced institutions. Researchers are thus obliged to wrestle with converting their data to BIDS following data acquisition. This process is prone to error if done manually, which poses particular problems for large studies. Software solutions are available to assist the conversion, but they require either basic programming skills (e.g., MNE-BIDS [@mnebids], data2bids in FieldTrip [@fieldtrip] and EEG-BIDS in EEGLAB [@eeglab]), or detailed user input for each file being converted, again limiting practicality for large studies as happens in EEG2BIDS [@eeg2bids].
+Despite these advantages, converting EEG datasets to BIDS in practice remains a significant challenge. EEG data varies widely in format due to the multitude of proprietary standards used by different hardware vendors, and datasets are often organized according to lab-specific or acquisition-driven conventions rather than any consistent structure. For researchers without strong programming backgrounds, particularly those at smaller or less well-resourced institutions, this conversion process typically requires either substantial manual effort or the ability to write dataset-specific scripts, both of which are error-prone and difficult to reproduce or scale to large multi-participant studies. SOVABIDS addresses this gap by providing a rule-based, semi-automated conversion workflow that is accessible to non-programmers while remaining flexible enough to handle the heterogeneity common in real-world EEG datasets.
 
-SOVABIDS addresses this challenge by enabling reproducible semi-automatic and interoperable conversion of EEG datasets into the BIDS standard, even by non-technical users. This democratizes access to BIDS compliance, enabling more EEG data to be shared and analyzed within the broader scientific community. Moreover, SOVABIDS facilitates the development of user-friendly graphical frontends, which further enhances its accessibility to a wider audience, including those who may not be familiar with programming or data structuring concepts. SOVABIDS leverages established EEG analysis tools, in particular MNE [@mne] for reading EEG data formats and MNE-BIDS [@mnebids] for BIDS compliant data saving. It also incorporates open-source best practices like automated testing and [streamlined documentation](https://sovabids.readthedocs.io/en/latest/autoapi/index.html) that includes [usage examples](https://sovabids.readthedocs.io/en/latest/auto_examples/index.html), ensuring continuous enhancement, and facilitating community usage and collaboration in maintaining and improving the software.
+# State of the Field
+
+Several tools support EEG conversion to BIDS, including MNE-BIDS [@mnebids], data2bids in FieldTrip [@fieldtrip], EEG-BIDS in EEGLAB [@eeglab], and EEG2BIDS [@eeg2bids]. More general-purpose converters such as Bidsme [@bidsme] also support EEG alongside other modalities.
+
+MNE-BIDS [@mnebids] provides a powerful programmatic interface within the MNE ecosystem and offers fine-grained control over metadata specification. However, it typically requires dataset-specific scripting, which limits accessibility for non-technical users and reduces scalability for large multi-participant studies.
+
+FieldTrip [@fieldtrip] and EEGLAB [@eeglab] provide conversion utilities integrated within their respective analysis environments. While convenient for users already embedded in those ecosystems, conversion workflows often require manual interaction or scripting for each dataset.
+
+EEG2BIDS [@eeg2bids] offers a more guided workflow but relies on detailed user input at the file level, which becomes impractical for large heterogeneous datasets.
+
+Bidsme [@bidsme] is a general-purpose converter that assumes datasets are already organized in a structured hierarchy prior to conversion. While effective when data are consistently arranged, many EEG datasets are stored using vendor-specific naming schemes or lab-driven folder structures that do not conform to any standard hierarchy. In such cases, substantial manual reorganization is required before conversion can begin.
+
+A natural question is whether SOVABIDS' goals could have been achieved by contributing to an existing tool, particularly MNE-BIDS. We argue they could not. MNE-BIDS is designed around a scripting paradigm where conversion logic is expressed in Python code. Adding rule-based, configuration-driven automation as a non-breaking extension would require architectural changes that diverge from MNE-BIDS’ current scripting-oriented design philosophy and typical usage patterns. The same barrier applies to FieldTrip and EEGLAB, where conversion is tightly coupled to their respective analysis environments.
+
+SOVABIDS instead introduces a distinct approach: an explicit two-tier separation between dataset-level rules and participant-level mappings, encoded in human-readable YAML configuration files. This separation enables automated propagation of general conversion logic while systematically capturing participant-specific deviations without requiring any scripting. Combined with flexible metadata extraction from arbitrary file paths, this design allows SOVABIDS to handle the heterogeneous directory structures and vendor-specific naming conventions common in real-world EEG datasets, while remaining accessible to researchers without programming experience. It also preserves full provenance, enabling reproducible and auditable conversion workflows.
+
+# Software Design
+
+Developing an EEG-to-BIDS conversion tool requires balancing usability, automation, reproducibility, and flexibility while ensuring compatibility with existing neuroimaging tools. The central design tension in SOVABIDS is between expressiveness and accessibility: more powerful conversion logic typically requires programming skill, while simpler interfaces tend to sacrifice flexibility. The following five design principles reflect the trade-offs made to resolve this tension.
+
+## 1. Accessibility for non-technical users
+
+A scripting-based interface, as used by tools like MNE-BIDS, offers maximum expressiveness but requires users to write and maintain dataset-specific code. We traded this expressiveness for accessibility by using human-readable YAML configuration files instead. This approach was inspired by Bidscoin [@bidscoin], a BIDS converter for MRI data. The trade-off is that highly unusual conversion scenarios may require more verbose configuration, but for the vast majority of EEG datasets the YAML-based approach is sufficient and considerably more approachable. To further lower the barrier to adoption, step-by-step guides and usage examples are provided in the documentation.
+
+## 2. Automation that can accommodate outliers
+
+EEG experiments typically produce multiple identically-organised datasets, one per participant. In practice, however, data organisation often varies slightly between participants due to technical issues, partial recordings, or repeated segments. A fully automated system that assumes identical structure across participants would silently fail in these cases, while a fully manual system would not scale. SOVABIDS resolves this by separating conversion logic into two configuration files (illustrated in \autoref{fig:cfg}):
+
+- The [Rules File](https://sovabids.readthedocs.io/en/latest/rules_schema.html), which encodes general conversion rules for the full dataset.
+- The [Mappings File](https://sovabids.readthedocs.io/en/latest/mappings_schema.html), derived from the Rules File, which holds specific conversion parameters for every individual file.
+
+![From a Rules File, a mapping for each file in the dataset can be generated and saved in the Mappings File. The colors illustrate how the information in both files is related.\label{fig:cfg}](rules-mappings.png)
+
+This two-tier approach, inspired by tools such as Bidscoin [@bidscoin] and HeuDiConv [@heudi] (both focused on MRI), extends their model by explicitly supporting non-identical participant structures. Users can also derive an initial Rules File from a community or institutional template to further reduce manual input, and can connect an external GUI via SOVABIDS' API for supervised adjustment of edge cases where full automation is not possible.
+
+To support flexible metadata extraction, SOVABIDS implements heuristics based on common EEG file path patterns. Rather than requiring data to be pre-organized into a standard folder hierarchy before conversion can begin, as both Bidscoin and Bidsme do, SOVABIDS can extract subject, session, task, and other BIDS-relevant properties from arbitrary file paths through flexible pattern matching. This is supported through three approaches of increasing technicality: paired source-target examples for users unfamiliar with pattern matching, placeholder-based templates for intermediate users, and full regular expressions for advanced users who need precise control.
+
+## 3. Reproducible conversion
+
+Reproducibility requires that the full conversion be re-runnable from saved state alone, without relying on the user's memory or undocumented manual steps. All parameters needed to replicate a conversion are therefore saved in the configuration files alongside provenance information. This allows users to audit, correct, and re-run conversions when a BIDS validator flags structural issues or when downstream analysis reveals incorrect metadata.
+
+## 4. Interoperability without a built-in GUI
+
+Including a graphical user interface directly in SOVABIDS would simplify initial use but would tightly couple the tool to a specific frontend technology, increasing maintenance burden and limiting integration with other platforms. Instead, SOVABIDS exposes an RPC-based API that allows any external application — desktop, web-based, or platform-specific — to interact with its conversion logic. RPC was chosen over REST because its action-oriented design maps naturally onto the procedural steps of a data conversion workflow. To demonstrate the API's usability, a [reference GUI was developed in Flask](https://sovabids.readthedocs.io/en/latest/auto_examples/gui_example.html) and is available as a working [example](https://www.youtube.com/watch?v=PW84cy6uUJs).
+
+## 5. Format support through MNE delegation
+
+Supporting the full range of EEG hardware formats from scratch would be an ongoing maintenance burden disproportionate to the tool's core contribution. SOVABIDS instead delegates file reading entirely to MNE-Python [@mne], and BIDS-compliant saving to MNE-BIDS [@mnebids], inheriting support for all formats those libraries handle. The trade-off is that SOVABIDS' format coverage is bounded by MNE's, but this is an acceptable constraint given MNE's broad and actively maintained format support. In practice, SOVABIDS has been specifically tested with BrainVision (.vhdr) and Neuroscan (.cnt) files.
+
+## Architecture Overview
+
+The five design principles above are reflected directly in SOVABIDS' two-module architecture, illustrated in \autoref{fig:arch}. The Rules Module takes the user-defined Rules File and applies it across all EEG files in the dataset, extracting conversion parameters and compiling them into a Mappings File. This separation means that general conversion logic and participant-specific details are handled in distinct, inspectable artifacts rather than embedded in code. The Conversion Module then reads the Mappings File and performs the actual transformation to BIDS-compliant output, delegating file reading to MNE and BIDS-compliant saving to MNE-BIDS. At either stage, the RPC API allows external tools and GUIs to inspect or modify the configuration, supporting the supervised adjustment workflows described above.
+
+![The architecture of SOVABIDS. The conversion process starts with a user-defined Rules File, which encodes general conversion rules (represented in blue inside the Rules File). The Rules Module processes these rules to generate a Mappings File, which contains specific configurations for all EEG files (each red line in the Mappings File represents the configuration of a different EEG file). The Conversion Module then applies these configurations to produce a BIDS-compliant dataset. Interoperability is enabled via an RPC API, allowing integration with external tools, including graphical user interfaces for optional user-supervised adjustments.\label{fig:arch}](arch.png)
 
 
 # Research Impact Statement
 
-SOVABIDS is currently available on the Neurodesk platform [www.neurodesk.org](www.neurodesk.org) [@neurodesk]. It has been used in both academic research and published scientific studies, including a Master's thesis on EEG-based Alzheimer's risk classification [@vero], a Bachelor's thesis on web-based EEG processing tools [@luisa], and a peer-reviewed study focused on harmonizing EEG features across multiple recording sites [@alberto].
+SOVABIDS is listed in the [official BIDS converter registry under the EEG/MEEG/iEEG category](https://bids.neuroimaging.io/tools/converters.html), reflecting recognition by the broader BIDS community. It is also available on the Neurodesk platform [www.neurodesk.org](www.neurodesk.org) [@neurodesk], a community-maintained open neuroimaging environment, which broadens its accessibility beyond the developing team.
 
-# Software Design
-
-Developing an EEG-to-BIDS conversion tool requires balancing usability, automation, reproducibility, and flexibility while ensuring compatibility with existing neuroimaging tools. SOVABIDS was designed with these challenges in mind, prioritizing accessibility for non-technical users, handling variations in EEG data structures, and enabling seamless integration with other software. The following five design principles guided its development:
-
-## 1. Adoption by non-technical users
-
-To decrease the need of programming skills, the conversion uses human-readable and writable YAML configuration files rather than a scripting language. This approach was inspired by Bidscoin [@bidscoin], a BIDS converter for MRI data. To maximise software adoption, step-by-step guides for SOVABIDS are provided.
-
-## 2. Automation that can accommodate outliers
-
-The planned output of EEG experiments is usually multiple identically-organised data structures,  typically one for each participant. Nevertheless, in practice data organisation often varies slightly between participants; for example, due to temporary technical issues, the data recorded for some participants might be partial or have repeated segments. Like other conversion tools such as Bidscoin [@bidscoin] and HeuDiConv [@heudi], we leverage the generally similar data organisation across participants, but we extend this by allowing for non-identical data structures. This is done by utilising two configuration files (which are illustrated in \autoref{fig:cfg}):
-
-- The [Rules File](https://sovabids.readthedocs.io/en/latest/rules_schema.html), which encodes the general conversion rules for a multiple-participant EEG dataset.
-- The [Mappings File](https://sovabids.readthedocs.io/en/latest/mappings_schema.html), which is derived from the Rules File, and holds specific conversion rules for every individual participant.
-
-![From a Rules File, a mapping for each file in the dataset can be generated and saved in the Mappings File. The colors illustrate how the information in both files is related.\label{fig:cfg}](rules-mappings.png)
-
-In addition, the user can derive the initial Rules File from a community or institutional template, further decreasing manual input. For more fine-tuning of special cases, a user-supervised adjustment loop can be set up through SOVABIDS' interoperable API (Application Programming Interface) to connect with an external graphical user interface (GUI), allowing for fast manual inputs when a fully automated generation is not possible.
-
-To support increased automation, SOVABIDS implements heuristics that take advantage of common file path patterns found in EEG research. Unlike tools that rely on strict prefix-based identification, such as the “--sub-prefix” and “--ses-prefix” options in Bidscoin [@bidscoin] and Bidsme [@bidsme], SOVABIDS enables flexible metadata extraction directly from file paths. It can extract not only subject and session information, but also other BIDS-relevant properties, including task labels. This flexibility is supported through multiple approaches:
-
-- Regular expressions, for advanced users who require precise control.
-- Placeholder-based templates, which offer an intuitive way to define rules (as shown in the “path_analysis” section of \autoref{fig:cfg}).
-- Paired source-target examples, designed for users without experience in regular expressions or placeholders.
-
-## 3. Reproducible conversion
-
-All the parameters needed to fully replicate the conversion are saved in the configuration files along with provenance information. This allows the user to evaluate, correct and repeat the conversion in case the BIDS-organised dataset has an invalid structure (as detected using a BIDS validator) or incorrect content (usually discovered during the analysis stage).
-
-## 4. Interoperability
-
-To increase maintainability, SOVABIDS does not include a graphical user interface, but its API allows interoperability with other applications, primarily GUI front ends (desktop or web-based). We used a remote procedure call (RPC) protocol, as its action-oriented design naturally fits the process-driven nature of data conversion workflows. Additionally, interoperability is enhanced through the YAML-based configuration files, which allow users to define conversion rules in a structured, human-readable format. This enables seamless integration with the many tools that support it without sacrificing the ease of managing the configuration files. To [demonstrate](https://www.youtube.com/watch?v=PW84cy6uUJs) the usability of the API, a [basic GUI was developed in Flask](https://sovabids.readthedocs.io/en/latest/auto_examples/gui_example.html).
-
-## 5. Broad support of formats
-
-SOVABIDS is designed to convert EEG datasets into the BIDS standard while accommodating diverse data formats. Since it relies on MNE-Python for reading electrophysiology files, any EEG format supported by MNE can be processed and converted. As of now, however, the software has been specifically tested with BrainVision (.vhdr) and Neuroscan (.cnt) filesonly.
-
-# Software Architecture
-
-The software architecture of [SOVABIDS](https://github.com/yjmantilla/sovabids/blob/main/paper/sovabids.readthedocs.io) is designed to streamline the process of converting EEG datasets to the BIDS format. As depicted in \autoref{fig:arch}, the system is built around two core modules that work in tandem to simplify this complex task:
-
-- Rules Module: At the heart of SOVABIDS, the Rules Module is where the logic of conversion is enacted. Users define specific rules in the 'Rules File', which the module applies to target EEG files, extracting and compiling conversion parameters into a 'Mappings File'. This 'Mappings File' becomes the blueprint for the subsequent data transformation process, ensuring that the individualized nuances of each EEG file are accounted for. These nuances can be introduced through manual editing or through the interoperation with GUIs by leveraging the RPC API.
-- Conversion Module: Acting upon the 'Mappings File', this module is responsible for the hands-on task of converting raw EEG data into the BIDS format. It's a crucial step that translates the preparatory work done by the Rules Module into a structured dataset aligned with the stringent requirements of the BIDS standard, allowing for better interoperability and reproducibility of research.
-
-![The architecture of SOVABIDS. The conversion process starts with a user-defined Rules File, which encodes general conversion rules (represented in blue inside the Rules File). The Rules Module processes these rules to generate a Mappings File, which contains specific configurations for all EEG files (each red line in the Mappings File represents the configuration of a different EEG file). The Conversion Module then applies these configurations to produce a BIDS-compliant dataset. Interoperability is enabled via an RPC API, allowing integration with external tools, including graphical user interfaces for optional user-supervised adjustments.\label{fig:arch}](arch.png)
+Its use has been documented in peer-reviewed and academic work: a Master's thesis on EEG-based Alzheimer's risk classification [@vero], a Bachelor's thesis on web-based EEG processing tools [@luisa], and a peer-reviewed study on harmonizing EEG features across multiple recording sites [@alberto]. These use cases reflect SOVABIDS' applicability across different research scales, from individual thesis projects to multi-site data harmonization studies.
 
 # Acknowledgements
 
 The authors acknowledge the support from the 2021 Google Summer of Code program under the International Neuroinformatics Coordinating Facility (INCF) organization, and the funding provided by the Australian Research Data Commons (ARDC) to support the Australian Electrophysiology Data Analytics Platform (AEDAPT). The authors also acknowledge the facilities and the scientific and technical assistance of the National Imaging Facility, a National Collaborative Research Infrastructure Strategy (NCRIS) capability, at Swinburne Neuroimaging, Swinburne University of Technology, and at the Centre for Advanced Imaging, The University of Queensland.
 
-## AI Usage Disclosure
+# AI Usage Disclosure
 
 The primary architecture and core functionality of this software were completed prior to December 2023. Generative AI tools were not used in the conceptual design, methodological decisions, or scientific development of the project.
 
@@ -142,6 +151,5 @@ AI assistance was used for:
 - Minor improvements on the paper
 
 All AI-assisted outputs were carefully reviewed, edited, tested, and validated by the authors. All core design decisions and scientific judgments were made by the human authors.
-
 
 # References

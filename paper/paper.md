@@ -141,7 +141,7 @@ The authors acknowledge the support from the 2021 Google Summer of Code program 
 
 The primary architecture and core functionality of this software were completed prior to December 2023. Generative AI tools were not used in the conceptual design, methodological decisions, or scientific development of the project.
 
-After March 2025, limited use of generative AI tools was made for maintenance and supporting tasks. The tools used were ChatGPT Codex (o4-mini) and ChatGPT (GPT-4.1) and Claude (Sonnet 4.6)
+After March 2025, limited use of generative AI tools was made for maintenance and supporting tasks. The tools used were ChatGPT Codex (o4-mini) and ChatGPT (GPT-4.1) and Claude (Sonnet 4.6).
 
 AI assistance was used for updating and improving GitHub Actions continuous integration workflows, 
 enhancing and clarifying documentation, assisting in the implementation of a utility function for 

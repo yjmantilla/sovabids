@@ -25,7 +25,6 @@ from sovabids.loggers import setup_logging
 from sovabids.settings import SECTION_STRING
 from sovabids.heuristics import from_io_example
 
-import logging
 LOGGER = logging.getLogger(__name__)
 
 def _regex_match(pattern,string):
@@ -534,12 +533,20 @@ def sovapply():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
+    logging.basicConfig(format="%(message)s")
+    LOGGER.setLevel(logging.WARN)
+
     parser = subparsers.add_parser('apply_rules')
     parser.add_argument('source_path',help='The path to the input data directory that will be converted to bids')  # add the name argument
     parser.add_argument('bids_path',help='The path to the output bids directory')  # add the name argument
     parser.add_argument('rules',help='The fullpath of the rules file')  # add the name argument
     parser.add_argument('-m','--mapping', help='The fullpath of the mapping file to be written. If not set it will be located in bids_path/code/sovabids/mappings.yml',default='')
+    parser.add_argument('-v','--verbose', action="store_true", help='Make the output more verbose.')
     args = parser.parse_args()
+
+    if args.verbose:
+        LOGGER.setLevel(logging.INFO)
+        
     apply_rules(args.source_path,args.bids_path,args.rules,args.mapping)
 
 if __name__ == "__main__":

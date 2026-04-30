@@ -1,17 +1,18 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools-scm>=8"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
 
 [project]
 name = "sovabids"
 dynamic = ["version"]
 description = "Automated eeg2bids conversion"
 readme = "README.rst"
-license = { text = "BSD-3-Clause" }
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 keywords = ["EEG", "eeg", "bids", "mne", "mne-bids", "conversion"]
 authors = [
-    { name = "sovabids developers" },
+    { name = "sovabids developers", email = "yjmantilla@gmail.com" },
 ]
 maintainers = [
     { name = "Yorguin Mantilla", email = "yjmantilla@gmail.com" },
@@ -69,10 +70,21 @@ dev = [
     "sovabids[gui,docs]",
 ]
 
-[tool.setuptools.packages.find]
-exclude = ["tests*", "front*"]
+[tool.hatch.metadata]
+allow-direct-references = true
 
-[tool.setuptools_scm]
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "pep440"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["tests/**", "front/**"]
+
+[tool.hatch.build.targets.wheel]
+exclude = ["tests/**", "front/**"]
 
 [tool.coverage.run]
 omit = ["*tests*"]

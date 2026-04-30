@@ -67,11 +67,17 @@ Installation
 Installation for GUI usage
 --------------------------
 
-This will install sovabids for usage with an experimental web gui, and as an experimental plugin for bidscoin.
+This will install sovabids for usage with an experimental web gui.
 
 .. code-block:: bash
 
    pip install "sovabids[gui]"
+
+For the experimental bidscoin plugin, install the sovabids fork of bidscoin manually:
+
+.. code-block:: bash
+
+   pip install "git+https://github.com/yjmantilla/bidscoin.git@sovabids"
 
 Installation for developers
 ---------------------------
@@ -119,12 +125,13 @@ Use the sovaconvert entry-point to convert the dataset given its mapping file.
 Funding
 -------
 
-.. raw:: html
+.. image:: https://developers.google.com/open-source/gsoc/resources/downloads/GSoC-logo-horizontal.svg
+   :width: 250px
+   :alt: Google Summer of Code
 
-   <br/>
-   <img src="https://developers.google.com/open-source/gsoc/resources/downloads/GSoC-logo-horizontal.svg" width="250">
-   <br/>
-   <img src="https://user-images.githubusercontent.com/4021595/119062104-3caf4400-ba19-11eb-8211-e2e9ce831a16.png" width="250">
+.. image:: https://user-images.githubusercontent.com/4021595/119062104-3caf4400-ba19-11eb-8211-e2e9ce831a16.png
+   :width: 250px
+   :alt: Funding logo
 
 
 
@@ -133,20 +140,29 @@ Acknowledgments
 
 sovabids is developed with the help of the following entities:
 
-.. raw:: html
+.. image:: https://www.neurodesk.org/static/docs/overview/uq_logo.png
+   :width: 250px
+   :alt: University of Queensland
 
-   <br/>
-   <img src="https://www.neurodesk.org/static/docs/overview/uq_logo.png" width="250">
-   <br/>
-   <img src="https://www.neurodesk.org/static/docs/overview/swinburne_uni_logo.png" width="250">
-   <br/>
-   <img src="https://www.udea.edu.co/wps/wcm/connect/udea/2288a382-341c-41ee-9633-702a83d5ad2b/logosimbolo-horizontal-png.png?MOD=AJPERES&CVID=ljeSAX9" width="250">
-   <br/>
-   <img src="https://www.udea.edu.co/wps/wcm/connect/udea/eba017e2-87fb-40c7-b7d8-6bb7d0e008ae/Logo_GRUNECO_R.jpg?MOD=AJPERES&CACHEID=ROOTWORKSPACE.Z18_L8L8H8C0LODDC0A6SSS2AD2GO4-eba017e2-87fb-40c7-b7d8-6bb7d0e008ae-l-x54eU" width="250">
-   <br/>
-   <img src="https://www.neurodesk.org/static/docs/overview/nif.png" width="250">
-   <br/>
-   <img src="https://www.incf.org/sites/default/files/INCF_logo_with_tagline.png" width="250">
+.. image:: https://www.neurodesk.org/static/docs/overview/swinburne_uni_logo.png
+   :width: 250px
+   :alt: Swinburne University
+
+.. image:: https://www.udea.edu.co/wps/wcm/connect/udea/2288a382-341c-41ee-9633-702a83d5ad2b/logosimbolo-horizontal-png.png?MOD=AJPERES&CVID=ljeSAX9
+   :width: 250px
+   :alt: Universidad de Antioquia
+
+.. image:: https://www.udea.edu.co/wps/wcm/connect/udea/eba017e2-87fb-40c7-b7d8-6bb7d0e008ae/Logo_GRUNECO_R.jpg?MOD=AJPERES&CACHEID=ROOTWORKSPACE.Z18_L8L8H8C0LODDC0A6SSS2AD2GO4-eba017e2-87fb-40c7-b7d8-6bb7d0e008ae-l-x54eU
+   :width: 250px
+   :alt: GRUNECO
+
+.. image:: https://www.neurodesk.org/static/docs/overview/nif.png
+   :width: 250px
+   :alt: Neuroimaging Facility
+
+.. image:: https://www.incf.org/sites/default/files/INCF_logo_with_tagline.png
+   :width: 250px
+   :alt: INCF
 
 
 

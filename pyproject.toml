@@ -52,7 +52,6 @@ gui = [
     "fastapi-jsonrpc>=3.4.2",
     "httpx",
     "pydantic",
-    "bidscoin @ git+https://github.com/yjmantilla/bidscoin.git@sovabids",
 ]
 docs = [
     "sphinx>=4.0.0",

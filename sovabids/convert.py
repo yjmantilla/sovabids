@@ -80,6 +80,8 @@ def convert_them(mappings_input):
 def sovaconvert():
     """Console script usage for conversion."""
     # see https://github.com/Donders-Institute/bidscoin/blob/master/bidscoin/bidsmapper.py for example of how to make this
+    from sovabids.misc import handle_unicode_dashes
+    handle_unicode_dashes()
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 

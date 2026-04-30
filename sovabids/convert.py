@@ -80,6 +80,9 @@ def convert_them(mappings_input):
 def sovaconvert():
     """Console script usage for conversion."""
     # see https://github.com/Donders-Institute/bidscoin/blob/master/bidscoin/bidsmapper.py for example of how to make this
+    logging.basicConfig(format="%(message)s")
+    LOGGER.setLevel(logging.WARN)
+
     from sovabids.misc import handle_unicode_dashes
     handle_unicode_dashes()
     parser = argparse.ArgumentParser()
@@ -87,7 +90,12 @@ def sovaconvert():
 
     parser = subparsers.add_parser('convert_them')
     parser.add_argument('mappings',help='The mapping file of the conversion.')
+    parser.add_argument('-v','--verbose', action="store_true", help='Make the output more verbose.')
     args = parser.parse_args()
+
+    if args.verbose:
+        LOGGER.setLevel(logging.INFO)
+
     convert_them(args.mappings)
 
 if __name__ == "__main__":

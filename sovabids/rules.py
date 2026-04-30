@@ -37,7 +37,7 @@ def get_info_from_path(path,rules):
     Parameters
     ----------
 
-    path : str
+    path : str | pathlib.Path
         The path from where we want to extract information.
     rules : dict
         A dictionary following the "Rules File Schema".
@@ -47,6 +47,7 @@ def get_info_from_path(path,rules):
 
     See the Rules File Schema documentation for the expected schema of the dictionary.
     """
+    path = os.fspath(path)
     rules_copy = deepcopy(rules)
     patterns_extracted = {}
 
@@ -97,9 +98,9 @@ def get_files(source_path,rules):
     Parameters
     ----------
 
-    source_path : str
+    source_path : str | pathlib.Path
         The path we want to obtain the files from.
-    rules : str|dict
+    rules : str | pathlib.Path | dict
         The path to the rules file, or the rules dictionary.
 
     Returns
@@ -109,6 +110,8 @@ def get_files(source_path,rules):
         A list containing the path to each valid file in the source_path.
     """
     rules_copy = load_rules(rules)
+    if not isinstance(source_path, list):
+        source_path = os.fspath(source_path)
 
     if isinstance(source_path,str):
         # Generate all files
@@ -141,7 +144,7 @@ def load_rules(rules):
     Parameters
     ----------
     
-    rules : str|dict
+    rules : str | pathlib.Path | dict
         The path to the rules file, or the rules dictionary.
 
     Returns
@@ -150,6 +153,8 @@ def load_rules(rules):
     dict
         The rules dictionary.
     """
+    if isinstance(rules, os.PathLike):
+        rules = os.fspath(rules)
     if isinstance(rules,str):
         try:
             with open(rules,encoding="utf-8") as f:
@@ -167,11 +172,11 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
     Parameters
     ----------
 
-    file : str
+    file : str | pathlib.Path
         Path to the file.
-    rules : str|dict
+    rules : str | pathlib.Path | dict
         Path to the rules file or rules dictionary.
-    bids_path : str
+    bids_path : str | pathlib.Path
         Path to the bids directory
     write : bool, optional
         Whether to write the converted files to disk or not.
@@ -188,10 +193,9 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
     preview : bool|dict
         If preview = False, then False. If True, then the preview dictionary.
     """
-    if isinstance(file,str):
-        f = file
-    else:
-        raise ValueError(f'Expected file to be str, got {type(file)} instead.')
+    file = os.fspath(file)
+    bids_path = os.fspath(bids_path)
+    f = file
 
     rules_copy = load_rules(rules)
 
@@ -435,14 +439,14 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
     Parameters
     ----------
 
-    source_path : str | list of str
-        If str, the path with the files we want to convert to bids.
-        If list of str with the paths of the files we want to convert (ie the output of get_files).
-    bids_path : str
+    source_path : str | pathlib.Path | list of str | list of pathlib.Path
+        If str or Path, the path with the files we want to convert to bids.
+        If list with the paths of the files we want to convert (ie the output of get_files).
+    bids_path : str | pathlib.Path
         The path we want the converted files in.
-    rules : str|dict
+    rules : str | pathlib.Path | dict
         The path to the rules file, or a dictionary with the rules.
-    mapping_path : str, optional
+    mapping_path : str | pathlib.Path, optional
         The fullpath where we want to write the mappings file.
         If '', then bids_path/code/sovabids/mappings.yml will be used.
     
@@ -456,6 +460,13 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
                                 }
     """
     
+    bids_path = os.fspath(bids_path)
+    mapping_path = os.fspath(mapping_path)
+    if isinstance(source_path, list):
+        source_path = [os.fspath(p) for p in source_path]
+    else:
+        source_path = os.fspath(source_path)
+
     # Safe Copy/Load Rules
     rules_copy = load_rules(rules)
 

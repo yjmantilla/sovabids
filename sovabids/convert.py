@@ -17,7 +17,7 @@ def convert_them(mappings_input):
 
     Parameters
     ----------
-    mappings_input : str|dict
+    mappings_input : str | pathlib.Path | dict
         The path to the mapping file or the mapping dictionary:
             {
                 'General': dict with the general rules,
@@ -29,6 +29,8 @@ def convert_them(mappings_input):
     None
     """
 
+    if isinstance(mappings_input, os.PathLike):
+        mappings_input = os.fspath(mappings_input)
     # Loading Mappings
     mappings = load_rules(mappings_input)
     mapping_file = mappings_input if isinstance(mappings_input,str) else None

@@ -1,4 +1,5 @@
 """Module with parser utilities."""
+import os
 import re
 from copy import deepcopy
 
@@ -119,12 +120,12 @@ def parse_entity_from_bidspath(path,entity,mode='r2l'):
     
     Parameters
     ----------
-    path : str
+    path : str | pathlib.Path
         The bidspath we are going to derive the information on.
         Should be the complete path of file of a modality (ie an _eeg file).
     entity : str
         The entity we are going to extract.
-        SHOULD be one of sub|ses|task|acq|run 
+        SHOULD be one of sub|ses|task|acq|run
     mode : str
         Direction of lookup. One of r2l|l2r .
         r2l (right to left)
@@ -136,6 +137,7 @@ def parse_entity_from_bidspath(path,entity,mode='r2l'):
         The extracted value of the entity as a string.
         If None, it means the entity was not found on the string.
     """
+    path = os.fspath(path)
     entity = entity if '-' in entity else entity + '-'
     # Easier to find it from the tail of the bidspath
     if mode == 'r2l':
@@ -187,7 +189,7 @@ def parse_entities_from_bidspath(targetpath,entities=['sub','ses','task','acq','
     
     Parameters
     ----------
-    targetpath : str
+    targetpath : str | pathlib.Path
         The bidspath we are going to derive the information on.
     entities : list of str
         The entities we are going to extract.
@@ -203,6 +205,7 @@ def parse_entities_from_bidspath(targetpath,entities=['sub','ses','task','acq','
         A dictionary with the extracted entities.
         {'sub':'11','task':'resting','ses':'V1','acq':'A','run':1}
     """
+    targetpath = os.fspath(targetpath)
     path = deepcopy(targetpath)
     bids_dict = dict()
     for entity in entities:
@@ -216,7 +219,7 @@ def parse_path_pattern_from_entities(sourcepath,bids_entities):
 
     Parameters
     ----------
-    sourcepath : str
+    sourcepath : str | pathlib.Path
         The sourcepath that will be modified to get the path pattern
     bids_entities : dict
         Dictionary with the entities and their values on the path.
@@ -230,6 +233,7 @@ def parse_path_pattern_from_entities(sourcepath,bids_entities):
     str :
         The path pattern in placeholder format
     """
+    sourcepath = os.fspath(sourcepath)
     path = deepcopy(sourcepath)
     values = [val for key,val in bids_entities.items()]
     key_map={
@@ -270,7 +274,7 @@ def find_bidsroot(path):
 
     Parameters
     ----------
-    path : str
+    path : str | pathlib.Path
         The absolute path to any bids file inside a sub- folder.
 
     Returns
@@ -279,6 +283,7 @@ def find_bidsroot(path):
     str :
         The bidsroot absolute path.
     """
+    path = os.fspath(path)
     sub = parse_entities_from_bidspath(path,entities=['sub'],mode='r2l')
     index = path.find(sub['sub'])
     #We know the bids root is the path up until that index minus some stuff

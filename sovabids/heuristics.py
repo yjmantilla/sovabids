@@ -2,6 +2,7 @@
 
 Functions should return a dictionary.
 """
+import os
 from sovabids.parsers import parse_path_pattern_from_entities
 from sovabids.parsers import parse_entities_from_bidspath
 from sovabids.parsers import find_bidsroot
@@ -14,9 +15,9 @@ def from_io_example(sourcepath,targetpath):
     
     Parameters
     ----------
-    sourcepath : str
+    sourcepath : str | pathlib.Path
         The sourcepath that will be modified to get the path pattern
-    targetpath : str
+    targetpath : str | pathlib.Path
         The bidspath we are going to derive the information on.
 
     Returns
@@ -26,6 +27,8 @@ def from_io_example(sourcepath,targetpath):
             'pattern': The path pattern in placeholder format.
         }
     """
+    sourcepath = os.fspath(sourcepath)
+    targetpath = os.fspath(targetpath)
     # TODO: Should  we also allow the user to just populate the bids stuff by himself
     # That is, instead of providing the target , directly provide the values
     # of the entities he expects on a dictionary

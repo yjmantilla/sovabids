@@ -4,11 +4,11 @@ import requests
 import yaml
 def _get_files(root_path):
     """Recursively scan the directory for files, returning a list with the full-paths to each.
-    
+
     Parameters
     ----------
 
-    root_path : str
+    root_path : str | pathlib.Path
         The path we want to obtain the files from.
 
     Returns
@@ -17,6 +17,7 @@ def _get_files(root_path):
     filepaths : list of str
         A list containing the path to each file in root_path.
     """
+    root_path = os.fspath(root_path)
     filepaths = []
     for root, dirs, files  in os.walk(root_path, topdown=False):
         for name in files:
@@ -30,7 +31,7 @@ def _write_yaml(dictionary,path=None):
     ----------
     dictionary : dict
         The dictionary to be written.
-    path : str | None
+    path : str | pathlib.Path | None
         Full path to the yaml file to be written. If None, no file will be written.
 
     Returns
@@ -39,6 +40,8 @@ def _write_yaml(dictionary,path=None):
     str :
         The dump version of the generated yaml document.
     """
+    if path is not None:
+        path = os.fspath(path)
     if path is not None:
         outputfolder,outputname = os.path.split(path)
         os.makedirs(outputfolder,exist_ok=True)
@@ -59,9 +62,10 @@ def download(url,path):
 
     url : str
         The url of the file to download.
-    path : str
+    path : str | pathlib.Path
         The path where to download the file.
     """
+    path = os.fspath(path)
     get_response = requests.get(url,stream=True)
     file_name  = url.split("/")[-1]
     p = os.path.abspath(os.path.join(path))

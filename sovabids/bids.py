@@ -14,11 +14,12 @@ def update_dataset_description(dataset_description,bids_path,do_not_create=False
 
     dataset_description : dict
         The dataset_description dictionary to update with, following the schema of the dataset_description.json file of bids.
-    bids_path : str
+    bids_path : str | pathlib.Path
         The bids_path of the dataset description file, basically the folder where the file is.
     do_not_create : bool
         If true, does not create the file if it does not exist.
     """
+    bids_path = os.fspath(bids_path)
     jsonfile = os.path.join(bids_path,'dataset_description.json')
     os.makedirs(bids_path,exist_ok=True)
     if os.path.isfile(jsonfile):

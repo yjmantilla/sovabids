@@ -22,7 +22,7 @@ def setup_logging(log_file=None, debug=False):
 
     Parameters
     ----------
-    log_file: str
+    log_file: str | pathlib.Path
         Name of the logfile
     debug: bool
         Set log level to DEBUG if debug==True
@@ -38,6 +38,8 @@ def setup_logging(log_file=None, debug=False):
     This function is a copy of the one found in bidscoin.
     https://github.com/Donders-Institute/bidscoin/blob/748ea2ba537b06d8eee54ac7217b909bdf91a812/bidscoin/bidscoin.py#L41-L83
     """
+    if log_file is not None:
+        log_file = os.fspath(log_file)
     currentDT = datetime.now()
     currentDT.strftime("%Y-%m-%d %H:%M:%S")
 

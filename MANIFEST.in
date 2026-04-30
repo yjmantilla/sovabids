@@ -1,2 +1,2 @@
-include versioneer.py
-include sovabids/_version.py
+include LICENSE
+include README.rst

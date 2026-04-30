@@ -1,3 +1,6 @@
+from importlib.metadata import version, PackageNotFoundError
 
-from . import _version
-__version__ = _version.get_versions()['version']
+try:
+    __version__ = version("sovabids")
+except PackageNotFoundError:
+    __version__ = "unknown"

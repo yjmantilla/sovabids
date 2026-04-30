@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sovabids"
+dynamic = ["version"]
+description = "Automated eeg2bids conversion"
+readme = "README.rst"
+license = { text = "BSD-3-Clause" }
+requires-python = ">=3.9"
+keywords = ["EEG", "eeg", "bids", "mne", "mne-bids", "conversion"]
+authors = [
+    { name = "sovabids developers" },
+]
+maintainers = [
+    { name = "Yorguin Mantilla", email = "yjmantilla@gmail.com" },
+]
+classifiers = [
+    "Topic :: Scientific/Engineering",
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research",
+    "Development Status :: 3 - Alpha",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+]
+dependencies = [
+    "bids-validator",
+    "pybv>=0.7.3",
+    "mne-bids",
+    "pyyaml",
+    "pandas",
+]
+
+[project.urls]
+Documentation = "https://sovabids.readthedocs.io/en/latest/"
+"Bug Reports" = "https://github.com/yjmantilla/sovabids/issues"
+Source = "https://github.com/yjmantilla/sovabids"
+
+[project.scripts]
+sovapply = "sovabids.rules:sovapply"
+sovaconvert = "sovabids.convert:sovaconvert"
+
+[project.optional-dependencies]
+gui = [
+    "flask",
+    "uvicorn",
+    "fastapi",
+    "fastapi-jsonrpc>=3.4.2",
+    "httpx",
+    "pydantic",
+    "bidscoin @ git+https://github.com/yjmantilla/bidscoin.git@sovabids",
+]
+docs = [
+    "sphinx>=4.0.0",
+    "insegel",
+    "furo",
+    "sphinx-gallery",
+    "sphinx-copybutton",
+    "sphinxcontrib-mermaid",
+    "sphinx-autoapi",
+    "myst-parser",
+]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "sovabids[gui,docs]",
+]
+
+[tool.setuptools.packages.find]
+exclude = ["tests*", "front*"]
+
+[tool.setuptools_scm]
+
+[tool.coverage.run]
+omit = ["*tests*"]

@@ -1,6 +1,0 @@
-requests
-pybv >= 0.7.3
-pyyaml
-pandas
-fastapi
-fastapi-jsonrpc >= 3.4.2

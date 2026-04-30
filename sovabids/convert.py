@@ -83,6 +83,8 @@ def sovaconvert():
     logging.basicConfig(format="%(message)s")
     LOGGER.setLevel(logging.WARN)
 
+    from sovabids.misc import handle_unicode_dashes
+    handle_unicode_dashes()
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 

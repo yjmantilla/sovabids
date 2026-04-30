@@ -1,6 +1,43 @@
 "Module with misc utilities for sovabids."
 
+import sys
 import numpy as np
+
+# Unicode characters that look like hyphens but break CLI argument parsing.
+# Users often get these by copy-pasting from word processors or PDFs.
+_UNICODE_DASHES = {
+    '‐': '-',  # HYPHEN
+    '‑': '-',  # NON-BREAKING HYPHEN
+    '‒': '-',  # FIGURE DASH
+    '–': '-',  # EN DASH
+    '—': '-',  # EM DASH
+    '―': '-',  # HORIZONTAL BAR
+    '−': '-',  # MINUS SIGN
+}
+
+def handle_unicode_dashes():
+    """Replace Unicode dash characters in sys.argv with regular hyphens.
+
+    Word processors and some terminals substitute hyphens with typographic
+    dashes (em dash, en dash, etc.). This causes cryptic argparse errors.
+    Call this before parse_args() in every CLI entry point.
+    """
+    found = []
+    for i, arg in enumerate(sys.argv[1:], 1):
+        new_arg = arg
+        for dash, hyphen in _UNICODE_DASHES.items():
+            if dash in new_arg:
+                found.append((i, arg, dash))
+                new_arg = new_arg.replace(dash, hyphen)
+        sys.argv[i] = new_arg
+    if found:
+        print(
+            "WARNING: Unicode dash character(s) detected in command-line arguments "
+            "and replaced with standard hyphens. This often happens when copying "
+            "commands from a word processor or PDF. The following arguments were affected:"
+        )
+        for idx, original, dash in found:
+            print(f"  argv[{idx}]: {original!r}  (contained U+{ord(dash):04X} {dash})")
 
 def flat_paren_counter(string):
     """Count the number of non-nested balanced parentheses in the string. If parenthesis is not balanced then return -1.

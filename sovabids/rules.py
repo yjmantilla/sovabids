@@ -530,6 +530,8 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
 def sovapply():
     """Console script usage for applying rules."""
     # see https://github.com/Donders-Institute/bidscoin/blob/master/bidscoin/bidsmapper.py for example of how to make this
+    from sovabids.misc import handle_unicode_dashes
+    handle_unicode_dashes()
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 

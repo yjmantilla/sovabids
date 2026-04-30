@@ -4,7 +4,7 @@ Thank you for your interest in contributing to sovabids! This document provides 
 
 ## Prerequisites
 
-- Python 3.8+
+- Python 3.9+
 - Git
 - Basic knowledge of EEG data processing and BIDS specification
 - Understanding of MNE-Python and MNE-BIDS
@@ -19,7 +19,7 @@ Thank you for your interest in contributing to sovabids! This document provides 
    ```
 3. **Create a development environment**:
    ```bash
-   pip install -r requirements-dev.txt
+   pip install -e ".[dev]"
    ```
 4. **Run tests** to ensure everything works:
    ```bash

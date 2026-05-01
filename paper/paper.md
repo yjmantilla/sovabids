@@ -93,7 +93,7 @@ Developing an EEG-to-BIDS conversion tool requires balancing usability, automati
 
 ## 1. Accessibility for non-technical users
 
-A scripting-based interface, as used by tools like MNE-BIDS, offers maximum expressiveness but requires users to write and maintain dataset-specific code. We traded this expressiveness for accessibility by using human-readable YAML configuration files instead. This approach was inspired by Bidscoin [@bidscoin], a BIDS converter for MRI data. The trade-off is that highly unusual conversion scenarios may require more verbose configuration, but for the vast majority of EEG datasets the YAML-based approach is sufficient and considerably more approachable. To further lower the barrier to adoption, step-by-step guides and usage examples are provided in the documentation.
+A scripting-based interface, as used by tools like MNE-BIDS, offers maximum expressiveness but requires users to write and maintain dataset-specific code. We traded this expressiveness for accessibility by using human-readable YAML configuration files instead. This approach was inspired by Bidscoin [@bidscoin], a BIDS converter for MRI data. While YAML introduces its own learning requirement for users unfamiliar with the format, it offers a declarative configuration that is reusable across similar datasets and auditable without programming knowledge. The trade-off is that highly unusual conversion scenarios may require more verbose configuration, but for the vast majority of EEG datasets the YAML-based approach is sufficient and considerably more approachable. To further lower the barrier to adoption, step-by-step guides and usage examples are provided in the documentation.
 
 ## 2. Automation that can accommodate outliers
 

@@ -13,6 +13,7 @@ build:
     python: "3.11"
   jobs:
     post_install:
+      - python -m pip install -e ".[docs,gui]"
       - python -m pip install "git+https://github.com/yjmantilla/bidscoin.git@sovabids"
 
 python:

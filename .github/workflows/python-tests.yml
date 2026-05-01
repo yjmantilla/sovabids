@@ -38,6 +38,9 @@ jobs:
     - name: Install dependencies
       run: uv sync --frozen --all-extras
 
+    - name: Install bidscoin (not on PyPI, required for sova2coin plugin tests)
+      run: uv pip install "git+https://github.com/yjmantilla/bidscoin.git@sovabids"
+
     - name: Test with pytest
       run: uv run pytest tests/ --cov=sovabids/ --cov-report=xml --verbose -s
 

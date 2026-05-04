@@ -57,9 +57,6 @@ def setup_logging(log_file=None, debug=False):
     datefmt   = '%Y-%m-%d %H:%M:%S'
     formatter = logging.Formatter(fmt=fmt, datefmt=datefmt)
 
-    # Set & add the streamhandler and add some color to those boring terminal logs! :-)
-    #coloredlogs.install(level=logger.level, fmt=fmt, datefmt=datefmt)
-
     if not log_file:
         return logger
 
@@ -82,4 +79,15 @@ def setup_logging(log_file=None, debug=False):
     errorhandler.setFormatter(formatter)
     errorhandler.set_name('errorhandler')
     logger.addHandler(errorhandler)
+
+    # Add stderr handler for warnings/errors so they always appear on the console,
+    # regardless of whether the caller invoked logging.basicConfig beforehand.
+    if not any(type(h) is logging.StreamHandler for h in logger.handlers):
+        streamhandler = logging.StreamHandler(sys.stderr)
+        streamhandler.setLevel(logging.WARNING)
+        streamhandler.setFormatter(formatter)
+        streamhandler.set_name('streamhandler')
+        logger.addHandler(streamhandler)
+
+    logger.info(f"Full log: {log_name} | Errors/warnings: {error_file}")
     return logger

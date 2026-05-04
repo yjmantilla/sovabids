@@ -493,6 +493,8 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
         LOGGER.info(f"Obtaining list of files.")
         filepaths = get_files(source_path,rules_copy)
         LOGGER.info(f"Found {len(filepaths)} files")
+        if len(filepaths) == 0:
+            LOGGER.warning(f"No files found in {source_path} matching the configured extensions/filters. Individual mappings will be empty.")
     elif isinstance(source_path,list) and len(source_path)!= 0 and isinstance(source_path[0],str):
         filepaths = deepcopy(source_path)
     else:

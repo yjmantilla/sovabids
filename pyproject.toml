@@ -30,7 +30,8 @@ classifiers = [
 dependencies = [
     "bids-validator",
     "pybv>=0.7.3",
-    "mne-bids",
+    "mne-bids>=0.15",
+    "mne>=1.8",
     "pyyaml",
     "pandas",
 ]

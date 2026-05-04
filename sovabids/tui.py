@@ -212,7 +212,7 @@ class RulesPane(Static):
 
     def _schedule_preview(self) -> None:
         if self._preview_timer is not None:
-            self._preview_timer.cancel()
+            self._preview_timer.stop()
         self._preview_timer = self.set_timer(0.6, self._run_preview)
 
     def _run_preview(self) -> None:

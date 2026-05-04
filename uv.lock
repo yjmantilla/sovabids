@@ -3464,6 +3464,8 @@ name = "sovabids"
 source = { editable = "." }
 dependencies = [
     { name = "bids-validator" },
+    { name = "mne", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "mne", version = "1.12.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "mne-bids", version = "0.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "mne-bids", version = "0.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
     { name = "mne-bids", version = "0.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -3549,7 +3551,8 @@ requires-dist = [
     { name = "httpx", marker = "extra == 'gui'" },
     { name = "insegel", marker = "extra == 'dev'" },
     { name = "insegel", marker = "extra == 'docs'" },
-    { name = "mne-bids" },
+    { name = "mne", specifier = ">=1.8" },
+    { name = "mne-bids", specifier = ">=0.15" },
     { name = "myst-parser", marker = "extra == 'dev'" },
     { name = "myst-parser", marker = "extra == 'docs'" },
     { name = "pandas" },

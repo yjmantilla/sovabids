@@ -245,6 +245,28 @@ def test_dummy_dataset():
     dummy_dataset('placeholder',write=True,mode='rpc')
     dummy_dataset('regex',write=True,mode='rpc')
 
+def test_apply_rules_no_matching_files_warns(tmp_path, caplog):
+    import logging
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "some_file.txt").write_text("dummy")
+    bids = tmp_path / "bids"
+    bids.mkdir()
+
+    rules = {
+        'non-bids': {
+            'eeg_extension': '.vhdr',
+            'path_analysis': {'pattern': '%subject%.vhdr'},
+        }
+    }
+
+    with caplog.at_level(logging.WARNING, logger='sovabids.rules'):
+        result = apply_rules(source_path=str(source), bids_path=str(bids), rules=rules)
+
+    assert result['Individual'] == []
+    assert any('No files found' in r.message for r in caplog.records if r.levelno == logging.WARNING)
+
+
 #TODO: A test for incremental conversion
 if __name__ == '__main__':
     test_dummy_dataset()

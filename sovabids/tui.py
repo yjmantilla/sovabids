@@ -140,6 +140,47 @@ class SetupPane(Static):
         }
 
 
+# ── Files list modal ─────────────────────────────────────────────────────────
+
+class FilesListScreen(ModalScreen):
+    """Modal showing all matched files with full paths."""
+
+    DEFAULT_CSS = """
+    FilesListScreen { align: center middle; }
+    FilesListScreen > Vertical {
+        width: 92%; height: 90%;
+        border: thick $primary; background: $surface; padding: 1;
+    }
+    FilesListScreen DataTable { height: 1fr; }
+    FilesListScreen Horizontal { height: 3; align: right middle; }
+    """
+
+    def __init__(self, files: list[str]) -> None:
+        super().__init__()
+        self._files = files
+
+    def compose(self) -> ComposeResult:
+        with Vertical():
+            yield Label(f"[b]{len(self._files)} matched file(s)[/b] — full paths")
+            yield DataTable(id="files-table", zebra_stripes=True)
+            with Horizontal():
+                yield Button("Close", id="close-files", variant="primary")
+
+    def on_mount(self) -> None:
+        table = self.query_one("#files-table", DataTable)
+        table.add_column("File path")
+        for f in self._files:
+            table.add_row(f)
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "close-files":
+            self.dismiss()
+
+    def on_key(self, event) -> None:  # noqa: ANN001
+        if event.key == "escape":
+            self.dismiss()
+
+
 # ── Rules tab ─────────────────────────────────────────────────────────────────
 
 class RulesPane(Static):
@@ -147,21 +188,33 @@ class RulesPane(Static):
     RulesPane { padding: 1 2; }
     RulesPane Label { margin-top: 1; }
     RulesPane .hint { color: $text-muted; }
+    RulesPane #pattern-examples {
+        color: $text-muted;
+        margin-bottom: 1;
+        padding: 0 2;
+        border-left: solid $primary;
+    }
     RulesPane #preview-label {
         margin-top: 1;
         padding: 1;
         border: solid $primary;
         color: $success;
+        width: 1fr;
     }
     RulesPane #preview-label.error { color: $error; }
     RulesPane #preview-label.muted { color: $text-muted; }
+    RulesPane #show-files { width: 18; margin-left: 1; }
     RulesPane Select { margin-bottom: 1; }
     RulesPane Input { margin-bottom: 1; }
     RulesPane .section-head { margin-top: 1; }
     """
 
-    _preview_timer = None
     _preview_lock: ClassVar = threading.Lock()
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._preview_timer = None
+        self._matched_files: list[str] = []
 
     def compose(self) -> ComposeResult:
         yield Label("[b]EEG file extension[/b]")
@@ -170,8 +223,20 @@ class RulesPane(Static):
 
         yield Label("[b]Path pattern[/b]")
         yield Static(
-            "Use %entity% placeholders, e.g.  …/%subject%_%task%_%run%.vhdr",
+            "Use %entity% placeholders matched against the full file path.",
             classes="hint",
+        )
+        yield Static(
+            "[dim]Examples:[/dim]\n"
+            "  [cyan]%subject%_%task%.vhdr[/cyan]\n"
+            "    matches: /data/001_rest.vhdr  →  subject=001, task=rest\n"
+            "  [cyan]%subject%/%task%_%run%.bdf[/cyan]\n"
+            "    matches: /data/001/rest_01.bdf  →  subject=001, task=rest, run=01\n"
+            "  [cyan]raw/%subject%_%session%_%task%_%run%.eeg[/cyan]\n"
+            "    matches: /raw/001_ses01_rest_01.eeg\n"
+            "  [cyan]sub-%subject%/ses-%session%/eeg/sub-%subject%_ses-%session%_%task%_eeg.set[/cyan]\n"
+            "    already-partially-BIDSified paths",
+            id="pattern-examples",
         )
         yield Input(placeholder="%subject%_%task%.vhdr", id="pattern-input")
         with Horizontal():
@@ -181,6 +246,7 @@ class RulesPane(Static):
                 classes="muted",
             )
             yield Button("Refresh", id="refresh-preview", variant="default")
+            yield Button("Show all (0)", id="show-files", variant="default", disabled=True)
 
         yield Rule()
         yield Label("[b]Sidecar fields[/b]", classes="section-head")
@@ -209,6 +275,8 @@ class RulesPane(Static):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "refresh-preview":
             self._run_preview()
+        elif event.button.id == "show-files":
+            self.app.push_screen(FilesListScreen(self._matched_files))
 
     def _schedule_preview(self) -> None:
         if self._preview_timer is not None:
@@ -236,16 +304,23 @@ class RulesPane(Static):
         try:
             files = get_files(source, rules)
         except Exception as exc:
-            self.call_from_thread(self._set_preview, f"Error: {exc}", "error")
+            self.app.call_from_thread(self._set_preview, f"Error: {exc}", "error")
             return
         count = len(files)
         if count == 0:
             msg = "0 files matched — check your pattern and extension."
-            self.call_from_thread(self._set_preview, msg, "error")
+            self.app.call_from_thread(self._set_preview, msg, "error")
         else:
             example = os.path.relpath(files[0], source)
             msg = f"{count} file(s) matched.  Example: …/{example}"
-            self.call_from_thread(self._set_preview, msg, "")
+            self.app.call_from_thread(self._set_preview, msg, "")
+        self.app.call_from_thread(self._update_show_files_btn, files)
+
+    def _update_show_files_btn(self, files: list[str]) -> None:
+        self._matched_files = files
+        btn = self.query_one("#show-files", Button)
+        btn.label = f"Show all ({len(files)})"
+        btn.disabled = len(files) == 0
 
     def _set_preview(self, text: str, css_class: str) -> None:
         label = self.query_one("#preview-label", Label)
@@ -346,9 +421,9 @@ class MappingsPane(Static):
         try:
             mapping_data = apply_rules(source_path=source, bids_path=bids, rules=rules)
             self.app._mapping_data = mapping_data
-            self.call_from_thread(self._populate_table, mapping_data["Individual"])
+            self.app.call_from_thread(self._populate_table, mapping_data["Individual"])
         except Exception as exc:
-            self.call_from_thread(
+            self.app.call_from_thread(
                 self._set_status, f"Error generating mappings: {exc}", True
             )
 
@@ -433,16 +508,16 @@ class ConvertPane(Static):
                 self._call(self._rl.write, line)
 
         root = logging.getLogger()
-        handler = TuiHandler(log, self.call_from_thread)
+        handler = TuiHandler(log, self.app.call_from_thread)
         handler.setLevel(logging.INFO)
         root.addHandler(handler)
         try:
             convert_them(mapping_data)
-            self.call_from_thread(
+            self.app.call_from_thread(
                 self._log, "[bold green]Conversion complete![/bold green]"
             )
         except Exception as exc:
-            self.call_from_thread(self._log, f"[red]Conversion failed: {exc}[/red]")
+            self.app.call_from_thread(self._log, f"[red]Conversion failed: {exc}[/red]")
         finally:
             root.removeHandler(handler)
 

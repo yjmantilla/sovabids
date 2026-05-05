@@ -85,7 +85,7 @@ Running the TUI
 
    sovatui
 
-See the `TUI tutorial video <https://youtu.be/dOWiMTuGvAA>`_ for a walkthrough.
+See the `TUI tutorial video <https://youtu.be/dOWiMTuGvAA>`_ for a walkthrough and its `example at https://sovabids.readthedocs.io/en/latest/auto_examples/tui_example.html`_.
 
 Command Line Interface (CLI) entry-points
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -140,7 +140,7 @@ This will install sovabids for usage with an experimental web gui.
 
    pip install "sovabids[gui]"
 
-See the `WEB GUI tutorial video <https://youtu.be/PW84cy6uUJs>`_ for a walkthrough.
+See the `WEB GUI tutorial video <https://youtu.be/PW84cy6uUJs>`_ for a walkthrough and its `example at https://sovabids.readthedocs.io/en/latest/auto_examples/gui_example.html`_.
 
 
 Using the experimental bidscoin plugin
@@ -153,6 +153,8 @@ For the experimental bidscoin plugin, install the sovabids fork of bidscoin manu
 
    pip install "git+https://github.com/yjmantilla/bidscoin.git@sovabids"
 
+Follow the example at https://sovabids.readthedocs.io/en/latest/auto_examples/bidscoin_example.html to see how to use the plugin.
+
 
 Installation for developers
 ---------------------------
@@ -164,8 +166,6 @@ Fork this repo and run:
    git clone https://github.com/<gh-username>/sovabids.git
    cd sovabids
    pip install -e ".[dev]"
-
-
 
 
 Funding

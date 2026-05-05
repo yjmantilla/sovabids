@@ -69,7 +69,7 @@ def setup_logging(log_file=None, debug=False):
     loghandler = logging.FileHandler(log_name)
     loghandler.setLevel(logging.DEBUG)
     loghandler.setFormatter(formatter)
-    loghandler.set_name('loghandler')
+    loghandler.set_name('sovabids_loghandler')
     logger.addHandler(loghandler)
 
     # Set & add the error / warnings handler
@@ -77,16 +77,17 @@ def setup_logging(log_file=None, debug=False):
     errorhandler = logging.FileHandler(error_file, mode='w')
     errorhandler.setLevel(logging.WARNING)
     errorhandler.setFormatter(formatter)
-    errorhandler.set_name('errorhandler')
+    errorhandler.set_name('sovabids_errorhandler')
     logger.addHandler(errorhandler)
+
 
     # Add stderr handler for warnings/errors so they always appear on the console,
     # regardless of whether the caller invoked logging.basicConfig beforehand.
-    if not any(h.name == 'streamhandler' for h in logger.handlers):
+    if not any(h.name == 'sovabids_streamhandler' for h in logger.handlers):
         streamhandler = logging.StreamHandler(sys.stderr)
         streamhandler.setLevel(logging.WARNING)
         streamhandler.setFormatter(formatter)
-        streamhandler.set_name('streamhandler')
+        streamhandler.set_name('sovabids_streamhandler')
         logger.addHandler(streamhandler)
 
     logger.info(f"Full log: {log_name} | Errors/warnings: {error_file}")

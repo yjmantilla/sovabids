@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import pytest
 from sovabids.loggers import setup_logging
 
@@ -18,7 +19,7 @@ def test_setup_logging_adds_stderr_streamhandler(tmp_path):
     log_file = str(tmp_path / "test.log")
     setup_logging(log_file)
     root = logging.getLogger()
-    stream_handlers = [h for h in root.handlers if h.name == 'streamhandler']
+    stream_handlers = [h for h in root.handlers if h.name == 'sovabids_streamhandler']
     assert len(stream_handlers) == 1
     assert stream_handlers[0].level == logging.WARNING
 
@@ -28,7 +29,7 @@ def test_setup_logging_stderr_handler_not_duplicated(tmp_path):
     setup_logging(log_file)
     setup_logging(log_file)
     root = logging.getLogger()
-    stream_handlers = [h for h in root.handlers if h.name == 'streamhandler']
+    stream_handlers = [h for h in root.handlers if h.name == 'sovabids_streamhandler']
     assert len(stream_handlers) == 1
 
 

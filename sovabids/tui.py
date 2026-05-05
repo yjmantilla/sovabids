@@ -339,6 +339,12 @@ class RulesPane(Static):
     RulesPane #regex-fields-row.visible { display: block; }
     RulesPane #regex-examples { display: none; }
     RulesPane #regex-examples.visible { display: block; }
+    RulesPane #io-example-row { display: none; height: auto; }
+    RulesPane #io-examples { display: none; }
+    RulesPane #io-src-row { height: 3; }
+    RulesPane #io-src-row Input { width: 1fr; }
+    RulesPane #io-src-row Button { width: 18; margin-left: 1; }
+    RulesPane #pattern-section { height: auto; }
     RulesPane .inspect-row { height: 3; margin-bottom: 1; }
     RulesPane .inspect-row Button { margin-right: 1; }
     """
@@ -360,42 +366,70 @@ class RulesPane(Static):
         with RadioSet(id="pattern-mode"):
             yield RadioButton("Placeholder  (%field%)", id="mode-placeholder", value=True)
             yield RadioButton("Regex  (with named fields)", id="mode-regex")
+            yield RadioButton("File example  (source → BIDS path)", id="mode-example")
         yield Vertical(
             Label("Fields (comma-separated, same order as regex groups)"),
             Input(placeholder="entities.subject, entities.task", id="regex-fields-input"),
             id="regex-fields-row",
         )
+        yield Vertical(
+            Label("Source example  (one raw EEG file path)"),
+            Horizontal(
+                Input(placeholder="/data/sub-01_task-rest.vhdr", id="io-src-input"),
+                Button("Pick first match", id="io-pick-src", disabled=True),
+                id="io-src-row",
+            ),
+            Label("Target BIDS example  (corresponding BIDS output path)"),
+            Input(
+                placeholder="/bids/sub-01/eeg/sub-01_task-rest_eeg.vhdr",
+                id="io-tgt-input",
+            ),
+            id="io-example-row",
+        )
 
-        yield Label("[b]Path pattern[/b]", id="pattern-label")
-        yield Static(
-            "Use %entity% placeholders matched against the full file path.",
-            id="pattern-hint",
-            classes="hint",
+        yield Vertical(
+            Label("[b]Path pattern[/b]", id="pattern-label"),
+            Static(
+                "Use %entity% placeholders matched against the full file path.",
+                id="pattern-hint",
+                classes="hint",
+            ),
+            Static(
+                "[dim]Placeholder examples:[/dim]\n"
+                "  [cyan]%subject%_%task%.vhdr[/cyan]\n"
+                "    matches: /data/001_rest.vhdr  →  subject=001, task=rest\n"
+                "  [cyan]%subject%/%task%_%run%.bdf[/cyan]\n"
+                "    matches: /data/001/rest_01.bdf  →  subject=001, task=rest, run=01\n"
+                "  [cyan]raw/%subject%_%session%_%task%_%run%.eeg[/cyan]\n"
+                "    matches: /raw/001_ses01_rest_01.eeg\n"
+                "  [cyan]sub-%subject%/ses-%session%/eeg/sub-%subject%_ses-%session%_%task%_eeg.set[/cyan]\n"
+                "    already-partially-BIDSified paths",
+                id="placeholder-examples",
+                classes="pattern-examples",
+            ),
+            Static(
+                "[dim]Regex examples:[/dim]\n"
+                "  Pattern: [cyan]([^/]+)_([^/]+)\\.vhdr[/cyan]   Fields: [cyan]entities.subject, entities.task[/cyan]\n"
+                "    matches: /data/001_rest.vhdr  →  subject=001, task=rest\n"
+                "  Pattern: [cyan]([^/]+)/([^/]+)_([^/]+)\\.bdf[/cyan]   Fields: [cyan]entities.subject, entities.task, entities.run[/cyan]\n"
+                "    matches: /data/001/rest_01.bdf  →  subject=001, task=rest, run=01\n"
+                "  Fields use dot-notation: [cyan]entities.subject[/cyan], [cyan]entities.task[/cyan], [cyan]entities.session[/cyan], [cyan]entities.run[/cyan]",
+                id="regex-examples",
+                classes="pattern-examples",
+            ),
+            Static(
+                "[dim]File example mode:[/dim]\n"
+                "  Give one raw file path and its corresponding BIDS output path.\n"
+                "  The pattern is derived automatically via entity matching.\n"
+                "  [cyan]Source:[/cyan] /data/sub-SU0/ses-SE0/eeg-TA0-0.vhdr\n"
+                "  [cyan]Target:[/cyan] /bids/sub-SU0/ses-SE0/eeg/sub-SU0_ses-SE0_task-TA0_run-0_eeg.vhdr\n"
+                "  Derived pattern applied to all matched files.",
+                id="io-examples",
+                classes="pattern-examples",
+            ),
+            Input(placeholder="%subject%_%task%.vhdr", id="pattern-input"),
+            id="pattern-section",
         )
-        yield Static(
-            "[dim]Placeholder examples:[/dim]\n"
-            "  [cyan]%subject%_%task%.vhdr[/cyan]\n"
-            "    matches: /data/001_rest.vhdr  →  subject=001, task=rest\n"
-            "  [cyan]%subject%/%task%_%run%.bdf[/cyan]\n"
-            "    matches: /data/001/rest_01.bdf  →  subject=001, task=rest, run=01\n"
-            "  [cyan]raw/%subject%_%session%_%task%_%run%.eeg[/cyan]\n"
-            "    matches: /raw/001_ses01_rest_01.eeg\n"
-            "  [cyan]sub-%subject%/ses-%session%/eeg/sub-%subject%_ses-%session%_%task%_eeg.set[/cyan]\n"
-            "    already-partially-BIDSified paths",
-            id="placeholder-examples",
-            classes="pattern-examples",
-        )
-        yield Static(
-            "[dim]Regex examples:[/dim]\n"
-            "  Pattern: [cyan]([^/]+)_([^/]+)\\.vhdr[/cyan]   Fields: [cyan]entities.subject, entities.task[/cyan]\n"
-            "    matches: /data/001_rest.vhdr  →  subject=001, task=rest\n"
-            "  Pattern: [cyan]([^/]+)/([^/]+)_([^/]+)\\.bdf[/cyan]   Fields: [cyan]entities.subject, entities.task, entities.run[/cyan]\n"
-            "    matches: /data/001/rest_01.bdf  →  subject=001, task=rest, run=01\n"
-            "  Fields use dot-notation: [cyan]entities.subject[/cyan], [cyan]entities.task[/cyan], [cyan]entities.session[/cyan], [cyan]entities.run[/cyan]",
-            id="regex-examples",
-            classes="pattern-examples",
-        )
-        yield Input(placeholder="%subject%_%task%.vhdr", id="pattern-input")
         with Horizontal(id="preview-row"):
             yield Label(
                 "Waiting for source path and pattern…",
@@ -426,7 +460,7 @@ class RulesPane(Static):
     # ── pattern preview ───────────────────────────────────────────────────────
 
     def on_input_changed(self, event: Input.Changed) -> None:
-        if event.input.id in ("pattern-input", "regex-fields-input"):
+        if event.input.id in ("pattern-input", "regex-fields-input", "io-src-input", "io-tgt-input"):
             self._schedule_preview()
 
     def on_select_changed(self, event: Select.Changed) -> None:
@@ -436,23 +470,39 @@ class RulesPane(Static):
 
     def on_radio_set_changed(self, event: RadioSet.Changed) -> None:
         if event.radio_set.id == "pattern-mode":
-            row = self.query_one("#regex-fields-row", Vertical)
+            regex_row = self.query_one("#regex-fields-row", Vertical)
+            io_row = self.query_one("#io-example-row", Vertical)
+            pat_sec = self.query_one("#pattern-section", Vertical)
             ph_ex = self.query_one("#placeholder-examples", Static)
             rx_ex = self.query_one("#regex-examples", Static)
+            io_ex = self.query_one("#io-examples", Static)
             pat = self.query_one("#pattern-input", Input)
             lbl = self.query_one("#pattern-label", Label)
             hint = self.query_one("#pattern-hint", Static)
             if event.index == 1:  # regex
-                row.display = True
+                regex_row.display = True
+                io_row.display = False
+                pat_sec.display = True
                 ph_ex.display = False
                 rx_ex.display = True
+                io_ex.display = False
                 pat.placeholder = "([^/]+)_([^/]+)\\.vhdr"
                 lbl.update("[b]Regex pattern[/b]  (only the regex — put field names in the Fields box above)")
                 hint.update("Enter a Python regex. Each capture group [cyan]()[/cyan] maps to one field, in order.")
+            elif event.index == 2:  # file example
+                regex_row.display = False
+                io_row.display = True
+                pat_sec.display = False
+                ph_ex.display = False
+                rx_ex.display = False
+                io_ex.display = True
             else:  # placeholder
-                row.display = False
+                regex_row.display = False
+                io_row.display = False
+                pat_sec.display = True
                 ph_ex.display = True
                 rx_ex.display = False
+                io_ex.display = False
                 pat.placeholder = "%subject%_%task%.vhdr"
                 lbl.update("[b]Path pattern[/b]")
                 hint.update("Use %entity% placeholders matched against the full file path.")
@@ -463,8 +513,20 @@ class RulesPane(Static):
             self._run_preview()
         elif event.button.id == "show-files":
             mode, fields = self._get_mode_and_fields()
-            pattern = self.query_one("#pattern-input", Input).value.strip()
-            self.app.push_screen(FilesListScreen(self._matched_files, pattern=pattern, mode=mode, fields=fields))
+            if mode == "example":
+                io_src, io_tgt = self._get_io_example()
+                try:
+                    from sovabids.heuristics import from_io_example
+                    pattern = from_io_example(io_src, io_tgt).get("pattern", "")
+                except Exception:
+                    pattern = ""
+                self.app.push_screen(FilesListScreen(self._matched_files, pattern=pattern, mode="placeholder", fields=[]))
+            else:
+                pattern = self.query_one("#pattern-input", Input).value.strip()
+                self.app.push_screen(FilesListScreen(self._matched_files, pattern=pattern, mode=mode, fields=fields))
+        elif event.button.id == "io-pick-src":
+            if self._matched_files:
+                self.query_one("#io-src-input", Input).value = self._matched_files[0]
         elif event.button.id == "show-psd":
             if self._matched_files:
                 self._set_preview("Computing PSD — window will open separately…", "muted")
@@ -475,10 +537,22 @@ class RulesPane(Static):
 
     def _get_mode_and_fields(self) -> tuple[str, list[str]]:
         radio = self.query_one("#pattern-mode", RadioSet)
-        mode = "regex" if radio.pressed_index == 1 else "placeholder"
+        idx = radio.pressed_index
+        if idx == 1:
+            mode = "regex"
+        elif idx == 2:
+            mode = "example"
+        else:
+            mode = "placeholder"
         fields_raw = self.query_one("#regex-fields-input", Input).value.strip()
         fields = [f.strip() for f in fields_raw.split(",") if f.strip()] if fields_raw else []
         return mode, fields
+
+    def _get_io_example(self) -> tuple[str, str]:
+        return (
+            self.query_one("#io-src-input", Input).value.strip(),
+            self.query_one("#io-tgt-input", Input).value.strip(),
+        )
 
     def _schedule_ext_count(self) -> None:
         self.set_timer(0.1, self._run_ext_count)
@@ -535,12 +609,20 @@ class RulesPane(Static):
 
     def _run_preview(self) -> None:
         source = self._get_source()
-        pattern = self.query_one("#pattern-input", Input).value.strip()
         ext = self.query_one("#ext-select", Select).value
         mode, fields = self._get_mode_and_fields()
         if not source:
             self._set_preview("Set source directory in Setup tab first.", "muted")
             return
+        if mode == "example":
+            io_src, io_tgt = self._get_io_example()
+            if not io_src or not io_tgt:
+                self._set_preview("File example mode: enter source and target paths above.", "muted")
+                return
+            self._set_preview("Deriving pattern from example…", "muted")
+            self._preview_worker(source, "", str(ext), mode, fields, io_src, io_tgt)
+            return
+        pattern = self.query_one("#pattern-input", Input).value.strip()
         if not pattern:
             self._set_preview("Enter a pattern above.", "muted")
             return
@@ -551,9 +633,42 @@ class RulesPane(Static):
         self._preview_worker(source, pattern, str(ext), mode, fields)
 
     @work(thread=True)
-    def _preview_worker(self, source: str, pattern: str, ext: str, mode: str, fields: list[str]) -> None:
+    def _preview_worker(self, source: str, pattern: str, ext: str, mode: str, fields: list[str], io_src: str = "", io_tgt: str = "") -> None:
         from sovabids.parsers import parse_from_placeholder, parse_from_regex
         from sovabids.rules import get_files
+
+        if mode == "example":
+            try:
+                from sovabids.heuristics import from_io_example
+                derived_pattern = from_io_example(io_src, io_tgt).get("pattern", "")
+            except Exception as exc:
+                self.app.call_from_thread(self._set_preview, f"Example error: {exc}", "error")
+                self.app.call_from_thread(self._update_show_files_btn, [])
+                return
+            # derived pattern already uses %entities.subject% notation
+            scan_rules = {"non-bids": {"eeg_extension": ext, "path_analysis": {"pattern": derived_pattern}}}
+            try:
+                files = get_files(source, scan_rules)
+            except Exception as exc:
+                self.app.call_from_thread(self._set_preview, f"Error: {exc}", "error")
+                return
+            matched = []
+            for f in files:
+                try:
+                    if parse_from_placeholder(f, derived_pattern):
+                        matched.append(f)
+                except Exception:
+                    pass
+            count = len(matched)
+            if count == 0:
+                msg = f"0 files matched with derived pattern: {derived_pattern}"
+                self.app.call_from_thread(self._set_preview, msg, "error")
+            else:
+                example = os.path.relpath(matched[0], source)
+                msg = f"{count} file(s) matched.  Derived pattern: [cyan]{derived_pattern}[/cyan]  Example: …/{example}"
+                self.app.call_from_thread(self._set_preview, msg, "")
+            self.app.call_from_thread(self._update_show_files_btn, matched)
+            return
 
         rules = {"non-bids": {"eeg_extension": ext, "path_analysis": {"pattern": pattern}}}
         try:
@@ -592,6 +707,7 @@ class RulesPane(Static):
         btn.disabled = not has
         self.query_one("#show-psd", Button).disabled = not has
         self.query_one("#show-channels", Button).disabled = not has
+        self.query_one("#io-pick-src", Button).disabled = not has
 
     def _set_preview(self, text: str, css_class: str) -> None:
         label = self.query_one("#preview-label", Label)
@@ -618,7 +734,11 @@ class RulesPane(Static):
         mode, fields = self._get_mode_and_fields()
 
         rules: dict = {"non-bids": {"eeg_extension": ext}}
-        if pattern:
+        if mode == "example":
+            io_src, io_tgt = self._get_io_example()
+            if io_src and io_tgt:
+                rules["non-bids"]["path_analysis"] = {"source": io_src, "target": io_tgt}
+        elif pattern:
             if mode == "placeholder":
                 from sovabids.parsers import _modify_entities_of_placeholder_pattern
                 rules_pattern = _modify_entities_of_placeholder_pattern(pattern, mode="append")

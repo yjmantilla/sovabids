@@ -34,6 +34,9 @@ dependencies = [
     "mne>=1.8",
     "pyyaml",
     "pandas",
+    "mne",
+    "numpy",
+    "requests",
 ]
 
 [project.urls]
@@ -44,6 +47,7 @@ Source = "https://github.com/yjmantilla/sovabids"
 [project.scripts]
 sovapply = "sovabids.rules:sovapply"
 sovaconvert = "sovabids.convert:sovaconvert"
+sovatui = "sovabids.tui:main"
 
 [project.optional-dependencies]
 gui = [
@@ -53,6 +57,9 @@ gui = [
     "fastapi-jsonrpc>=3.4.2",
     "httpx",
     "pydantic",
+]
+tui = [
+    "textual>=0.50.0",
 ]
 docs = [
     "sphinx>=4.0.0",
@@ -67,7 +74,8 @@ docs = [
 dev = [
     "pytest",
     "pytest-cov",
-    "sovabids[gui,docs]",
+    "anyio",
+    "sovabids[gui,tui,docs]",
 ]
 
 [tool.hatch.metadata]

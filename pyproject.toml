@@ -33,6 +33,9 @@ dependencies = [
     "mne-bids",
     "pyyaml",
     "pandas",
+    "mne",
+    "numpy",
+    "requests",
 ]
 
 [project.urls]
@@ -70,6 +73,7 @@ docs = [
 dev = [
     "pytest",
     "pytest-cov",
+    "anyio",
     "sovabids[gui,tui,docs]",
 ]
 

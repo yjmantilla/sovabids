@@ -57,6 +57,20 @@ def setup_logging(log_file=None, debug=False):
     datefmt   = '%Y-%m-%d %H:%M:%S'
     formatter = logging.Formatter(fmt=fmt, datefmt=datefmt)
 
+    # Add stderr handler for warnings/errors so they always appear on the console,
+    # regardless of whether the caller invoked logging.basicConfig beforehand.
+    # We remove any existing sovabids_streamhandler to ensure we use the current sys.stderr
+    # (relevant for testing with capsys)
+    for h in list(logger.handlers):
+        if getattr(h, 'name', None) == 'sovabids_streamhandler':
+            logger.removeHandler(h)
+
+    streamhandler = logging.StreamHandler(sys.stderr)
+    streamhandler.setLevel(logging.WARNING)
+    streamhandler.setFormatter(formatter)
+    streamhandler.set_name('sovabids_streamhandler')
+    logger.addHandler(streamhandler)
+
     if not log_file:
         return logger
 
@@ -80,15 +94,6 @@ def setup_logging(log_file=None, debug=False):
     errorhandler.set_name('sovabids_errorhandler')
     logger.addHandler(errorhandler)
 
-
-    # Add stderr handler for warnings/errors so they always appear on the console,
-    # regardless of whether the caller invoked logging.basicConfig beforehand.
-    if not any(h.name == 'sovabids_streamhandler' for h in logger.handlers):
-        streamhandler = logging.StreamHandler(sys.stderr)
-        streamhandler.setLevel(logging.WARNING)
-        streamhandler.setFormatter(formatter)
-        streamhandler.set_name('sovabids_streamhandler')
-        logger.addHandler(streamhandler)
 
     logger.info(f"Full log: {log_name} | Errors/warnings: {error_file}")
     return logger

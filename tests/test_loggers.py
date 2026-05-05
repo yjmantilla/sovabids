@@ -86,3 +86,6 @@ def test_setup_logging_no_logfile_returns_logger():
     logger = setup_logging(log_file=None)
     assert logger is not None
     assert isinstance(logger, logging.Logger)
+    root = logging.getLogger()
+    stream_handlers = [h for h in root.handlers if h.name == 'sovabids_streamhandler']
+    assert len(stream_handlers) == 1

@@ -58,12 +58,16 @@ The main elements of sovabids are:
 
 Internally sovabids uses `MNE-Python <https://github.com/mne-tools/mne-python>`_ and `MNE-BIDS <https://github.com/mne-tools/mne-bids>`_ to perform the conversion. In a sense is a wrapper that allows to do conversions from the command line.
 
-Installation
-------------
 
-.. code-block:: bash
+Basic Usage
+-----------
 
-   pip install sovabids
+
+Terminal User Interface (sovatui)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The easiest way to use sovabids is through its terminal user interface (TUI) called sovatui. This will allow you to do the conversion without having to write any command line code, and also to have a more visual experience of the conversion process. The TUI guides you through the full conversion workflow in four tabs: Setup, Rules, Mappings, and Convert.
+
 
 Installation for TUI usage
 --------------------------
@@ -74,41 +78,8 @@ This will install sovabids with the terminal user interface dependencies.
 
    pip install "sovabids[tui]"
 
-Installation for WEB GUI usage
---------------------------
-
-This will install sovabids for usage with an experimental web gui.
-
-.. code-block:: bash
-
-   pip install "sovabids[gui]"
-
-For the experimental bidscoin plugin, install the sovabids fork of bidscoin manually:
-
-.. code-block:: bash
-
-   pip install "git+https://github.com/yjmantilla/bidscoin.git@sovabids"
-
-Installation for developers
----------------------------
-
-Fork this repo and run:
-
-.. code-block:: bash
-
-   git clone https://github.com/<gh-username>/sovabids.git
-   cd sovabids
-   pip install -e ".[dev]"
-
-
-Basic Usage
------------
-
-
-Terminal User Interface (sovatui)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The easiest way to use sovabids is through its terminal user interface (TUI) called sovatui. This will allow you to do the conversion without having to write any command line code, and also to have a more visual experience of the conversion process. The TUI guides you through the full conversion workflow in four tabs: Setup, Rules, Mappings, and Convert.
+Running the TUI
+----------------
 
 .. code-block:: bash
 
@@ -121,6 +92,14 @@ Command Line Interface (CLI) entry-points
 
 
 Use sovabids through its CLI entry-points as follows:
+
+Installation
+""""""""""""
+
+.. code-block:: bash
+
+   pip install sovabids
+
 
 sovapply
 """"""""
@@ -140,13 +119,53 @@ By default the mapping file made will have the following filepath:
 
 
 sovaconvert
-"""""""""""""
+"""""""""""
 
 Use the sovaconvert entry-point to convert the dataset given its mapping file.
 
 .. code-block:: bash
 
    sovaconvert mapping_file
+
+
+Using the experimental web GUI
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Installation for WEB GUI usage
+------------------------------
+
+This will install sovabids for usage with an experimental web gui.
+
+.. code-block:: bash
+
+   pip install "sovabids[gui]"
+
+See the `WEB GUI tutorial video <https://youtu.be/PW84cy6uUJs>`_ for a walkthrough.
+
+
+Using the experimental bidscoin plugin
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+For the experimental bidscoin plugin, install the sovabids fork of bidscoin manually:
+
+.. code-block:: bash
+
+   pip install "git+https://github.com/yjmantilla/bidscoin.git@sovabids"
+
+
+Installation for developers
+---------------------------
+
+Fork this repo and run:
+
+.. code-block:: bash
+
+   git clone https://github.com/<gh-username>/sovabids.git
+   cd sovabids
+   pip install -e ".[dev]"
+
+
 
 
 Funding

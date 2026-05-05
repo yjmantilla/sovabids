@@ -82,7 +82,7 @@ def setup_logging(log_file=None, debug=False):
 
     # Add stderr handler for warnings/errors so they always appear on the console,
     # regardless of whether the caller invoked logging.basicConfig beforehand.
-    if not any(type(h) is logging.StreamHandler for h in logger.handlers):
+    if not any(h.name == 'streamhandler' for h in logger.handlers):
         streamhandler = logging.StreamHandler(sys.stderr)
         streamhandler.setLevel(logging.WARNING)
         streamhandler.setFormatter(formatter)

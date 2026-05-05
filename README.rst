@@ -22,11 +22,12 @@ sovabids
 
 * sovabids is a python package for automating eeg2bids conversion. 
 
-* sovabids can be used through (click to see the examples): 
-   a. `its python API <https://sovabids.readthedocs.io/en/latest/auto_examples/lemon_example.html#using-the-python-api>`_ 
+* sovabids can be used through (click to see the examples):
+   a. `its python API <https://sovabids.readthedocs.io/en/latest/auto_examples/lemon_example.html#using-the-python-api>`_
    b. `its CLI entry points <https://sovabids.readthedocs.io/en/latest/auto_examples/lemon_example.html#using-the-cli-tool>`_
-   c. `its JSON-RPC entry points (needs a server running the backend) <https://sovabids.readthedocs.io/en/latest/auto_examples/rpc_example.html>`_
-   d. `its minimal web-app GUI <https://sovabids.readthedocs.io/en/latest/auto_examples/gui_example.html>`_
+   c. `its terminal user interface (TUI) <https://youtu.be/dOWiMTuGvAA>`_
+   d. `its JSON-RPC entry points (needs a server running the backend) <https://sovabids.readthedocs.io/en/latest/auto_examples/rpc_example.html>`_
+   e. `its minimal web-app GUI <https://sovabids.readthedocs.io/en/latest/auto_examples/gui_example.html>`_
 
 .. note::
 
@@ -64,7 +65,16 @@ Installation
 
    pip install sovabids
 
-Installation for GUI usage
+Installation for TUI usage
+--------------------------
+
+This will install sovabids with the terminal user interface dependencies.
+
+.. code-block:: bash
+
+   pip install "sovabids[tui]"
+
+Installation for WEB GUI usage
 --------------------------
 
 This will install sovabids for usage with an experimental web gui.
@@ -94,10 +104,26 @@ Fork this repo and run:
 Basic Usage
 -----------
 
-The easiest way is to use sovabids through its CLI entry-points as follows:
+
+Terminal User Interface (sovatui)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The easiest way to use sovabids is through its terminal user interface (TUI) called sovatui. This will allow you to do the conversion without having to write any command line code, and also to have a more visual experience of the conversion process. The TUI guides you through the full conversion workflow in four tabs: Setup, Rules, Mappings, and Convert.
+
+.. code-block:: bash
+
+   sovatui
+
+See the `TUI tutorial video <https://youtu.be/dOWiMTuGvAA>`_ for a walkthrough.
+
+Command Line Interface (CLI) entry-points
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Use sovabids through its CLI entry-points as follows:
 
 sovapply
-^^^^^^^^
+""""""""
 
 Use the sovapply entry-point to produce a mapping file from a source path, an output bids root path and a rules filepath.
 
@@ -114,13 +140,14 @@ By default the mapping file made will have the following filepath:
 
 
 sovaconvert
-^^^^^^^^^^^
+"""""""""""""
 
 Use the sovaconvert entry-point to convert the dataset given its mapping file.
 
 .. code-block:: bash
 
    sovaconvert mapping_file
+
 
 Funding
 -------

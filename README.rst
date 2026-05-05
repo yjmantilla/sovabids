@@ -20,7 +20,9 @@ sovabids
 
 .. after-init-label
 
-* sovabids is a python package for automating eeg2bids conversion. 
+* sovabids is a python package for automating eeg2bids conversion.
+
+* **New to sovabids?** Start with the `Quickstart guide <https://sovabids.readthedocs.io/en/latest/quickstart.html>`_.
 
 * sovabids can be used through (click to see the examples):
    a. `its python API <https://sovabids.readthedocs.io/en/latest/auto_examples/lemon_example.html#using-the-python-api>`_

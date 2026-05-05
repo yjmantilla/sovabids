@@ -5,6 +5,7 @@ Welcome to sovabids' documentation!
    :maxdepth: 1
    :caption: Contents:
 
+   quickstart.rst
    README.rst
    rules_schema.rst
    mappings_schema.rst

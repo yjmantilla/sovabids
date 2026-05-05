@@ -3533,14 +3533,21 @@ dependencies = [
     { name = "mne-bids", version = "0.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "mne-bids", version = "0.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
     { name = "mne-bids", version = "0.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "numpy", version = "2.4.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "pandas", version = "3.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pybv" },
     { name = "pyyaml" },
+    { name = "requests", version = "2.32.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "requests", version = "2.33.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
 ]
 
 [package.optional-dependencies]
 dev = [
+    { name = "anyio", version = "4.12.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "anyio", version = "4.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "fastapi", version = "0.122.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "fastapi", version = "0.136.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "fastapi-jsonrpc", version = "3.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
@@ -3606,6 +3613,7 @@ tui = [
 
 [package.metadata]
 requires-dist = [
+    { name = "anyio", marker = "extra == 'dev'" },
     { name = "bids-validator" },
     { name = "fastapi", marker = "extra == 'dev'" },
     { name = "fastapi", marker = "extra == 'gui'" },
@@ -3619,10 +3627,12 @@ requires-dist = [
     { name = "httpx", marker = "extra == 'gui'" },
     { name = "insegel", marker = "extra == 'dev'" },
     { name = "insegel", marker = "extra == 'docs'" },
+    { name = "mne" },
     { name = "mne", specifier = ">=1.8" },
     { name = "mne-bids", specifier = ">=0.15" },
     { name = "myst-parser", marker = "extra == 'dev'" },
     { name = "myst-parser", marker = "extra == 'docs'" },
+    { name = "numpy" },
     { name = "pandas" },
     { name = "pybv", specifier = ">=0.7.3" },
     { name = "pydantic", marker = "extra == 'dev'" },
@@ -3630,6 +3640,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "pyyaml" },
+    { name = "requests" },
     { name = "sphinx", marker = "extra == 'dev'", specifier = ">=4.0.0" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=4.0.0" },
     { name = "sphinx-autoapi", marker = "extra == 'dev'" },

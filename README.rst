@@ -20,7 +20,7 @@ sovabids
 
 .. after-init-label
 
-* sovabids is a python package for automating eeg2bids conversion.
+* sovabids is a python package for automating EEG/MEG to BIDS conversion.
 
 * **New to sovabids?** Start with the `Quickstart guide <https://sovabids.readthedocs.io/en/latest/quickstart.html>`_.
 
@@ -39,9 +39,52 @@ sovabids
    
    Do notice that at the moment the files have to be on the same computer that runs the server.
 
-.. warning::
+.. note::
 
-   Currently meg2bids conversion is not supported, but this is a targeted feature.
+   MEG conversion is supported. Set ``non-bids.output_format: FIF`` in your rules file when converting MEG data.
+
+.. _supported-formats:
+
+Supported Formats
+-----------------
+
+sovabids reads EEG and MEG files via `MNE-Python's read_raw <https://mne.tools/stable/generated/mne.io.read_raw.html>`_,
+which supports a wide range of formats including BrainVision, EDF/BDF, EEGLAB, FIF, CNT, KIT/SQD, CTF, and more.
+See the full list in the MNE documentation.
+
+Output is always written as a valid BIDS dataset. The table below lists formats that can also be
+**exported natively** (i.e., the BIDS data files stay in that format rather than being converted to BrainVision):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 15 20 30
+
+   * - Format
+     - Extension
+     - Extra needed
+     - Notes
+   * - BrainVision
+     - ``.vhdr``
+     - *(core)*
+     - Default output format; ``pybv`` included in base install
+   * - EDF
+     - ``.edf``
+     - ``sovabids[formats]``
+     - Requires ``edfio``; date must be in 1985–2084
+   * - EEGLAB
+     - ``.set``
+     - ``sovabids[formats]``
+     - Requires ``eeglabio``; montage with fiducials needed
+   * - FIF
+     - ``.fif``
+     - *(core)*
+     - MNE native format; required output for MEG data (set ``output_format: FIF``)
+
+Install export support for EDF and EEGLAB::
+
+   pip install "sovabids[formats]"
+
+For all other readable formats, sovabids converts the data to BrainVision on output (the default mne-bids behaviour).
 
 .. tip::
 

@@ -274,7 +274,8 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
                 raise ValueError(f'Expected code_execution to be str or list, got {type(code_execution)} instead')
 
         # remember the `entities` key fields must have the same parameters as the BIDSPath constructor argument
-        bids_path = BIDSPath(**entities,root=bids_path,datatype='eeg',suffix='eeg')
+        datatype = _handle_datatype(raw, None)
+        bids_path = BIDSPath(**entities,root=bids_path,datatype=datatype,suffix=datatype)
 
         real_times = raw.times[-1] # Save real duration of the eeg, since it is lost if write is false
 
@@ -332,7 +333,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
         if write or preview:
             # sidecar json
             try:
-                sidecar_path = bids_path.copy().update(datatype='eeg',suffix='eeg', extension='.json')
+                sidecar_path = bids_path.copy().update(datatype=bids_path.datatype,suffix=bids_path.suffix, extension='.json')
                 with open(sidecar_path.fpath) as f:
                     sidecarjson = json.load(f)
                     sidecar = rules_copy.get('sidecar',{})
@@ -355,7 +356,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
                 sidecarjson = ''
  
             # channels
-            channels_path = bids_path.copy().update(datatype='eeg',suffix='channels', extension='.tsv')
+            channels_path = bids_path.copy().update(datatype=bids_path.datatype,suffix='channels', extension='.tsv')
             try:
                 channels_table = read_csv (channels_path.fpath, sep = '\t',dtype=str,keep_default_na=False,na_filter=False,na_values=[],true_values=[],false_values=[])
                 channels_rules = rules_copy.get('channels',{})

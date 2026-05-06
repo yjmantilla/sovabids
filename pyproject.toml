@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "sovabids"
 dynamic = ["version"]
-description = "Automated eeg2bids conversion"
+description = "Automated EEG/MEG to BIDS conversion"
 readme = "README.rst"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
@@ -61,6 +61,10 @@ gui = [
 tui = [
     "textual>=0.50.0",
 ]
+formats = [
+    "edfio",
+    "eeglabio",
+]
 docs = [
     "sphinx>=4.0.0",
     "insegel",
@@ -75,7 +79,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "anyio",
-    "sovabids[gui,tui,docs]",
+    "sovabids[gui,tui,docs,formats]",
 ]
 
 [tool.hatch.metadata]

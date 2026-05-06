@@ -1000,6 +1000,38 @@ wheels = [
 ]
 
 [[package]]
+name = "edfio"
+version = "0.4.13"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "numpy", version = "2.4.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2f/84/68b9cffe050757f2399ce85801c813eaa016f1a690234c0d091b34aca911/edfio-0.4.13.tar.gz", hash = "sha256:1744a7e7fc354d4e39082edcd4cac72ec1fa13414ca8a07c630d35f78da6c4dd", size = 27367, upload-time = "2026-02-11T10:01:47.766Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/51/2e/4c3ef336aa46144d5c166d25357d78de94049787a0afb7824e7c9dc44ec0/edfio-0.4.13-py3-none-any.whl", hash = "sha256:d70a1e50f7eb89f3af8c74d96a4daa7a0a7f74b82a8ee2fd01992267396afa23", size = 30359, upload-time = "2026-02-11T10:01:48.92Z" },
+]
+
+[[package]]
+name = "eeglabio"
+version = "0.1.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "numpy", version = "2.4.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "scipy", version = "1.13.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ef/f9/071281281e7ce4cde8f65ba7b919feef3b10fd9739b53369edb13489e5ea/eeglabio-0.1.3.tar.gz", hash = "sha256:0dbb48ba5a5bc1ebe156acf1b1cc793575928f9a6f73457a05eef567967f9bf3", size = 10113, upload-time = "2026-01-20T18:07:18.901Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/ef/f9f8c900f4b635ae7a2ea9e3e5adca8eb98a079a6965d36f59ed38c0d029/eeglabio-0.1.3-py3-none-any.whl", hash = "sha256:ad979ee0b6a919be90326741bb98597140b908ee60a49abcf096cb42ac685c71", size = 10915, upload-time = "2026-01-20T18:07:17.065Z" },
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3548,6 +3580,8 @@ dependencies = [
 dev = [
     { name = "anyio", version = "4.12.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "anyio", version = "4.13.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "edfio" },
+    { name = "eeglabio" },
     { name = "fastapi", version = "0.122.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "fastapi", version = "0.136.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "fastapi-jsonrpc", version = "3.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
@@ -3596,6 +3630,10 @@ docs = [
     { name = "sphinxcontrib-mermaid", version = "1.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "sphinxcontrib-mermaid", version = "2.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
 ]
+formats = [
+    { name = "edfio" },
+    { name = "eeglabio" },
+]
 gui = [
     { name = "fastapi", version = "0.122.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "fastapi", version = "0.136.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
@@ -3615,6 +3653,10 @@ tui = [
 requires-dist = [
     { name = "anyio", marker = "extra == 'dev'" },
     { name = "bids-validator" },
+    { name = "edfio", marker = "extra == 'dev'" },
+    { name = "edfio", marker = "extra == 'formats'" },
+    { name = "eeglabio", marker = "extra == 'dev'" },
+    { name = "eeglabio", marker = "extra == 'formats'" },
     { name = "fastapi", marker = "extra == 'dev'" },
     { name = "fastapi", marker = "extra == 'gui'" },
     { name = "fastapi-jsonrpc", marker = "extra == 'dev'", specifier = ">=3.4.2" },
@@ -3656,7 +3698,7 @@ requires-dist = [
     { name = "uvicorn", marker = "extra == 'dev'" },
     { name = "uvicorn", marker = "extra == 'gui'" },
 ]
-provides-extras = ["dev", "docs", "gui", "tui"]
+provides-extras = ["dev", "docs", "formats", "gui", "tui"]
 
 [[package]]
 name = "sphinx"

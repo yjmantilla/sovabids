@@ -314,17 +314,21 @@ This is the most complex object. As of now what is supported is:
 eeg_extension
 ^^^^^^^^^^^^^
 
-This property just defines the extension of the eeg files we want to read. If this property is non-existent then the eeg files will be any from the following extensions: ['.set' ,'.cnt' ,'.vhdr' ,'.bdf' ,'.fif']. 
+Defines the file extension to scan for. Works for both EEG and MEG formats. If omitted, sovabids searches for any of: ``['.set', '.cnt', '.vhdr', '.bdf', '.fif']``.
 
 .. note::
-    Notice it is preferable that you put the dot before the extension; the code should add it if you dont though.
+    The leading dot is preferred but optional; sovabids adds it if missing.
 
-Supposing you are using brainvision files, then you would configure it as:
-
-.. code-block:: yaml
+For BrainVision EEG files::
 
     non-bids :
         eeg_extension : '.vhdr'
+
+For MEG FIF files::
+
+    non-bids :
+        eeg_extension : '.fif'
+        output_format : 'FIF'
 
 path_analysis
 ^^^^^^^^^^^^^
@@ -661,15 +665,12 @@ You could express the configuration mentioned before using regex with:
                 entities.subject : "[a] + [b]"
 
 
-output_format (EXPERIMENTAL)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+output_format
+^^^^^^^^^^^^^
 
-.. warning::
-    
-    This feature is experimental, is not well tested so it may not run correctly.
+Sets the output format by controlling the *format* parameter of *mne_bids.write_raw_bids*. Acceptable values: ``'auto'``, ``'BrainVision'``, ``'EDF'``, ``'FIF'``.
 
-
-Sets up the output format by controlling the *format* parameter of *mne_bids.write_raw_bids*. Acceptable values are the ones supported by that function (currently 'auto' | 'BrainVision' | 'EDF' | 'FIF').
+**Required for MEG data** — set to ``'FIF'`` when converting MEG files.
 
 .. code-block:: yaml
     

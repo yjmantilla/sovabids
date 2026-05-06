@@ -352,9 +352,10 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
                 # Get flat version of the sidecar
                 with open(sidecar_path.fpath) as f:
                     sidecarjson = f.read().replace('\n', '')
-            except:
+            except Exception:
+                LOGGER.warning(f'Could not update sidecar JSON for {f}', exc_info=True)
                 sidecarjson = ''
- 
+
             # channels
             channels_path = bids_path.copy().update(datatype=bids_path.datatype,suffix='channels', extension='.tsv')
             try:
@@ -381,7 +382,8 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
                 channels={}
                 for key,value in chans_dict.items():
                      channels[str(key)] = ','.join(value)
-            except:
+            except Exception:
+                LOGGER.warning(f'Could not update channels TSV for {f}', exc_info=True)
                 channels = ''
 
 
@@ -506,19 +508,22 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
     LOGGER.info(f"Generating Individual Mappings")
 
     all_mappings = []
+    failed_mappings = []
     num_files = len(filepaths)
     for i,f in enumerate(filepaths):
         try:
             LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {f}")
             map,_ = apply_rules_to_single_file(f,rules_copy,bids_path,write=False,preview=False) #TODO There should be a way to control how verbose this is
             all_mappings.append(map)
-        except :
-            LOGGER.exception(f'Error for {f}')
-            
-            
+        except Exception:
+            LOGGER.exception(f'Error mapping {f}')
+            failed_mappings.append(f)
 
-
-    LOGGER.info(f"Individual Mappings Done!")
+    LOGGER.info(f"Individual Mappings Done! {len(all_mappings)}/{num_files} files mapped successfully.")
+    if failed_mappings:
+        LOGGER.warning(f"{len(failed_mappings)} file(s) failed mapping:")
+        for f in failed_mappings:
+            LOGGER.warning(f"  FAILED: {f}")
 
     # ADD IO to General Rules (this is for the mapping file)
     LOGGER.info(f"Making General Mapping")
@@ -534,8 +539,8 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
         with open(full_mapping_path, 'w') as outfile:
             yaml.dump(mapping_data, outfile, default_flow_style=False)
         LOGGER.info(f"Mapping file written to:{full_mapping_path}")
-    except:
-        LOGGER.warning(f'Couldn\'t write mapping file to:{full_mapping_path}')
+    except Exception:
+        LOGGER.warning(f'Couldn\'t write mapping file to:{full_mapping_path}', exc_info=True)
 
     LOGGER.info(SECTION_STRING + ' END APPLY_RULES ' + SECTION_STRING)
 

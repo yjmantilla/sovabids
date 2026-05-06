@@ -123,7 +123,7 @@ For external integration, SOVABIDS exposes an RPC-based API that allows any exte
 
 ## 5. Format support through MNE delegation
 
-Supporting the full range of EEG and MEG hardware formats from scratch would be an ongoing maintenance burden disproportionate to the tool's core contribution. SOVABIDS instead delegates file reading entirely to MNE-Python [@mne], and BIDS-compliant saving to MNE-BIDS [@mnebids], inheriting support for all formats those libraries handle. The trade-off is that SOVABIDS' format coverage is bounded by MNE's, but this is an acceptable constraint given MNE's broad and actively maintained format support. In practice, SOVABIDS has been specifically tested with BrainVision (.vhdr), Neuroscan (.cnt), EDF (.edf), EEGLAB (.set), FIF (.fif), and MEG FIF (.fif with MEG channel types).
+Supporting the full range of EEG and MEG hardware formats from scratch would be an ongoing maintenance burden disproportionate to the tool's core contribution. SOVABIDS instead delegates file reading entirely to MNE-Python [@mne], and BIDS-compliant saving to MNE-BIDS [@mnebids], inheriting support for all formats those libraries handle. The trade-off is that SOVABIDS' format coverage is bounded by MNE's, but this is an acceptable constraint given MNE's broad and actively maintained format support. In practice, SOVABIDS has been specifically tested with BrainVision (.vhdr), EDF (.edf), EEGLAB (.set), FIF (.fif), and MEG FIF (.fif with MEG channel types). Read-only formats supported by MNE but not writable via its export API (such as Neuroscan .cnt, BDF, KIT, and CTF) are covered by MNE delegation but are not independently tested in SOVABIDS' continuous integration suite.
 
 ## Architecture Overview
 

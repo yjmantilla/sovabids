@@ -93,7 +93,11 @@ For all other readable formats, sovabids converts the data to BrainVision on out
 
 .. tip::
 
-   By default sovabids will skip files already converted. If you want to overwrite previous conversions currently you need to delete the output folder (by yourself) and start sovabids over again.
+   sovabids supports incremental conversion: files whose BIDS output already exists are skipped
+   automatically, so you can safely re-run after adding new participants without re-converting
+   the whole dataset. To force a full re-conversion, delete the output folder and start over.
+   The Python API returns ``{'succeeded': [...], 'failed': [...]}`` so you can inspect which
+   files were converted and which failed.
 
 Architecture
 ------------

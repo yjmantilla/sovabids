@@ -123,13 +123,17 @@ Open the *Convert* tab and click **Convert**. Logs stream in real time.
 .. code-block:: python
 
    from sovabids.convert import convert_them
-   convert_them(mappings)
+   result = convert_them(mappings)
+   print(result["succeeded"])  # list of successfully converted source paths
+   print(result["failed"])     # list of source paths that raised an error
 
-The converted dataset will be at ``bids_path``.
+The converted dataset will be at ``bids_path``. The CLI exits with a non-zero
+status code if any files failed, making it suitable for use in scripts and CI pipelines.
 
 .. tip::
-   By default sovabids skips files already converted. To redo a conversion,
-   delete the output folder and start over.
+   **Incremental conversion**: files whose BIDS output already exists are skipped
+   automatically. Re-running after adding new participants converts only the new files.
+   To force a full re-conversion, delete the output folder and start over.
 
 Next steps
 ----------

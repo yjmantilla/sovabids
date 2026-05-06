@@ -276,6 +276,9 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
         # remember the `entities` key fields must have the same parameters as the BIDSPath constructor argument
         datatype = _handle_datatype(raw, None)
         bids_path = BIDSPath(**entities,root=bids_path,datatype=datatype,suffix=datatype)
+        # BrainVision is wrong for MEG — auto-promote to FIF unless user explicitly set a format
+        if datatype == 'meg' and output_format == 'BrainVision':
+            output_format = 'FIF'
 
         real_times = raw.times[-1] # Save real duration of the eeg, since it is lost if write is false
 

@@ -46,7 +46,8 @@ sovabids
    manufacturer calibration files, or digitization coordinate systems. For complex MEG datasets
    (Elekta/Neuromag, CTF, KIT) those steps must be handled manually after conversion using
    MNE-BIDS directly — see the `MNE-BIDS MEG conversion guide <https://mne.tools/mne-bids/stable/auto_examples/convert_mne_sample.html>`_.
-   Set ``non-bids.output_format: FIF`` in your rules file when converting MEG data.
+   The output format is automatically set to FIF for MEG data; you do not need to set
+   ``non-bids.output_format`` manually (but you may still override it if needed).
 
 .. _supported-formats:
 

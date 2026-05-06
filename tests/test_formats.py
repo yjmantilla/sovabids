@@ -103,7 +103,6 @@ def test_meg_to_bids(tmp_path):
         "channels": {},
         "non-bids": {
             "eeg_extension": ".fif",
-            "output_format": "FIF",
             "path_analysis": {"pattern": pattern, "fields": ["entities.subject"]},
         },
         "IO": {"source": str(source), "target": str(bids)},

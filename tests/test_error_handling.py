@@ -74,7 +74,8 @@ def test_incremental_conversion_skips_existing(tmp_path):
     # Second conversion — should skip everything
     result2 = convert_them(mappings)
     assert result2["failed"] == []
-    assert str(fname) in result2["succeeded"]
+    assert result2["succeeded"] == []
+    assert str(fname) in result2["skipped"]
 
     # No output file should have been re-written
     for f, mtime in mtimes_after_first.items():

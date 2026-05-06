@@ -96,8 +96,9 @@ For all other readable formats, sovabids converts the data to BrainVision on out
    sovabids supports incremental conversion: files whose BIDS output already exists are skipped
    automatically, so you can safely re-run after adding new participants without re-converting
    the whole dataset. To force a full re-conversion, delete the output folder and start over.
-   The Python API returns ``{'succeeded': [...], 'failed': [...]}`` so you can inspect which
-   files were converted and which failed.
+   The Python API returns ``{'succeeded': [...], 'skipped': [...], 'failed': [...]}`` so you
+   can distinguish newly converted files, skipped files, and failures. Skips are also logged
+   at ``WARNING`` level so they appear in CLI output without ``-v``.
 
 Architecture
 ------------

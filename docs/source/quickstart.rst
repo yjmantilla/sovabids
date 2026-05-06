@@ -124,8 +124,9 @@ Open the *Convert* tab and click **Convert**. Logs stream in real time.
 
    from sovabids.convert import convert_them
    result = convert_them(mappings)
-   print(result["succeeded"])  # list of successfully converted source paths
-   print(result["failed"])     # list of source paths that raised an error
+   print(result["succeeded"])  # newly converted source paths
+   print(result["skipped"])    # paths skipped because BIDS output already existed
+   print(result["failed"])     # paths that raised an error
 
 The converted dataset will be at ``bids_path``. The CLI exits with a non-zero
 status code if any files failed, making it suitable for use in scripts and CI pipelines.

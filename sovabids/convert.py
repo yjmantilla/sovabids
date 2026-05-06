@@ -28,8 +28,9 @@ def convert_them(mappings_input):
     Returns
     -------
     dict
-        ``{'succeeded': [str, ...], 'failed': [str, ...]}`` — source paths of
-        files that converted successfully and those that raised an error.
+        ``{'succeeded': [str, ...], 'skipped': [str, ...], 'failed': [str, ...]}`` —
+        source paths of files that were newly converted, skipped because their BIDS
+        output already existed, and those that raised an error.
     """
 
     if isinstance(mappings_input, os.PathLike):
@@ -56,6 +57,7 @@ def convert_them(mappings_input):
     LOGGER.info(f"Converting Individual Mappings")
     num_files = len(mappings['Individual'])
     succeeded = []
+    skipped = []
     failed = []
     for i,mapping in enumerate(mappings['Individual']):
         input_file=deep_get(mapping,'IO.source',None)
@@ -64,14 +66,21 @@ def convert_them(mappings_input):
             LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {input_file}")
             if not os.path.isfile(output_file):
                 apply_rules_to_single_file(input_file,mapping,bids_path,write=True)
+                succeeded.append(input_file)
             else:
-                LOGGER.info(f'{output_file} already existed. Skipping...')
-            succeeded.append(input_file)
+                LOGGER.warning(f'SKIPPED (already converted): {input_file}')
+                skipped.append(input_file)
         except Exception:
             LOGGER.exception(f'Error converting {input_file}')
             failed.append(input_file)
 
-    LOGGER.info(f"Conversion Done! {len(succeeded)}/{num_files} files converted successfully.")
+    LOGGER.info(
+        f"Conversion Done! {len(succeeded)} converted, "
+        f"{len(skipped)} skipped, {len(failed)} failed "
+        f"(total {num_files})."
+    )
+    if skipped:
+        LOGGER.warning(f"{len(skipped)} file(s) skipped (output already exists — delete to re-convert).")
     if failed:
         LOGGER.warning(f"{len(failed)} file(s) failed conversion:")
         for f in failed:
@@ -88,7 +97,7 @@ def convert_them(mappings_input):
 
     LOGGER.info(SECTION_STRING + ' END CONVERT_THEM ' + SECTION_STRING)
 
-    return {'succeeded': succeeded, 'failed': failed}
+    return {'succeeded': succeeded, 'skipped': skipped, 'failed': failed}
 
 
 def sovaconvert():

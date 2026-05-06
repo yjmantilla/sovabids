@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "sovabids"
 dynamic = ["version"]
-description = "Automated EEG/MEG to BIDS conversion"
+description = "Automated EEG to BIDS conversion (experimental MEG support)"
 readme = "README.rst"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]

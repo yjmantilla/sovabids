@@ -20,7 +20,7 @@ sovabids
 
 .. after-init-label
 
-* sovabids is a python package for automating EEG/MEG to BIDS conversion.
+* sovabids is a python package for automating EEG to BIDS conversion (experimental MEG support).
 
 * **New to sovabids?** Start with the `Quickstart guide <https://sovabids.readthedocs.io/en/latest/quickstart.html>`_.
 
@@ -39,16 +39,21 @@ sovabids
    
    Do notice that at the moment the files have to be on the same computer that runs the server.
 
-.. note::
+.. warning::
 
-   MEG conversion is supported. Set ``non-bids.output_format: FIF`` in your rules file when converting MEG data.
+   MEG support is **experimental**. sovabids correctly routes MEG data to the ``meg`` BIDS datatype,
+   but does not expose MEG-specific metadata requirements such as empty-room recordings,
+   manufacturer calibration files, or digitization coordinate systems. For complex MEG datasets
+   (Elekta/Neuromag, CTF, KIT) those steps must be handled manually after conversion using
+   MNE-BIDS directly — see the `MNE-BIDS MEG conversion guide <https://mne.tools/mne-bids/stable/auto_examples/convert_mne_sample.html>`_.
+   Set ``non-bids.output_format: FIF`` in your rules file when converting MEG data.
 
 .. _supported-formats:
 
 Supported Formats
 -----------------
 
-sovabids reads EEG and MEG files via `MNE-Python's read_raw <https://mne.tools/stable/generated/mne.io.read_raw.html>`_,
+sovabids reads EEG files via `MNE-Python's read_raw <https://mne.tools/stable/generated/mne.io.read_raw.html>`_,
 which supports a wide range of formats including BrainVision, EDF/BDF, EEGLAB, FIF, CNT, KIT/SQD, CTF, and more.
 See the full list in the MNE documentation.
 
@@ -78,7 +83,7 @@ Output is always written as a valid BIDS dataset. The table below lists formats 
    * - FIF
      - ``.fif``
      - *(core)*
-     - MNE native format; required output for MEG data (set ``output_format: FIF``)
+     - MNE native format; use for MEG data (experimental — see warning above)
 
 Install export support for EDF and EEGLAB::
 

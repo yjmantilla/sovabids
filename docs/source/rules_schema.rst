@@ -1,9 +1,44 @@
 Rules File Schema
 =================
 
-The rules file setups the way the conversion is done from a general point of view. It is intended to be configurable by a power-user, mainly at an institutional or organization level (or whatever level data seems to be collected uniformly). 
+The rules file setups the way the conversion is done from a general point of view. It is intended to be configurable by a power-user, mainly at an institutional or organization level (or whatever level data seems to be collected uniformly).
 
 To make the rules file by hand we need to understand the schema of the file. For starts, the file is written in yaml. As of now the purpose of this documentation is not to teach yaml (we may have a dedicated file for that in the future). For now, you can check this `guide <https://www.cloudbees.com/blog/yaml-tutorial-everything-you-need-get-started>`_ though.
+
+What each section produces
+--------------------------
+
+Each top-level key in the rules file controls a specific set of output files.
+The table below maps rule sections to the concrete files they populate:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 40 35
+
+   * - Rules section
+     - Output file(s)
+     - Example filename
+   * - ``entities``
+     - Controls the BIDS filename and folder structure for every EEG file
+     - ``sub-SU0/ses-SE0/eeg/sub-SU0_ses-SE0_task-TA0_run-0_eeg.vhdr``
+   * - ``dataset_description``
+     - Dataset-level metadata (one file per dataset)
+     - ``dataset_description.json``
+   * - ``sidecar``
+     - EEG sidecar — technical recording metadata (one per EEG file)
+     - ``sub-SU0_ses-SE0_task-TA0_run-0_eeg.json``
+   * - ``channels``
+     - Channel list with names and types (one per EEG file)
+     - ``sub-SU0_ses-SE0_task-TA0_run-0_channels.tsv``
+   * - ``non-bids``
+     - Not a BIDS file — controls how sovabids scans and processes files
+
+The following files are also generated automatically by MNE-BIDS (not directly
+controlled by the rules file):
+
+- ``participants.tsv`` / ``participants.json`` — one row per subject
+- ``sub-*/ses-*/*_scans.tsv`` — scan list per session
+- ``*_events.tsv`` / ``*_events.json`` — event information extracted from the EEG
 
 The Typical Rules File
 ----------------------

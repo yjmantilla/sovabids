@@ -20,7 +20,9 @@ sovabids
 
 .. after-init-label
 
-* sovabids is a python package for automating eeg2bids conversion. 
+* sovabids is a python package for automating eeg2bids conversion.
+
+* **New to sovabids?** Start with the `Quickstart guide <https://sovabids.readthedocs.io/en/latest/quickstart.html>`_.
 
 * sovabids can be used through (click to see the examples):
    a. `its python API <https://sovabids.readthedocs.io/en/latest/auto_examples/lemon_example.html#using-the-python-api>`_
@@ -58,48 +60,6 @@ The main elements of sovabids are:
 
 Internally sovabids uses `MNE-Python <https://github.com/mne-tools/mne-python>`_ and `MNE-BIDS <https://github.com/mne-tools/mne-bids>`_ to perform the conversion. In a sense is a wrapper that allows to do conversions from the command line.
 
-Installation
-------------
-
-.. code-block:: bash
-
-   pip install sovabids
-
-Installation for TUI usage
---------------------------
-
-This will install sovabids with the terminal user interface dependencies.
-
-.. code-block:: bash
-
-   pip install "sovabids[tui]"
-
-Installation for WEB GUI usage
---------------------------
-
-This will install sovabids for usage with an experimental web gui.
-
-.. code-block:: bash
-
-   pip install "sovabids[gui]"
-
-For the experimental bidscoin plugin, install the sovabids fork of bidscoin manually:
-
-.. code-block:: bash
-
-   pip install "git+https://github.com/yjmantilla/bidscoin.git@sovabids"
-
-Installation for developers
----------------------------
-
-Fork this repo and run:
-
-.. code-block:: bash
-
-   git clone https://github.com/<gh-username>/sovabids.git
-   cd sovabids
-   pip install -e ".[dev]"
-
 
 Basic Usage
 -----------
@@ -110,17 +70,38 @@ Terminal User Interface (sovatui)
 
 The easiest way to use sovabids is through its terminal user interface (TUI) called sovatui. This will allow you to do the conversion without having to write any command line code, and also to have a more visual experience of the conversion process. The TUI guides you through the full conversion workflow in four tabs: Setup, Rules, Mappings, and Convert.
 
+
+Installation for TUI usage
+--------------------------
+
+This will install sovabids with the terminal user interface dependencies.
+
+.. code-block:: bash
+
+   pip install "sovabids[tui]"
+
+Running the TUI
+----------------
+
 .. code-block:: bash
 
    sovatui
 
-See the `TUI tutorial video <https://youtu.be/dOWiMTuGvAA>`_ for a walkthrough.
+See the `TUI tutorial video <https://youtu.be/dOWiMTuGvAA>`_ for a walkthrough and its `example at https://sovabids.readthedocs.io/en/latest/auto_examples/tui_example.html`_.
 
 Command Line Interface (CLI) entry-points
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Use sovabids through its CLI entry-points as follows:
+
+Installation
+""""""""""""
+
+.. code-block:: bash
+
+   pip install sovabids
+
 
 sovapply
 """"""""
@@ -140,13 +121,53 @@ By default the mapping file made will have the following filepath:
 
 
 sovaconvert
-"""""""""""""
+"""""""""""
 
 Use the sovaconvert entry-point to convert the dataset given its mapping file.
 
 .. code-block:: bash
 
    sovaconvert mapping_file
+
+
+Using the experimental web GUI
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Installation for WEB GUI usage
+------------------------------
+
+This will install sovabids for usage with an experimental web gui.
+
+.. code-block:: bash
+
+   pip install "sovabids[gui]"
+
+See the `WEB GUI tutorial video <https://youtu.be/PW84cy6uUJs>`_ for a walkthrough and its `example at https://sovabids.readthedocs.io/en/latest/auto_examples/gui_example.html`_.
+
+
+Using the experimental bidscoin plugin
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+For the experimental bidscoin plugin, install the sovabids fork of bidscoin manually:
+
+.. code-block:: bash
+
+   pip install "git+https://github.com/yjmantilla/bidscoin.git@sovabids"
+
+Follow the example at https://sovabids.readthedocs.io/en/latest/auto_examples/bidscoin_example.html to see how to use the plugin.
+
+
+Installation for developers
+---------------------------
+
+Fork this repo and run:
+
+.. code-block:: bash
+
+   git clone https://github.com/<gh-username>/sovabids.git
+   cd sovabids
+   pip install -e ".[dev]"
 
 
 Funding

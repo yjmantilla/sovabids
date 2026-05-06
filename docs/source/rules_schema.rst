@@ -314,7 +314,7 @@ This is the most complex object. As of now what is supported is:
 eeg_extension
 ^^^^^^^^^^^^^
 
-Defines the file extension to scan for. Works for both EEG and MEG formats. If omitted, sovabids searches for any of: ``['.set', '.cnt', '.vhdr', '.bdf', '.fif']``.
+Defines the file extension to scan for. If omitted, sovabids searches for any of: ``['.set', '.cnt', '.vhdr', '.bdf', '.fif']``. MEG formats (e.g. ``.fif``) are accepted but MEG support is experimental — see ``output_format`` below.
 
 .. note::
     The leading dot is preferred but optional; sovabids adds it if missing.
@@ -670,7 +670,13 @@ output_format
 
 Sets the output format by controlling the *format* parameter of *mne_bids.write_raw_bids*. Acceptable values: ``'auto'``, ``'BrainVision'``, ``'EDF'``, ``'FIF'``.
 
-**Required for MEG data** — set to ``'FIF'`` when converting MEG files.
+.. warning::
+
+   MEG support is experimental. Set to ``'FIF'`` when converting MEG files, but note that
+   MEG-specific metadata (empty-room recordings, calibration files, coordinate systems) must
+   be handled manually — sovabids does not expose these through its rule system. See the
+   `MNE-BIDS MEG conversion guide <https://mne.tools/mne-bids/stable/auto_examples/convert_mne_sample.html>`_
+   for the full MEG-to-BIDS workflow.
 
 .. code-block:: yaml
     

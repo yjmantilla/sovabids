@@ -121,7 +121,14 @@ apply_rules(source_path,bids_path,rules_path,mapping_path)
 # Doing the conversion
 # ^^^^^^^^^^^^^^^^^^^^
 # We now do the conversion of the dataset by reading the mapping file ('mappings.yml') with the convert them module.
-convert_them(mapping_path)
+# convert_them returns a dict with 'succeeded' and 'failed' lists of source file paths.
+# Files whose BIDS output already exists are skipped automatically (incremental conversion).
+result = convert_them(mapping_path)
+print(f"Converted: {len(result['succeeded'])}, Skipped: {len(result['skipped'])}, Failed: {len(result['failed'])}")
+if result['failed']:
+    print("Failed files:")
+    for f in result['failed']:
+        print(f"  {f}")
 
 #%%
 # Checking the conversion

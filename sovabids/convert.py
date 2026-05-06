@@ -2,6 +2,7 @@
 """
 import argparse
 import os
+import sys
 
 import logging
 from sovabids.dicts import deep_get
@@ -26,7 +27,10 @@ def convert_them(mappings_input):
     
     Returns
     -------
-    None
+    dict
+        ``{'succeeded': [str, ...], 'skipped': [str, ...], 'failed': [str, ...]}`` —
+        source paths of files that were newly converted, skipped because their BIDS
+        output already existed, and those that raised an error.
     """
 
     if isinstance(mappings_input, os.PathLike):
@@ -52,20 +56,35 @@ def convert_them(mappings_input):
 
     LOGGER.info(f"Converting Individual Mappings")
     num_files = len(mappings['Individual'])
+    succeeded = []
+    skipped = []
+    failed = []
     for i,mapping in enumerate(mappings['Individual']):
         input_file=deep_get(mapping,'IO.source',None)
         output_file=deep_get(mapping,'IO.target',None)
         try:
-
             LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {input_file}")
             if not os.path.isfile(output_file):
                 apply_rules_to_single_file(input_file,mapping,bids_path,write=True)
+                succeeded.append(input_file)
             else:
-                LOGGER.info(f'{output_file} already existed. Skipping...')
-        except :
-            LOGGER.exception(f'Error for {input_file}')
+                LOGGER.warning(f'SKIPPED (already converted): {input_file}')
+                skipped.append(input_file)
+        except Exception:
+            LOGGER.exception(f'Error converting {input_file}')
+            failed.append(input_file)
 
-    LOGGER.info(f"Conversion Done!")
+    LOGGER.info(
+        f"Conversion Done! {len(succeeded)} converted, "
+        f"{len(skipped)} skipped, {len(failed)} failed "
+        f"(total {num_files})."
+    )
+    if skipped:
+        LOGGER.warning(f"{len(skipped)} file(s) skipped (output already exists — delete to re-convert).")
+    if failed:
+        LOGGER.warning(f"{len(failed)} file(s) failed conversion:")
+        for f in failed:
+            LOGGER.warning(f"  FAILED: {f}")
 
     LOGGER.info(f"Updating Dataset Description")
 
@@ -77,6 +96,8 @@ def convert_them(mappings_input):
     LOGGER.info(f"Dataset Description Updated!")
 
     LOGGER.info(SECTION_STRING + ' END CONVERT_THEM ' + SECTION_STRING)
+
+    return {'succeeded': succeeded, 'skipped': skipped, 'failed': failed}
 
 
 def sovaconvert():
@@ -98,7 +119,9 @@ def sovaconvert():
     if args.verbose:
         LOGGER.setLevel(logging.INFO)
 
-    convert_them(args.mappings)
+    result = convert_them(args.mappings)
+    if result['failed']:
+        sys.exit(1)
 
 if __name__ == "__main__":
     sovaconvert()

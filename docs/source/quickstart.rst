@@ -1,7 +1,7 @@
 Quickstart
 ==========
 
-This page walks through a full EEG/MEG-to-BIDS conversion in one place.
+This page walks through a full EEG-to-BIDS conversion in one place.
 The four steps are always the same regardless of which interface you use:
 
 .. contents:: Steps
@@ -24,9 +24,9 @@ For CLI-only usage:
    pip install sovabids
 
 .. tip::
-   sovabids can read any EEG or MEG format supported by MNE's ``read_raw``. For native EDF or EEGLAB output,
-   install ``pip install "sovabids[formats]"``. For MEG data, set ``non-bids.output_format: FIF`` in your rules.
-   See the :ref:`Supported Formats <supported-formats>` section in the README for the full table.
+   sovabids can read any EEG format supported by MNE's ``read_raw``. For native EDF or EEGLAB output,
+   install ``pip install "sovabids[formats]"``. MEG support is experimental — see the
+   :ref:`Supported Formats <supported-formats>` section in the README for details and caveats.
 
 Step 2 — Prepare a rules file
 ------------------------------
@@ -123,13 +123,18 @@ Open the *Convert* tab and click **Convert**. Logs stream in real time.
 .. code-block:: python
 
    from sovabids.convert import convert_them
-   convert_them(mappings)
+   result = convert_them(mappings)
+   print(result["succeeded"])  # newly converted source paths
+   print(result["skipped"])    # paths skipped because BIDS output already existed
+   print(result["failed"])     # paths that raised an error
 
-The converted dataset will be at ``bids_path``.
+The converted dataset will be at ``bids_path``. The CLI exits with a non-zero
+status code if any files failed, making it suitable for use in scripts and CI pipelines.
 
 .. tip::
-   By default sovabids skips files already converted. To redo a conversion,
-   delete the output folder and start over.
+   **Incremental conversion**: files whose BIDS output already exists are skipped
+   automatically. Re-running after adding new participants converts only the new files.
+   To force a full re-conversion, delete the output folder and start over.
 
 Next steps
 ----------

@@ -7,6 +7,7 @@ The four steps are always the same regardless of which interface you use:
 .. contents:: Steps
    :local:
    :depth: 1
+   :class: this-will-duplicate-information-and-it-is-still-useful-here
 
 Step 1 — Install
 ----------------

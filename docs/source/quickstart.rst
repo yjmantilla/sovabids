@@ -140,8 +140,8 @@ status code if any files failed, making it suitable for use in scripts and CI pi
 Next steps
 ----------
 
-* Full worked example (Python API + CLI): :ref:`LEMON dataset example <lemon_example>`
-* Full worked example (TUI): :ref:`TUI example <tui_example>`
+* Full worked example (Python API + CLI): `LEMON dataset example <https://sovabids.readthedocs.io/en/latest/auto_examples/lemon_example.html>`_
+* Full worked example (TUI): `TUI example <https://sovabids.readthedocs.io/en/latest/auto_examples/tui_example.html>`_
 * Rules file reference: :doc:`rules_schema`
 * Mappings file reference: :doc:`mappings_schema`
 * Python API reference: :doc:`autoapi/index`

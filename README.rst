@@ -277,7 +277,7 @@ Academic Works
 
 * `Video for OHBM 2022 Anual Meeting <https://youtu.be/7M7JLrl6KAk>`_
 
-* `Poster for the eResearch Australasia Conference 2021 <https://www.canva.com/design/DAErO4bo4uk/gnHqwkVFs2qP7U1FhlViVQ/view?utm_content=DAErO4bo4uk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink>`_
+* `Poster for the eResearch Australasia Conference 2021 <https://canva.link/00tfwmoi7idsoud>`_
 
 
 

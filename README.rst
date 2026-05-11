@@ -273,7 +273,7 @@ Academic Works
 
 * `Poster for the Big Data Neuroscience Workshop 2022 (Austin, Texas) <https://www.canva.com/design/DAFMDNgVuGU/UTEbbAYk0JG0d-JpdjQOQg/view?utm_content=DAFMDNgVuGU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton>`_
 
-* `Poster for OHBM 2022 Anual Meeting <https://www.canva.com/design/DAFBHD1bCs4/FNZLtwC78ip_5jt7bcAajw/view?utm_content=DAFBHD1bCs4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton>`_
+* `Poster for OHBM 2022 Anual Meeting <https://canva.link/i4dunn18hm8mezk>`_
 
 * `Video for OHBM 2022 Anual Meeting <https://youtu.be/7M7JLrl6KAk>`_
 

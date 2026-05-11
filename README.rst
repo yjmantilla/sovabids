@@ -271,7 +271,7 @@ sovabids is developed with the help of the following entities:
 Academic Works
 ---------------
 
-* `Poster for the Big Data Neuroscience Workshop 2022 (Austin, Texas) <https://www.canva.com/design/DAFMDNgVuGU/UTEbbAYk0JG0d-JpdjQOQg/view?utm_content=DAFMDNgVuGU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton>`_
+* `Poster for the Big Data Neuroscience Workshop 2022 (Austin, Texas) <https://canva.link/n96b5zngko5hdrg>`_
 
 * `Poster for OHBM 2022 Anual Meeting <https://canva.link/i4dunn18hm8mezk>`_
 

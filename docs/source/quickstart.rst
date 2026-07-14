@@ -40,27 +40,16 @@ See the full :doc:`rules_schema` for all options.
 
 A minimal example for a BrainVision dataset where subject is encoded in the filename:
 
-.. code-block:: yaml
-
-   entities:
-       task: resting
-
-   dataset_description:
-       Name: MyDataset
-       Authors:
-           - Alice
-           - Bob
-
-   sidecar:
-       EEGReference: FCz
-       PowerLineFrequency: 50
-
-   non-bids:
-       eeg_extension: .vhdr
-       path_analysis:
-           pattern: %ignore%/sub-%entities.subject%.vhdr
+.. literalinclude:: ../../examples/quickstart_rules.yml
+   :language: yaml
 
 Save this as ``rules.yml``.
+
+.. note::
+   The ``pattern`` value is wrapped in quotes because it begins with ``%``. YAML reserves ``%`` as an
+   indicator character, so a plain (unquoted) scalar cannot start with it — any ``pattern`` that begins
+   with ``%`` (for example one starting with ``%ignore%``) must be quoted, e.g.
+   ``pattern: "%ignore%/sub-%entities.subject%.vhdr"``.
 
 .. tip::
    If you use the TUI (``sovatui``), the Rules tab builds this file for you

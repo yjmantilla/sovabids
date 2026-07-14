@@ -1,0 +1,19 @@
+entities:
+    task: resting
+
+dataset_description:
+    Name: MyDataset
+    Authors:
+        - Alice
+        - Bob
+
+sidecar:
+    EEGReference: FCz
+    PowerLineFrequency: 50
+
+non-bids:
+    eeg_extension: .vhdr
+    path_analysis:
+        # Quoted because the value begins with "%": YAML reserves "%" as an
+        # indicator character, so an unquoted scalar cannot start with it.
+        pattern: "%ignore%/sub-%entities.subject%.vhdr"

@@ -469,6 +469,13 @@ Now you just need to set the pattern, remember we need to use forward-slash nota
 
     You can use %ignore% if that part of the pattern varies but you don't care about its value.
 
+.. note::
+    If a ``pattern`` value *begins* with ``%`` (for example a pattern that starts with ``%ignore%`` or a
+    field placeholder), it must be wrapped in quotes in the YAML file: ``pattern: "%ignore%/..."``. YAML
+    reserves ``%`` as an indicator character, so a plain (unquoted) scalar cannot start with it and the
+    file will fail to parse. Patterns that begin with an ordinary character (e.g. ``_data/...``) do not
+    need quoting.
+
 .. warning::
     If the value extracted from a field includes hyphens or underscores (-,_) they will be deleted from the value so as to accomodate automatically to the bids standard.
     The only way to bypass this is if the field is "ignore".
@@ -637,7 +644,7 @@ To do this an operation procedure is introduced in the yaml as follows:
     
     non-bids:
         path_analysis:
-            pattern : %a%_%b%_%entities.task%.set
+            pattern : "%a%_%b%_%entities.task%.set"
             operation :
                 entities.subject : "[a] + [b]"
 

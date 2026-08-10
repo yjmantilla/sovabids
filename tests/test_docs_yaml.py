@@ -5,9 +5,10 @@ value that starts with ``%`` must be quoted. This slipped through because our ot
 ``%``-leading patterns as Python strings (never through a YAML loader) and every shipped rules fixture
 happens to start with an ordinary character.
 
-The quickstart example is kept as a real fixture (``examples/quickstart_rules.yml``) that is both
-rendered into the docs via ``literalinclude`` and loaded here through the real loader, so the docs and
-the tested file cannot drift apart.
+Both ``%``-leading doc examples are kept as real fixtures that are rendered into the docs via
+``literalinclude`` and loaded here through the real loader, so the docs and the tested file cannot drift
+apart: ``examples/quickstart_rules.yml`` (quickstart) and ``examples/operation_example_rules.yml`` (the
+operation example in the rules-schema docs).
 """
 import json
 import os
@@ -19,6 +20,7 @@ from sovabids.rules import load_rules
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 QUICKSTART_RULES = os.path.join(REPO_ROOT, "examples", "quickstart_rules.yml")
+OPERATION_RULES = os.path.join(REPO_ROOT, "examples", "operation_example_rules.yml")
 
 
 def test_quickstart_fixture_loads_through_real_loader():
@@ -26,6 +28,18 @@ def test_quickstart_fixture_loads_through_real_loader():
     rules = load_rules(QUICKSTART_RULES)
     assert isinstance(rules, dict)
     assert rules["non-bids"]["path_analysis"]["pattern"] == "%ignore%/sub-%entities.subject%.vhdr"
+
+
+def test_operation_example_fixture_loads_through_real_loader():
+    """The rules-schema operation example is a real fixture too (drift-locked like the quickstart).
+
+    It is the second ``%``-leading site the reviewer named. Because the docs render this exact file via
+    ``literalinclude`` and this test loads the same file, un-quoting the pattern in the docs would fail
+    here — the doc example and the tested file cannot silently diverge.
+    """
+    rules = load_rules(OPERATION_RULES)
+    assert isinstance(rules, dict)
+    assert rules["non-bids"]["path_analysis"]["pattern"] == "%a%_%b%_%entities.task%.set"
 
 
 @pytest.mark.parametrize("snippet", [

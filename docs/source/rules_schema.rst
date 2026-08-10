@@ -640,13 +640,8 @@ Lets says the result you want for subject Healthy-01 is:
 
 To do this an operation procedure is introduced in the yaml as follows:
 
-.. code-block:: yaml
-    
-    non-bids:
-        path_analysis:
-            pattern : "%a%_%b%_%entities.task%.set"
-            operation :
-                entities.subject : "[a] + [b]"
+.. literalinclude:: ../../examples/operation_example_rules.yml
+    :language: yaml
 
 As you may notice, this introduces "field intermediaries" that we can operate on using python expressions.
 

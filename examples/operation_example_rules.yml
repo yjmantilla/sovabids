@@ -1,0 +1,7 @@
+non-bids:
+    path_analysis:
+        # Quoted because the value begins with "%": YAML reserves "%" as an
+        # indicator character, so an unquoted scalar cannot start with it.
+        pattern: "%a%_%b%_%entities.task%.set"
+        operation:
+            entities.subject: "[a] + [b]"

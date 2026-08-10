@@ -9,6 +9,7 @@ The quickstart example is kept as a real fixture (``examples/quickstart_rules.ym
 rendered into the docs via ``literalinclude`` and loaded here through the real loader, so the docs and
 the tested file cannot drift apart.
 """
+import json
 import os
 
 import pytest
@@ -44,3 +45,62 @@ def test_unquoted_percent_leading_pattern_is_invalid_yaml(snippet):
 def test_quoted_percent_leading_pattern_parses_and_preserves_string(snippet, expected):
     """Quoting makes the pattern valid and preserves the exact string."""
     assert yaml.safe_load(snippet) == {"pattern": expected}
+
+
+def test_quickstart_example_runs_end_to_end(tmp_path):
+    """RUN the documented quickstart example on a simulated dataset (not just parse it).
+
+    This is the answer to "is the example actually tested?": it loads the *real* quickstart rules
+    fixture (the exact file the docs render via ``literalinclude``), simulates a tiny BrainVision
+    dataset laid out to match its ``%ignore%/sub-%entities.subject%.vhdr`` pattern, then performs the
+    quickstart's Steps 3-4 for real — ``apply_rules`` (source -> mappings) and ``convert_them``
+    (mappings -> BIDS) — and checks a valid BIDS dataset lands on disk. So the documented example is
+    exercised end to end, not merely loaded.
+    """
+    from bids_validator import BIDSValidator
+
+    from sovabids.datasets import make_dummy_dataset, save_dummy_vhdr
+    from sovabids.rules import apply_rules
+    from sovabids.convert import convert_them
+
+    rules = load_rules(QUICKSTART_RULES)  # the exact documented example
+
+    source_root = str(tmp_path / "source")
+    bids_root = str(tmp_path / "bids")
+    os.makedirs(source_root, exist_ok=True)
+    os.makedirs(bids_root, exist_ok=True)
+
+    # Simulate a source dataset matching the fixture's pattern: <dir>/sub-<subject>.vhdr
+    example = save_dummy_vhdr(str(tmp_path / "dummy.vhdr"))
+    make_dummy_dataset(
+        EXAMPLE=example,
+        PATTERN="%dataset%/sub-%subject%",   # -> DUMMY/sub-SU0.vhdr, DUMMY/sub-SU1.vhdr
+        DATASET="DUMMY",
+        NSUBS=2, NSESSIONS=1, NTASKS=1, NRUNS=1, NACQS=1,
+        ROOT=source_root,
+    )
+
+    # Step 3 — generate mappings by applying the real quickstart rules
+    mappings = apply_rules(source_path=source_root, bids_path=bids_root, rules=rules)
+    individual = mappings["Individual"]
+    assert len(individual) == 2, f"expected 2 mapped files, got {len(individual)}"
+
+    # Targets are valid BIDS; subject came from the pattern, task ('resting') from the fixture
+    validator = BIDSValidator()
+    rels = [m["IO"]["target"].replace(bids_root, "") for m in individual]
+    for rel in rels:
+        assert validator.is_bids(rel), f"{rel} is not a valid BIDS path"
+        assert "task-resting" in rel
+    assert any("sub-SU0" in rel for rel in rels)
+    assert any("sub-SU1" in rel for rel in rels)
+
+    # Step 4 — actually convert to BIDS and confirm the dataset landed on disk
+    convert_them(mappings)
+
+    dd = os.path.join(bids_root, "dataset_description.json")
+    assert os.path.isfile(dd)
+    with open(dd) as fh:
+        assert json.load(fh)["Name"] == "MyDataset"  # from the fixture's dataset_description
+    for sub in ("SU0", "SU1"):
+        eeg = os.path.join(bids_root, f"sub-{sub}", "eeg", f"sub-{sub}_task-resting_eeg.vhdr")
+        assert os.path.isfile(eeg), f"missing converted file {eeg}"

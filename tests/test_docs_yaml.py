@@ -14,13 +14,19 @@ import json
 import os
 
 import pytest
-import yaml
 
 from sovabids.rules import load_rules
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 QUICKSTART_RULES = os.path.join(REPO_ROOT, "examples", "quickstart_rules.yml")
 OPERATION_RULES = os.path.join(REPO_ROOT, "examples", "operation_example_rules.yml")
+
+
+def _load_snippet_through_rules(tmp_path, snippet):
+    """Write a YAML snippet and load it through the production rules path."""
+    rules_file = tmp_path / "rules.yml"
+    rules_file.write_text(snippet, encoding="utf-8")
+    return load_rules(rules_file)
 
 
 def test_quickstart_fixture_loads_through_real_loader():
@@ -46,19 +52,19 @@ def test_operation_example_fixture_loads_through_real_loader():
     "pattern: %ignore%/sub-%entities.subject%.vhdr",   # quickstart example (unquoted)
     "pattern: %a%_%b%_%entities.task%.set",            # rules_schema operation example (unquoted)
 ])
-def test_unquoted_percent_leading_pattern_is_invalid_yaml(snippet):
-    """An unquoted ``pattern`` beginning with ``%`` must fail to parse — this is the #92 bug."""
-    with pytest.raises(yaml.YAMLError):
-        yaml.safe_load(snippet)
+def test_unquoted_percent_leading_pattern_is_invalid_yaml(snippet, tmp_path):
+    """The production loader must reject an unquoted ``%``-leading pattern."""
+    with pytest.raises(OSError, match="Couldnt read .* file as a rule file"):
+        _load_snippet_through_rules(tmp_path, snippet)
 
 
 @pytest.mark.parametrize("snippet,expected", [
     ('pattern: "%ignore%/sub-%entities.subject%.vhdr"', "%ignore%/sub-%entities.subject%.vhdr"),
     ('pattern: "%a%_%b%_%entities.task%.set"', "%a%_%b%_%entities.task%.set"),
 ])
-def test_quoted_percent_leading_pattern_parses_and_preserves_string(snippet, expected):
-    """Quoting makes the pattern valid and preserves the exact string."""
-    assert yaml.safe_load(snippet) == {"pattern": expected}
+def test_quoted_percent_leading_pattern_parses_and_preserves_string(snippet, expected, tmp_path):
+    """The production loader preserves a quoted ``%``-leading pattern."""
+    assert _load_snippet_through_rules(tmp_path, snippet) == {"pattern": expected}
 
 
 def test_quickstart_example_runs_end_to_end(tmp_path):

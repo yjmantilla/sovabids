@@ -12,5 +12,6 @@ Welcome to sovabids' documentation!
    validation.rst
    auto_examples/index.rst
    autoapi/index.rst
+   contributing.md
    gsoc_proposal.md
    GitHub Repository <https://github.com/yjmantilla/sovabids>

@@ -224,6 +224,15 @@ Fork this repo and run:
    pip install -e ".[dev]"
 
 
+Contributing
+------------
+
+Contributions are welcome. See the `Contributing guide
+<https://sovabids.readthedocs.io/en/latest/contributing.html>`_ for how to set up a development
+environment, run the tests, and open a pull request. The guide also lives at
+`.github/CONTRIBUTING.md <https://github.com/yjmantilla/sovabids/blob/main/.github/CONTRIBUTING.md>`_.
+
+
 Funding
 -------
 

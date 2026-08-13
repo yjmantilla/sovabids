@@ -32,6 +32,7 @@ The table below maps rule sections to the concrete files they populate:
      - ``sub-SU0_ses-SE0_task-TA0_run-0_channels.tsv``
    * - ``non-bids``
      - Not a BIDS file — controls how sovabids scans and processes files
+     - N/A
 
 The following files are also generated automatically by MNE-BIDS (not directly
 controlled by the rules file):

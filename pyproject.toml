@@ -53,7 +53,8 @@ sovatui = "sovabids.tui:main"
 gui = [
     "flask",
     "uvicorn",
-    "fastapi",
+    # fastapi-jsonrpc 3.5.0 imports an internal removed in FastAPI 0.140.
+    "fastapi<0.140",
     "fastapi-jsonrpc>=3.4.2",
     "httpx",
     "pydantic",

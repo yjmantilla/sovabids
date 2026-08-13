@@ -5,4 +5,4 @@ You can validate the output of sovabids using the `online bids validator <https:
 
 You should get something like the following:
 
-.. image:: _images/online_validator.png
+.. image:: _copyover/_images/online_validator.png

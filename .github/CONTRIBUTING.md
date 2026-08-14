@@ -128,7 +128,7 @@ To help us reproduce and fix it quickly, include:
 - The full error message / traceback.
 - What you expected to happen versus what actually happened.
 
-## Getting Help
+## Seeking Support
 
 For usage questions and general "how do I…?" help (as opposed to bug reports), please use
 [GitHub Discussions](https://github.com/yjmantilla/sovabids/discussions) so the answers stay searchable for

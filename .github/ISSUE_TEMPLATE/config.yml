@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and support
+    url: https://github.com/yjmantilla/sovabids/discussions
+    about: For "how do I…?" and general usage questions, please use GitHub Discussions instead of opening an issue.

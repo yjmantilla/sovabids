@@ -232,6 +232,11 @@ Contributions are welcome. See the `Contributing guide
 environment, run the tests, and open a pull request. The guide also lives at
 `.github/CONTRIBUTING.md <https://github.com/yjmantilla/sovabids/blob/main/.github/CONTRIBUTING.md>`_.
 
+To report a bug, open an issue on the `issue tracker
+<https://github.com/yjmantilla/sovabids/issues>`_. For usage questions and general help, use
+`GitHub Discussions <https://github.com/yjmantilla/sovabids/discussions>`_. The project follows a
+`Code of Conduct <https://github.com/yjmantilla/sovabids/blob/main/.github/CODE_OF_CONDUCT.md>`_.
+
 
 Funding
 -------

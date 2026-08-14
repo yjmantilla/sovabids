@@ -112,3 +112,34 @@ Brief description of changes
 ## Related Issues
 Fixes #issue_number
 ```
+
+## Reporting Issues
+
+Found a bug or unexpected behavior? Please open an issue on the
+[issue tracker](https://github.com/yjmantilla/sovabids/issues). A quick search of existing issues first can
+save time in case it is already reported.
+
+To help us reproduce and fix it quickly, include:
+
+- The sovabids version (`pip show sovabids`) and how you installed it (pip, `.[dev]`, or from source).
+- Your operating system and Python version.
+- Which interface you were using (Python API, CLI, TUI, JSON-RPC, or web GUI).
+- A minimal rules file (or the relevant snippet) and the exact command or code you ran.
+- The full error message / traceback.
+- What you expected to happen versus what actually happened.
+
+## Getting Help
+
+For usage questions and general "how do I…?" help (as opposed to bug reports), please use
+[GitHub Discussions](https://github.com/yjmantilla/sovabids/discussions) so the answers stay searchable for
+everyone. You can also email the maintainer at <yjmantilla@gmail.com>.
+
+If you are new to sovabids, the
+[Quickstart guide](https://sovabids.readthedocs.io/en/latest/quickstart.html) is the fastest way to get
+going.
+
+## Code of Conduct
+
+This project is released with a
+[Code of Conduct](https://github.com/yjmantilla/sovabids/blob/main/.github/CODE_OF_CONDUCT.md). By
+participating, you are expected to uphold it. Please report unacceptable behavior to <yjmantilla@gmail.com>.

@@ -206,6 +206,45 @@ async def test_tui_dir_picker_returns_directory(dummy_source):
 
 
 @pytest.mark.anyio
+async def test_tui_dir_picker_create_folder(tmp_path):
+    """The directory picker can make a new folder, step into it, and return it on OK."""
+    from sovabids.tui import DirPickerScreen, FilePickerScreen
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        # dir picker exposes the create-folder controls; file picker does not
+        await pilot.click("#browse-bids")
+        await pilot.pause()
+        screen = app.screen
+        assert isinstance(screen, DirPickerScreen)
+        assert screen.query("#new-folder-name") and screen.query("#mk-folder")
+
+        # start it in a known place, name a new folder, create it
+        screen._reroot(str(tmp_path))
+        await pilot.pause()
+        screen.query_one("#new-folder-name", Input).value = "bids_out"
+        await pilot.click("#mk-folder")
+        await pilot.pause()
+        made = tmp_path / "bids_out"
+        assert made.is_dir()                       # created on disk
+        assert screen._root == str(made)           # stepped into it
+        assert screen._selected == str(made)       # pre-selected
+
+        await pilot.click("#ok")
+        await pilot.pause()
+        assert not isinstance(app.screen, DirPickerScreen)
+        assert app.query_one("#bids-input", Input).value == str(made)
+
+    # the FILE picker has no folder-creation controls (dir-only feature)
+    app2 = SovabidsApp()
+    async with app2.run_test(size=(120, 40)) as pilot:
+        await pilot.click("#browse-rules")
+        await pilot.pause()
+        assert isinstance(app2.screen, FilePickerScreen)
+        assert not app2.screen.query("#new-folder-name")
+        assert not app2.screen.query("#mk-folder")
+
+
+@pytest.mark.anyio
 async def test_tui_rules_picker_ok_requires_file(tmp_path):
     """OK with only directory navigation (no file chosen) must not return a directory."""
     from sovabids.tui import FilePickerScreen

@@ -87,6 +87,12 @@ class FSPickerScreen(ModalScreen[str]):
     FSPickerScreen .loc-row Input {
         width: 1fr;
     }
+    FSPickerScreen .newdir-row {
+        height: 3;
+    }
+    FSPickerScreen .newdir-row Input {
+        width: 1fr;
+    }
     FSPickerScreen .btn-row {
         height: 3;
         align: right middle;
@@ -108,14 +114,19 @@ class FSPickerScreen(ModalScreen[str]):
 
     def compose(self) -> ComposeResult:
         with Vertical():
-            yield Label(self._prompt)
+            yield Label(self._prompt, id="fs-status")
             with Horizontal(classes="loc-row"):
                 yield Input(value=self._root, id="loc-input")
                 yield Button("Up", id="go-up", variant="default")
+            yield from self._extra_controls()
             yield DirectoryTree(self._root, id="fs-tree")
             with Horizontal(classes="btn-row"):
                 yield Button("Cancel", id="cancel", variant="default")
                 yield Button("OK", id="ok", variant="primary")
+
+    def _extra_controls(self) -> list:
+        """Widgets to place between the location bar and the tree. Base: none."""
+        return []
 
     def _reroot(self, path: str) -> None:
         """Point the tree (and the location bar) at ``path``'s nearest directory."""
@@ -129,6 +140,8 @@ class FSPickerScreen(ModalScreen[str]):
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if event.input.id == "loc-input":
             self._reroot(event.value)
+        elif event.input.id == "new-folder-name":
+            self._make_folder()
 
     def on_directory_tree_directory_selected(
         self, event: DirectoryTree.DirectorySelected
@@ -154,8 +167,33 @@ class FSPickerScreen(ModalScreen[str]):
             self.dismiss("")
         elif event.button.id == "go-up":
             self._reroot(os.path.dirname(self._root))
+        elif event.button.id == "mk-folder":
+            self._make_folder()
         elif event.button.id == "ok":
             self._confirm()
+
+    def _make_folder(self) -> None:
+        """Create a folder named after the ``new-folder-name`` box inside the
+        folder currently shown, then step into it and pre-select it. Only the
+        directory picker renders that box, so file mode never reaches here."""
+        try:
+            box = self.query_one("#new-folder-name", Input)
+        except Exception:
+            return
+        name = box.value.strip()
+        if not name:
+            return
+        target = os.path.join(self._root, name)
+        try:
+            os.makedirs(target, exist_ok=True)
+        except OSError as exc:
+            self.query_one("#fs-status", Label).update(
+                f"[red]Could not create folder: {exc}[/red]"
+            )
+            return
+        box.value = ""
+        self._reroot(target)           # step into the new folder
+        self._on_dir_selected(target)  # and mark it as the pending choice
 
     def _confirm(self) -> None:
         raise NotImplementedError
@@ -169,6 +207,17 @@ class DirPickerScreen(FSPickerScreen):
     """Modal that lets user browse and confirm a directory."""
 
     _prompt = "Pick a directory: click to select, double-click to enter; OK confirms."
+
+    def _extra_controls(self) -> list:
+        # A create-folder row, so an output directory that doesn't exist yet can
+        # be made without leaving the picker. Only the directory picker gets it.
+        return [
+            Horizontal(
+                Input(placeholder="new folder name (created here)", id="new-folder-name"),
+                Button("New folder", id="mk-folder", variant="default"),
+                classes="newdir-row",
+            )
+        ]
 
     def _on_dir_selected(self, path: str) -> None:
         self._selected = path

@@ -1,5 +1,5 @@
 import os
-import types
+from pathlib import Path
 import pytest
 import anyio
 from sovabids.tui import SovabidsApp
@@ -121,14 +121,63 @@ async def test_tui_rules_picker_returns_file(tmp_path):
         await pilot.pause()
         # browse-rules opens the FILE picker, not the directory picker
         assert isinstance(app.screen, FilePickerScreen)
-        # a file selection sets the confirmable value; OK returns it
-        app.screen.on_directory_tree_file_selected(
-            types.SimpleNamespace(path=str(rules_yml))
-        )
+        # post a REAL DirectoryTree.FileSelected message so this also exercises
+        # Textual's event dispatch (would catch a handler-name / convention change)
+        tree = app.screen.query_one(DirectoryTree)
+        app.screen.post_message(DirectoryTree.FileSelected(tree.root, Path(str(rules_yml))))
+        await pilot.pause()
         await pilot.click("#ok")
         await pilot.pause()
         assert not isinstance(app.screen, FilePickerScreen)
         assert app.query_one("#rules-file-input", Input).value == str(rules_yml)
+
+
+@pytest.mark.anyio
+async def test_tui_rules_picker_directory_click_cannot_override_file(tmp_path):
+    """#89 core hazard: after a file is chosen, navigating a directory must not change the result."""
+    from sovabids.tui import FilePickerScreen
+    rules_yml = tmp_path / "rules.yml"
+    rules_yml.write_text("a: 1\n")
+    subdir = tmp_path / "sub"
+    subdir.mkdir()
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.click("#browse-rules")
+        await pilot.pause()
+        screen = app.screen
+        assert isinstance(screen, FilePickerScreen)
+        # the guarantee is structural: a file picker has NO directory-selection
+        # handler, so a folder click can never become the confirmable value
+        assert not hasattr(FilePickerScreen, "on_directory_tree_directory_selected")
+        tree = screen.query_one(DirectoryTree)
+        # choose a file, then "navigate" into a directory, then confirm
+        screen.post_message(DirectoryTree.FileSelected(tree.root, Path(str(rules_yml))))
+        await pilot.pause()
+        screen.post_message(DirectoryTree.DirectorySelected(tree.root, Path(str(subdir))))
+        await pilot.pause()
+        await pilot.click("#ok")
+        await pilot.pause()
+        # the earlier file survives; the directory never overrides it
+        assert app.query_one("#rules-file-input", Input).value == str(rules_yml)
+
+
+@pytest.mark.anyio
+async def test_tui_dir_picker_returns_directory(dummy_source):
+    """Positive directory-mode: the source/BIDS picker returns the confirmed directory."""
+    from sovabids.tui import DirPickerScreen
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.click("#browse-source")
+        await pilot.pause()
+        screen = app.screen
+        assert isinstance(screen, DirPickerScreen)
+        tree = screen.query_one(DirectoryTree)
+        screen.post_message(DirectoryTree.DirectorySelected(tree.root, Path(dummy_source)))
+        await pilot.pause()
+        await pilot.click("#ok")
+        await pilot.pause()
+        assert not isinstance(app.screen, DirPickerScreen)
+        assert app.query_one("#source-input", Input).value == dummy_source
 
 
 @pytest.mark.anyio

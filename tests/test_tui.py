@@ -117,6 +117,8 @@ async def test_tui_rules_picker_returns_file(tmp_path):
     rules_yml.write_text("non-bids:\n  eeg_extension: .vhdr\n")
     app = SovabidsApp()
     async with app.run_test(size=(120, 40)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
         await pilot.click("#browse-rules")
         await pilot.pause()
         # browse-rules opens the FILE picker, not the directory picker
@@ -144,6 +146,8 @@ async def test_tui_rules_picker_directory_click_cannot_override_file(tmp_path):
     sub2.mkdir()
     app = SovabidsApp()
     async with app.run_test(size=(120, 40)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
         await pilot.click("#browse-rules")
         await pilot.pause()
         screen = app.screen
@@ -171,6 +175,8 @@ async def test_tui_picker_double_click_enters_folder(tmp_path):
     child.mkdir()
     app = SovabidsApp()
     async with app.run_test(size=(120, 40)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
         app.query_one("#rules-file-input", Input).value = str(tmp_path)
         await pilot.pause()
         await pilot.click("#browse-rules")
@@ -237,6 +243,8 @@ async def test_tui_dir_picker_create_folder(tmp_path):
     # the FILE picker has no folder-creation controls (dir-only feature)
     app2 = SovabidsApp()
     async with app2.run_test(size=(120, 40)) as pilot:
+        app2.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
         await pilot.click("#browse-rules")
         await pilot.pause()
         assert isinstance(app2.screen, FilePickerScreen)
@@ -250,6 +258,8 @@ async def test_tui_rules_picker_ok_requires_file(tmp_path):
     from sovabids.tui import FilePickerScreen
     app = SovabidsApp()
     async with app.run_test(size=(120, 40)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
         await pilot.click("#browse-rules")
         await pilot.pause()
         assert isinstance(app.screen, FilePickerScreen)
@@ -270,6 +280,8 @@ async def test_tui_rules_picker_reopen_from_file(tmp_path):
     rules_yml.write_text("a: 1\n")
     app = SovabidsApp()
     async with app.run_test(size=(120, 40)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
         app.query_one("#rules-file-input", Input).value = str(rules_yml)
         await pilot.pause()
         await pilot.click("#browse-rules")
@@ -300,36 +312,63 @@ async def test_tui_generate_rejects_nonfile_rules(dummy_source, tmp_path):
 
 
 @pytest.mark.anyio
-async def test_tui_rules_file_locks_rules_tab(tmp_path):
-    """Setting a rules file in Setup locks the Rules tab (it loses at Generate time, #89);
-    clearing the field unlocks it again."""
-    from textual.widgets import TabbedContent
+async def test_tui_rules_file_locks_builder(tmp_path):
+    """Loading a rules file (in the Rules tab) greys out the manual builder below it;
+    it wins at Generate time (#89). Clearing the field unlocks the builder again."""
     rules_yml = tmp_path / "rules.yml"
     rules_yml.write_text("a: 1\n")
     app = SovabidsApp()
-    async with app.run_test(size=(120, 40)) as pilot:
-        tab = app.query_one(TabbedContent).get_tab("tab-rules")
-        banner = app.query_one("#rules-locked-banner", Static)
-        rules_pane = app.query_one("RulesPane")
+    async with app.run_test(size=(120, 50)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        builder = app.query_one("#rules-builder")
+        note = app.query_one("#rules-lock-note", Static)
 
         # starts unlocked
-        assert "🔒" not in str(tab.label)
-        assert "locked" not in banner.classes
-        assert rules_pane.disabled is False
+        assert builder.disabled is False
+        assert "locked" not in note.classes
 
-        # a rules file locks it (this is the picker path too — .value posts Input.Changed)
+        # loading a rules file locks the builder (picker path too — .value posts Input.Changed)
         app.query_one("#rules-file-input", Input).value = str(rules_yml)
         await pilot.pause()
-        assert "🔒" in str(tab.label)
-        assert "locked" in banner.classes
-        assert rules_pane.disabled is True
+        assert builder.disabled is True
+        assert "locked" in note.classes
 
         # clearing the field unlocks it
         app.query_one("#rules-file-input", Input).value = ""
         await pilot.pause()
-        assert "🔒" not in str(tab.label)
-        assert "locked" not in banner.classes
-        assert rules_pane.disabled is False
+        assert builder.disabled is False
+        assert "locked" not in note.classes
+
+
+@pytest.mark.anyio
+async def test_tui_save_rules_feedback(tmp_path):
+    """Ctrl+S notifies on save; it refuses to write (with a warning) when the BIDS
+    dir is unset or a rules file is loaded."""
+    bids = tmp_path / "bids"
+    out = bids / "code" / "sovabids" / "rules.yml"
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 50)) as pilot:
+        # no BIDS dir -> no write, but a toast explains why
+        app.action_save_rules()
+        await pilot.pause()
+        assert not out.exists()
+        assert len(list(app._notifications)) >= 1
+
+        # BIDS set, no rules file -> writes and notifies
+        app.query_one("#bids-input", Input).value = str(bids)
+        await pilot.pause()
+        app.action_save_rules()
+        await pilot.pause()
+        assert out.exists()
+
+        # a loaded rules file wins -> builder save is refused (no overwrite)
+        out.unlink()
+        app.query_one("#rules-file-input", Input).value = str(tmp_path / "external.yml")
+        await pilot.pause()
+        app.action_save_rules()
+        await pilot.pause()
+        assert not out.exists()
 
 
 @pytest.mark.anyio
@@ -340,6 +379,8 @@ async def test_tui_picker_navigation(tmp_path):
     child.mkdir()
     app = SovabidsApp()
     async with app.run_test(size=(120, 40)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
         app.query_one("#rules-file-input", Input).value = str(child)
         await pilot.pause()
         await pilot.click("#browse-rules")

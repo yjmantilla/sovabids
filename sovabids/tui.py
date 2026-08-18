@@ -275,18 +275,16 @@ class SetupPane(Static):
         with Horizontal(classes="path-row"):
             yield Input(placeholder="/path/to/bids_output", id="bids-input")
             yield Button("Browse…", id="browse-bids")
-        yield Rule()
-        yield Label("[b]Load existing rules file[/b] (optional — skips Rules tab)")
-        with Horizontal(classes="path-row"):
-            yield Input(placeholder="/path/to/rules.yml", id="rules-file-input")
-            yield Button("Browse…", id="browse-rules")
-        yield Static("Leave blank to build rules from scratch in the Rules tab.", classes="hint")
+        yield Static(
+            "Then define your conversion rules in the Rules tab "
+            "(or load an existing rules file there).",
+            classes="hint",
+        )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         mapping = {
             "browse-source": ("source-input", True),
             "browse-bids": ("bids-input", True),
-            "browse-rules": ("rules-file-input", False),
         }
         if event.button.id in mapping:
             target_id, is_dir = mapping[event.button.id]
@@ -299,7 +297,6 @@ class SetupPane(Static):
         return {
             "source": self.query_one("#source-input", Input).value.strip(),
             "bids": self.query_one("#bids-input", Input).value.strip(),
-            "rules_file": self.query_one("#rules-file-input", Input).value.strip(),
         }
 
 
@@ -479,6 +476,19 @@ class RulesPane(Static):
         padding: 0 2;
         border-left: solid $primary;
     }
+    RulesPane .rulesfile-row { height: 3; }
+    RulesPane .rulesfile-row Input { width: 1fr; }
+    RulesPane .rulesfile-row Button { width: 14; margin-left: 1; }
+    RulesPane #rules-lock-note {
+        display: none;
+        height: auto;
+        color: $warning;
+        border: round $warning;
+        padding: 0 1;
+        margin-bottom: 1;
+    }
+    RulesPane #rules-lock-note.locked { display: block; }
+    RulesPane #rules-builder { height: auto; }
     RulesPane #ext-count { color: $text-muted; height: 1; margin-bottom: 1; }
     RulesPane #sample-paths {
         display: none;
@@ -527,6 +537,22 @@ class RulesPane(Static):
         self._matched_files: list[str] = []
 
     def compose(self) -> ComposeResult:
+        # Either load an existing rules file, OR build the rules below. Loading a
+        # file wins at Generate time (#89), so it locks the builder.
+        yield Label("[b]Load existing rules file[/b] (optional — locks the builder below)")
+        with Horizontal(classes="rulesfile-row"):
+            yield Input(placeholder="/path/to/rules.yml", id="rules-file-input")
+            yield Button("Browse…", id="browse-rules")
+        yield Static(
+            "🔒 A rules file is loaded — the builder below is ignored. "
+            "Clear the field to build rules here.",
+            id="rules-lock-note",
+        )
+        yield Rule()
+        with Vertical(id="rules-builder"):
+            yield from self._compose_builder()
+
+    def _compose_builder(self) -> ComposeResult:
         yield Label("[b]EEG file extension[/b]")
         ext_options = [(e, e) for e in SUPPORTED_EXTENSIONS]
         yield Select(ext_options, value=SUPPORTED_EXTENSIONS[0], id="ext-select")
@@ -632,8 +658,21 @@ class RulesPane(Static):
     # ── pattern preview ───────────────────────────────────────────────────────
 
     def on_input_changed(self, event: Input.Changed) -> None:
+        if event.input.id == "rules-file-input":
+            self._set_builder_locked(bool(event.value.strip()))
+            return
         if event.input.id in ("pattern-input", "regex-fields-input", "io-src-input", "io-tgt-input"):
             self._schedule_preview()
+
+    def _set_builder_locked(self, locked: bool) -> None:
+        try:
+            self.query_one("#rules-builder").disabled = locked
+            self.query_one("#rules-lock-note", Static).set_class(locked, "locked")
+        except Exception:
+            pass
+
+    def get_rules_file(self) -> str:
+        return self.query_one("#rules-file-input", Input).value.strip()
 
     def on_select_changed(self, event: Select.Changed) -> None:
         if event.select.id == "ext-select":
@@ -681,7 +720,11 @@ class RulesPane(Static):
             self._schedule_preview()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "refresh-preview":
+        if event.button.id == "browse-rules":
+            self.app._pending_input_id = "rules-file-input"
+            start = self.query_one("#rules-file-input", Input).value or "."
+            self.app.push_screen(FilePickerScreen(start), self.app._on_path_picked)
+        elif event.button.id == "refresh-preview":
             self._run_preview()
         elif event.button.id == "show-files":
             mode, fields = self._get_mode_and_fields()
@@ -999,7 +1042,7 @@ class MappingsPane(Static):
     def _generate(self) -> None:
         vals = self.app.query_one(SetupPane).get_values()
         source, bids = vals["source"], vals["bids"]
-        rules_file = vals["rules_file"]
+        rules_file = self.app.query_one(RulesPane).get_rules_file()
 
         if not source or not bids:
             self._set_status("Set source and BIDS directories in Setup tab.", error=True)
@@ -1148,15 +1191,6 @@ class SovabidsApp(App):
     CSS = """
     TabbedContent { height: 1fr; }
     TabPane { height: 1fr; }
-    #rules-locked-banner {
-        display: none;
-        height: auto;
-        padding: 0 1;
-        margin: 1 2 0 2;
-        color: $warning;
-        border: round $warning;
-    }
-    #rules-locked-banner.locked { display: block; }
     """
     BINDINGS = [
         ("q", "quit", "Quit"),
@@ -1165,20 +1199,13 @@ class SovabidsApp(App):
 
     _mapping_data: dict | None = None
     _pending_input_id: str = ""
-    _RULES_TAB_LABEL = "2 · Rules"
-    _RULES_TAB_LABEL_LOCKED = "2 · Rules 🔒"
 
     def compose(self) -> ComposeResult:
         yield Header()
         with TabbedContent():
             with TabPane("1 · Setup", id="tab-setup"):
                 yield ScrollableContainer(SetupPane())
-            with TabPane(self._RULES_TAB_LABEL, id="tab-rules"):
-                yield Static(
-                    "🔒 A rules file is set in Setup, so this tab is ignored when "
-                    "generating. Clear the rules-file field in Setup to edit rules here.",
-                    id="rules-locked-banner",
-                )
+            with TabPane("2 · Rules", id="tab-rules"):
                 yield ScrollableContainer(RulesPane())
             with TabPane("3 · Mappings", id="tab-mappings"):
                 yield MappingsPane()
@@ -1204,35 +1231,24 @@ class SovabidsApp(App):
             except Exception:
                 pass
 
-    def on_input_changed(self, event: Input.Changed) -> None:
-        # A rules file set in Setup wins over the Rules tab at Generate time
-        # (#89). Reflect that: lock the Rules tab so it can't be edited by
-        # mistake, and say why. Fires for the picker too (setting .value posts
-        # Input.Changed).
-        if event.input.id == "rules-file-input":
-            self._set_rules_locked(bool(event.value.strip()))
-
-    def _set_rules_locked(self, locked: bool) -> None:
-        try:
-            tab = self.query_one(TabbedContent).get_tab("tab-rules")
-            tab.label = (
-                self._RULES_TAB_LABEL_LOCKED if locked else self._RULES_TAB_LABEL
-            )
-            self.query_one(RulesPane).disabled = locked
-            self.query_one("#rules-locked-banner", Static).set_class(locked, "locked")
-        except Exception:
-            pass
-
     def action_save_rules(self) -> None:
-        vals = self.query_one(SetupPane).get_values()
-        rules = self.query_one(RulesPane).get_rules()
-        bids = vals.get("bids", "")
+        bids = self.query_one(SetupPane).get_values().get("bids", "")
         if not bids:
+            self.notify("Set a BIDS output directory first (Setup tab).", severity="warning")
             return
+        rules_pane = self.query_one(RulesPane)
+        if rules_pane.get_rules_file():
+            self.notify(
+                "A rules file is loaded — clear it in the Rules tab to save builder rules.",
+                severity="warning",
+            )
+            return
+        rules = rules_pane.get_rules()
         out = os.path.join(bids, "code", "sovabids", "rules.yml")
         os.makedirs(os.path.dirname(out), exist_ok=True)
         with open(out, "w") as f:
             yaml.dump(rules, f, default_flow_style=False)
+        self.notify(f"Saved rules to {out}")
 
 
 def main() -> None:

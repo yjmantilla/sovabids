@@ -1098,6 +1098,11 @@ class MappingsPane(Static):
             self._set_status("Generate mappings first.", error=True)
             return
         bids = self.app.query_one(SetupPane).get_values()["bids"]
+        if not bids:
+            # Without this, os.path.join("", ...) is relative and silently writes
+            # mappings.yml into the current working directory.
+            self._set_status("Set a BIDS output directory first (Setup tab).", error=True)
+            return
         out_path = os.path.join(bids, "code", "sovabids", "mappings.yml")
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
         with open(out_path, "w") as f:

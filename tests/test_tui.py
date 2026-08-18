@@ -372,6 +372,36 @@ async def test_tui_save_rules_feedback(tmp_path):
 
 
 @pytest.mark.anyio
+async def test_tui_save_mappings_requires_bids(tmp_path, monkeypatch):
+    """Saving mappings reports status; without a BIDS dir it warns instead of
+    silently writing mappings.yml into the current working directory."""
+    monkeypatch.chdir(tmp_path)          # so any accidental relative write lands here
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 50)) as pilot:
+        mp = app.query_one("MappingsPane")
+
+        # nothing generated -> "generate first"
+        mp._save_mappings_yaml()
+        await pilot.pause()
+        assert "generate" in str(app.query_one("#mappings-status", Static).render()).lower()
+
+        # a mapping exists but the BIDS dir is empty -> guarded, no CWD write
+        app._mapping_data = {"Individual": [{"IO": {"source": "a", "target": "b"}}]}
+        mp._save_mappings_yaml()
+        await pilot.pause()
+        assert "bids output" in str(app.query_one("#mappings-status", Static).render()).lower()
+        assert not (tmp_path / "code" / "sovabids" / "mappings.yml").exists()
+
+        # set the BIDS dir -> writes and reports the real path
+        bids = tmp_path / "bids"
+        app.query_one("#bids-input", Input).value = str(bids)
+        await pilot.pause()
+        mp._save_mappings_yaml()
+        await pilot.pause()
+        assert (bids / "code" / "sovabids" / "mappings.yml").exists()
+
+
+@pytest.mark.anyio
 async def test_tui_picker_navigation(tmp_path):
     """The picker can leave the seed folder: Up climbs to the parent, the location bar jumps anywhere."""
     from sovabids.tui import FilePickerScreen

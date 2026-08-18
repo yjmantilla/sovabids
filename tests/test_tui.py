@@ -169,10 +169,13 @@ async def test_tui_rules_picker_directory_click_cannot_override_file(tmp_path):
 
 @pytest.mark.anyio
 async def test_tui_picker_double_click_enters_folder(tmp_path):
-    """Double-clicking a folder navigates into it (re-roots the tree)."""
+    """Two quick DirectorySelected on the same folder (a double-click) enters it;
+    a single selection or a slow second one must NOT re-root."""
     from sovabids.tui import FilePickerScreen
     child = tmp_path / "child"
     child.mkdir()
+    other = tmp_path / "other"
+    other.mkdir()
     app = SovabidsApp()
     async with app.run_test(size=(120, 40)) as pilot:
         app.query_one("TabbedContent").active = "tab-rules"
@@ -184,12 +187,32 @@ async def test_tui_picker_double_click_enters_folder(tmp_path):
         screen = app.screen
         tree = screen.query_one(DirectoryTree)
         assert str(tree.path) == str(tmp_path)
-        # two quick selections of the same folder == a double-click -> enter it
-        msg = DirectoryTree.DirectorySelected(tree.root, Path(str(child)))
-        screen.on_directory_tree_directory_selected(msg)
-        screen.on_directory_tree_directory_selected(msg)
+
+        def select(path):
+            # post a REAL DirectorySelected so this exercises Textual's dispatch
+            screen.post_message(DirectoryTree.DirectorySelected(tree.root, Path(str(path))))
+
+        # single selection -> navigate only, no re-root
+        select(other)
+        await pilot.pause()
+        assert str(tree.path) == str(tmp_path)
+
+        # two quick selections of the SAME folder == double-click -> enter it
+        select(child)
+        select(child)
         await pilot.pause()
         assert str(tree.path) == str(child)
+
+        # back up, then a SLOW second selection must NOT enter
+        await pilot.click("#go-up")
+        await pilot.pause()
+        assert str(tree.path) == str(tmp_path)
+        select(other)
+        await pilot.pause()
+        await anyio.sleep(screen._DOUBLE_CLICK_SECONDS + 0.15)
+        select(other)
+        await pilot.pause()
+        assert str(tree.path) == str(tmp_path)
 
 
 @pytest.mark.anyio
@@ -312,6 +335,69 @@ async def test_tui_generate_rejects_nonfile_rules(dummy_source, tmp_path):
 
 
 @pytest.mark.anyio
+async def test_tui_generate_uses_loaded_rules_file(dummy_source, tmp_path, monkeypatch):
+    """Positive #89: when a valid rules file is loaded, its rules drive apply_rules —
+    the manual builder is not consulted."""
+    import sovabids.rules as sr
+    sentinel = {"dataset_description": {"Name": "FROM_FILE"}}
+    captured = {}
+    monkeypatch.setattr(sr, "load_rules", lambda p: sentinel)          # the file's rules
+
+    def fake_apply(source_path, bids_path, rules):
+        captured["rules"] = rules
+        return {"Individual": []}
+    monkeypatch.setattr(sr, "apply_rules", fake_apply)
+    rules_yml = tmp_path / "r.yml"
+    rules_yml.write_text("x: 1\n")
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 50)) as pilot:
+        app.query_one("#source-input", Input).value = dummy_source
+        app.query_one("#bids-input", Input).value = str(tmp_path / "bids")
+        app.query_one("#rules-file-input", Input).value = str(rules_yml)
+        # give the (now-locked) builder a DIFFERENT dataset name to prove it's ignored
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        app.query_one("#ds-name-input", Input).value = "FROM_BUILDER"
+        await pilot.pause()
+        app.query_one("MappingsPane")._generate()
+        for _ in range(30):
+            await anyio.sleep(0.1)
+            await pilot.pause()
+            if captured:
+                break
+        assert captured["rules"] is sentinel          # the loaded file drove apply_rules
+        assert app._mapping_data == {"Individual": []}
+
+
+@pytest.mark.anyio
+async def test_tui_dir_picker_navigate_after_select_returns_current(tmp_path):
+    """Regression: selecting a folder then navigating away (Up) must not return the
+    stale earlier selection — OK returns the folder currently shown."""
+    from sovabids.tui import DirPickerScreen
+    sub = tmp_path / "a" / "b"
+    sub.mkdir(parents=True)
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.click("#browse-source")
+        await pilot.pause()
+        screen = app.screen
+        assert isinstance(screen, DirPickerScreen)
+        screen._reroot(str(sub))
+        await pilot.pause()
+        tree = screen.query_one(DirectoryTree)
+        screen.post_message(DirectoryTree.DirectorySelected(tree.root, Path(str(sub))))
+        await pilot.pause()
+        assert screen._selected == str(sub)
+        # navigate up -> the stale selection must be cleared
+        await pilot.click("#go-up")
+        await pilot.pause()
+        assert screen._selected == ""
+        await pilot.click("#ok")
+        await pilot.pause()
+        assert app.query_one("#source-input", Input).value == str(tmp_path / "a")
+
+
+@pytest.mark.anyio
 async def test_tui_rules_file_locks_builder(tmp_path):
     """Loading a rules file (in the Rules tab) greys out the manual builder below it;
     it wins at Generate time (#89). Clearing the field unlocks the builder again."""
@@ -342,17 +428,22 @@ async def test_tui_rules_file_locks_builder(tmp_path):
 
 
 @pytest.mark.anyio
-async def test_tui_save_rules_feedback(tmp_path):
+async def test_tui_save_rules_feedback(tmp_path, monkeypatch):
     """Ctrl+S notifies on save; it refuses to write (with a warning) when the BIDS
     dir is unset or a rules file is loaded."""
+    monkeypatch.chdir(tmp_path)          # so an accidental relative write lands here, not the repo
     bids = tmp_path / "bids"
     out = bids / "code" / "sovabids" / "rules.yml"
+    # with BIDS unset, os.path.join("", ...) is the RELATIVE path below — the guard
+    # must stop it from ever being written (else this would appear in the CWD):
+    cwd_relative = tmp_path / "code" / "sovabids" / "rules.yml"
     app = SovabidsApp()
     async with app.run_test(size=(120, 50)) as pilot:
-        # no BIDS dir -> no write, but a toast explains why
-        app.action_save_rules()
+        # no BIDS dir -> no write anywhere, but a toast explains why (via the real binding)
+        await pilot.press("ctrl+s")
         await pilot.pause()
         assert not out.exists()
+        assert not cwd_relative.exists()
         assert len(list(app._notifications)) >= 1
 
         # BIDS set, no rules file -> writes and notifies

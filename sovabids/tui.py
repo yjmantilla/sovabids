@@ -132,6 +132,14 @@ class FSPickerScreen(ModalScreen[str]):
         """Point the tree (and the location bar) at ``path``'s nearest directory."""
         root = _tree_root(path)
         self._root = root
+        # Navigating away invalidates any earlier single-click selection, so OK
+        # can't return a folder the user has since moved away from. Paths that do
+        # mean to select (double-click, make-folder) re-select right after this.
+        self._selected = ""
+        try:
+            self.query_one("#ok", Button).label = "OK"
+        except Exception:
+            pass
         tree = self.query_one("#fs-tree", DirectoryTree)
         tree.path = root
         tree.reload()
@@ -154,7 +162,8 @@ class FSPickerScreen(ModalScreen[str]):
         now = time.monotonic()
         if path == self._last_dir and (now - self._last_dir_t) <= self._DOUBLE_CLICK_SECONDS:
             self._last_dir = ""
-            self._reroot(path)
+            self._reroot(path)             # enter the folder (clears selection)…
+            self._on_dir_selected(path)    # …and re-select it (no-op for file mode)
             return
         self._last_dir, self._last_dir_t = path, now
         self._on_dir_selected(path)
@@ -183,6 +192,14 @@ class FSPickerScreen(ModalScreen[str]):
         name = box.value.strip()
         if not name:
             return
+        # Keep creation INSIDE the folder shown. Without this, os.path.join lets an
+        # absolute name ("/etc/x") or traversal ("../x") escape the root and then
+        # become the confirmed directory.
+        if os.path.isabs(name) or name in (".", "..") or "/" in name or "\\" in name:
+            self.query_one("#fs-status", Label).update(
+                "[red]Enter a plain folder name (no “/”, “\\”, or “..”).[/red]"
+            )
+            return
         target = os.path.join(self._root, name)
         try:
             os.makedirs(target, exist_ok=True)
@@ -192,6 +209,7 @@ class FSPickerScreen(ModalScreen[str]):
             )
             return
         box.value = ""
+        self.query_one("#fs-status", Label).update(self._prompt)  # clear any prior error
         self._reroot(target)           # step into the new folder
         self._on_dir_selected(target)  # and mark it as the pending choice
 
@@ -534,6 +552,7 @@ class RulesPane(Static):
     def __init__(self) -> None:
         super().__init__()
         self._preview_timer = None
+        self._ext_count_timer = None
         self._matched_files: list[str] = []
 
     def compose(self) -> ComposeResult:
@@ -770,7 +789,11 @@ class RulesPane(Static):
         )
 
     def _schedule_ext_count(self) -> None:
-        self.set_timer(0.1, self._run_ext_count)
+        # Debounce: extension changes and Rules-tab activation both trigger this,
+        # so coalesce bursts instead of firing a scan per event.
+        if self._ext_count_timer is not None:
+            self._ext_count_timer.stop()
+        self._ext_count_timer = self.set_timer(0.1, self._run_ext_count)
 
     def _run_ext_count(self) -> None:
         source = self._get_source()
@@ -781,7 +804,7 @@ class RulesPane(Static):
             return
         self._ext_count_worker(source, ext)
 
-    @work(thread=True)
+    @work(thread=True, exclusive=True, group="ext-count")
     def _ext_count_worker(self, source: str, ext: str) -> None:
         count = 0
         samples: list[str] = []

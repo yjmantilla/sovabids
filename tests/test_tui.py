@@ -236,6 +236,38 @@ async def test_tui_generate_rejects_nonfile_rules(dummy_source, tmp_path):
 
 
 @pytest.mark.anyio
+async def test_tui_picker_navigation(tmp_path):
+    """The picker can leave the seed folder: Up climbs to the parent, the location bar jumps anywhere."""
+    from sovabids.tui import FilePickerScreen
+    child = tmp_path / "child"
+    child.mkdir()
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        app.query_one("#rules-file-input", Input).value = str(child)
+        await pilot.pause()
+        await pilot.click("#browse-rules")
+        await pilot.pause()
+        screen = app.screen
+        assert isinstance(screen, FilePickerScreen)
+        tree = screen.query_one(DirectoryTree)
+        assert str(tree.path) == str(child)  # rooted at the seeded folder
+
+        # Up -> parent directory
+        await pilot.click("#go-up")
+        await pilot.pause()
+        assert str(tree.path) == str(tmp_path)
+
+        # location bar -> jump straight to an arbitrary directory
+        loc = screen.query_one("#loc-input", Input)
+        loc.focus()
+        await pilot.pause()
+        loc.value = str(child)
+        await pilot.press("enter")
+        await pilot.pause()
+        assert str(tree.path) == str(child)
+
+
+@pytest.mark.anyio
 async def test_tui_files_modal(dummy_source):
     app = SovabidsApp()
     async with app.run_test(size=(120, 40)) as pilot:

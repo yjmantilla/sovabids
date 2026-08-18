@@ -56,48 +56,96 @@ def _tree_root(start: str) -> str:
     return parent or os.path.expanduser("~")
 
 
-class DirPickerScreen(ModalScreen[str]):
-    """Modal that lets user browse and confirm a directory."""
+class FSPickerScreen(ModalScreen[str]):
+    """Base filesystem browser modal: an editable location bar + an Up button + a
+    ``DirectoryTree``, so the user can navigate anywhere (not just below the seed
+    folder). Subclasses decide whether OK returns a directory or a file.
+    """
 
     DEFAULT_CSS = """
-    DirPickerScreen {
+    FSPickerScreen {
         align: center middle;
     }
-    DirPickerScreen > Vertical {
+    FSPickerScreen > Vertical {
         width: 80%;
         height: 80%;
         border: thick $primary;
         background: $surface;
         padding: 1;
     }
-    DirPickerScreen DirectoryTree {
+    FSPickerScreen DirectoryTree {
         height: 1fr;
     }
-    DirPickerScreen Label {
+    FSPickerScreen Label {
         height: 1;
         margin-bottom: 1;
     }
-    DirPickerScreen Horizontal {
+    FSPickerScreen .loc-row {
+        height: 3;
+    }
+    FSPickerScreen .loc-row Input {
+        width: 1fr;
+    }
+    FSPickerScreen .btn-row {
         height: 3;
         align: right middle;
     }
-    DirPickerScreen Button {
+    FSPickerScreen Button {
         margin-left: 1;
     }
     """
 
+    _prompt: ClassVar[str] = "Select a path:"
+
     def __init__(self, start: str = ".") -> None:
         super().__init__()
         self._selected = ""
-        self._start = _tree_root(start)
+        self._root = _tree_root(start)
 
     def compose(self) -> ComposeResult:
         with Vertical():
-            yield Label("Select directory (press Enter or OK to confirm):")
-            yield DirectoryTree(self._start, id="dir-tree")
-            with Horizontal():
+            yield Label(self._prompt)
+            with Horizontal(classes="loc-row"):
+                yield Input(value=self._root, id="loc-input")
+                yield Button("Up", id="go-up", variant="default")
+            yield DirectoryTree(self._root, id="fs-tree")
+            with Horizontal(classes="btn-row"):
                 yield Button("Cancel", id="cancel", variant="default")
                 yield Button("OK", id="ok", variant="primary")
+
+    def _reroot(self, path: str) -> None:
+        """Point the tree (and the location bar) at ``path``'s nearest directory."""
+        root = _tree_root(path)
+        self._root = root
+        tree = self.query_one("#fs-tree", DirectoryTree)
+        tree.path = root
+        tree.reload()
+        self.query_one("#loc-input", Input).value = root
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        if event.input.id == "loc-input":
+            self._reroot(event.value)
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "cancel":
+            self.dismiss("")
+        elif event.button.id == "go-up":
+            self._reroot(os.path.dirname(self._root))
+        elif event.button.id == "ok":
+            self._confirm()
+
+    def _confirm(self) -> None:
+        raise NotImplementedError
+
+    def on_key(self, event) -> None:  # noqa: ANN001
+        if event.key == "escape":
+            self.dismiss("")
+
+
+class DirPickerScreen(FSPickerScreen):
+    """Modal that lets user browse and confirm a directory."""
+
+    _prompt = "Select a directory (click a folder, or use the path bar, then OK):"
 
     def on_directory_tree_directory_selected(
         self, event: DirectoryTree.DirectorySelected
@@ -105,83 +153,34 @@ class DirPickerScreen(ModalScreen[str]):
         self._selected = str(event.path)
         self.query_one("#ok", Button).label = f"OK  [{os.path.basename(str(event.path))}]"
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "cancel":
-            self.dismiss("")
-        elif event.button.id == "ok":
-            path = getattr(self, "_selected", "")
-            self.dismiss(path)
+    def _confirm(self) -> None:
+        # Return the highlighted directory, or fall back to the folder currently
+        # shown in the tree if the user only navigated.
+        self.dismiss(self._selected or self._root)
 
 
-class FilePickerScreen(ModalScreen[str]):
+class FilePickerScreen(FSPickerScreen):
     """Modal that lets user browse and confirm a *file* (e.g. a rules YAML).
 
     Unlike :class:`DirPickerScreen`, only a *file* selection sets the confirmable
     value; clicking a folder just navigates the tree and never becomes the
     result. That is what keeps a stray navigation click before OK from returning
-    a directory — the exact failure in issue #89.
+    a directory — the exact failure in issue #89. (There is deliberately no
+    ``on_directory_tree_directory_selected`` here.)
     """
 
-    DEFAULT_CSS = """
-    FilePickerScreen {
-        align: center middle;
-    }
-    FilePickerScreen > Vertical {
-        width: 80%;
-        height: 80%;
-        border: thick $primary;
-        background: $surface;
-        padding: 1;
-    }
-    FilePickerScreen DirectoryTree {
-        height: 1fr;
-    }
-    FilePickerScreen Label {
-        height: 1;
-        margin-bottom: 1;
-    }
-    FilePickerScreen Horizontal {
-        height: 3;
-        align: right middle;
-    }
-    FilePickerScreen Button {
-        margin-left: 1;
-    }
-    """
-
-    def __init__(self, start: str = ".") -> None:
-        super().__init__()
-        self._selected = ""
-        self._start = _tree_root(start)
-
-    def compose(self) -> ComposeResult:
-        with Vertical():
-            yield Label("Select a file (click a file, then press OK):")
-            yield DirectoryTree(self._start, id="file-tree")
-            with Horizontal():
-                yield Button("Cancel", id="cancel", variant="default")
-                yield Button("OK", id="ok", variant="primary")
+    _prompt = "Select a file (click a file, or use the path bar to navigate, then OK):"
 
     def on_directory_tree_file_selected(
         self, event: DirectoryTree.FileSelected
     ) -> None:
-        # Only a file click sets the confirmable value; directory navigation
-        # deliberately does not (no DirectorySelected handler), so OK can never
-        # return a folder.
         self._selected = str(event.path)
         self.query_one("#ok", Button).label = f"OK  [{os.path.basename(self._selected)}]"
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "cancel":
-            self.dismiss("")
-        elif event.button.id == "ok":
-            # Confirm only when a real file is chosen; otherwise OK is a no-op.
-            if os.path.isfile(self._selected):
-                self.dismiss(self._selected)
-
-    def on_key(self, event) -> None:  # noqa: ANN001
-        if event.key == "escape":
-            self.dismiss("")
+    def _confirm(self) -> None:
+        # Confirm only when a real file is chosen; otherwise OK is a no-op.
+        if os.path.isfile(self._selected):
+            self.dismiss(self._selected)
 
 
 # ── Setup tab ─────────────────────────────────────────────────────────────────

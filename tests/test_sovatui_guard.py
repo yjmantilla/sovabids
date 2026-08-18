@@ -47,6 +47,25 @@ def test_sovatui_missing_textual_exits_with_hint():
     assert "ModuleNotFoundError" not in combined, combined
 
 
+def test_sovatui_entry_point_wired_to_wrapper():
+    """The ``sovatui`` console script must target the guard wrapper, not ``sovabids.tui``.
+
+    Guards the one line the whole fix hinges on: reverting
+    ``[project.scripts] sovatui`` back to ``sovabids.tui:main`` would restore the raw
+    crash on a base install while every runtime test above still passes. We read the
+    source ``pyproject.toml`` (not installed metadata, which can be stale) so the check
+    tracks the packaging contract as written.
+    """
+    import tomllib  # Python 3.11+
+    from pathlib import Path
+
+    pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
+    if not pyproject.is_file():
+        pytest.skip("pyproject.toml not available (installed package, not a source checkout)")
+    data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+    assert data["project"]["scripts"]["sovatui"] == "sovabids.sovatui:main"
+
+
 def test_sovatui_delegates_when_textual_present(monkeypatch):
     """When ``textual`` is importable, the wrapper hands off to the real TUI entry point."""
     pytest.importorskip("textual")

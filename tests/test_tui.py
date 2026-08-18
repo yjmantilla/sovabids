@@ -261,6 +261,39 @@ async def test_tui_generate_rejects_nonfile_rules(dummy_source, tmp_path):
 
 
 @pytest.mark.anyio
+async def test_tui_rules_file_locks_rules_tab(tmp_path):
+    """Setting a rules file in Setup locks the Rules tab (it loses at Generate time, #89);
+    clearing the field unlocks it again."""
+    from textual.widgets import TabbedContent
+    rules_yml = tmp_path / "rules.yml"
+    rules_yml.write_text("a: 1\n")
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        tab = app.query_one(TabbedContent).get_tab("tab-rules")
+        banner = app.query_one("#rules-locked-banner", Static)
+        rules_pane = app.query_one("RulesPane")
+
+        # starts unlocked
+        assert "🔒" not in str(tab.label)
+        assert "locked" not in banner.classes
+        assert rules_pane.disabled is False
+
+        # a rules file locks it (this is the picker path too — .value posts Input.Changed)
+        app.query_one("#rules-file-input", Input).value = str(rules_yml)
+        await pilot.pause()
+        assert "🔒" in str(tab.label)
+        assert "locked" in banner.classes
+        assert rules_pane.disabled is True
+
+        # clearing the field unlocks it
+        app.query_one("#rules-file-input", Input).value = ""
+        await pilot.pause()
+        assert "🔒" not in str(tab.label)
+        assert "locked" not in banner.classes
+        assert rules_pane.disabled is False
+
+
+@pytest.mark.anyio
 async def test_tui_picker_navigation(tmp_path):
     """The picker can leave the seed folder: Up climbs to the parent, the location bar jumps anywhere."""
     from sovabids.tui import FilePickerScreen

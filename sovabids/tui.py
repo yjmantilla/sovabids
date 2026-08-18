@@ -1060,6 +1060,15 @@ class SovabidsApp(App):
     CSS = """
     TabbedContent { height: 1fr; }
     TabPane { height: 1fr; }
+    #rules-locked-banner {
+        display: none;
+        height: auto;
+        padding: 0 1;
+        margin: 1 2 0 2;
+        color: $warning;
+        border: round $warning;
+    }
+    #rules-locked-banner.locked { display: block; }
     """
     BINDINGS = [
         ("q", "quit", "Quit"),
@@ -1068,13 +1077,20 @@ class SovabidsApp(App):
 
     _mapping_data: dict | None = None
     _pending_input_id: str = ""
+    _RULES_TAB_LABEL = "2 · Rules"
+    _RULES_TAB_LABEL_LOCKED = "2 · Rules 🔒"
 
     def compose(self) -> ComposeResult:
         yield Header()
         with TabbedContent():
             with TabPane("1 · Setup", id="tab-setup"):
                 yield ScrollableContainer(SetupPane())
-            with TabPane("2 · Rules", id="tab-rules"):
+            with TabPane(self._RULES_TAB_LABEL, id="tab-rules"):
+                yield Static(
+                    "🔒 A rules file is set in Setup, so this tab is ignored when "
+                    "generating. Clear the rules-file field in Setup to edit rules here.",
+                    id="rules-locked-banner",
+                )
                 yield ScrollableContainer(RulesPane())
             with TabPane("3 · Mappings", id="tab-mappings"):
                 yield MappingsPane()
@@ -1088,6 +1104,25 @@ class SovabidsApp(App):
                 self.query_one(f"#{self._pending_input_id}", Input).value = path
             except Exception:
                 pass
+
+    def on_input_changed(self, event: Input.Changed) -> None:
+        # A rules file set in Setup wins over the Rules tab at Generate time
+        # (#89). Reflect that: lock the Rules tab so it can't be edited by
+        # mistake, and say why. Fires for the picker too (setting .value posts
+        # Input.Changed).
+        if event.input.id == "rules-file-input":
+            self._set_rules_locked(bool(event.value.strip()))
+
+    def _set_rules_locked(self, locked: bool) -> None:
+        try:
+            tab = self.query_one(TabbedContent).get_tab("tab-rules")
+            tab.label = (
+                self._RULES_TAB_LABEL_LOCKED if locked else self._RULES_TAB_LABEL
+            )
+            self.query_one(RulesPane).disabled = locked
+            self.query_one("#rules-locked-banner", Static).set_class(locked, "locked")
+        except Exception:
+            pass
 
     def action_save_rules(self) -> None:
         vals = self.query_one(SetupPane).get_values()

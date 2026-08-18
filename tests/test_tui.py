@@ -134,31 +134,56 @@ async def test_tui_rules_picker_returns_file(tmp_path):
 
 @pytest.mark.anyio
 async def test_tui_rules_picker_directory_click_cannot_override_file(tmp_path):
-    """#89 core hazard: after a file is chosen, navigating a directory must not change the result."""
+    """#89 core hazard: in file mode a directory selection never becomes the confirmable value."""
     from sovabids.tui import FilePickerScreen
     rules_yml = tmp_path / "rules.yml"
     rules_yml.write_text("a: 1\n")
-    subdir = tmp_path / "sub"
-    subdir.mkdir()
+    sub1 = tmp_path / "s1"
+    sub1.mkdir()
+    sub2 = tmp_path / "s2"
+    sub2.mkdir()
     app = SovabidsApp()
     async with app.run_test(size=(120, 40)) as pilot:
         await pilot.click("#browse-rules")
         await pilot.pause()
         screen = app.screen
         assert isinstance(screen, FilePickerScreen)
-        # the guarantee is structural: a file picker has NO directory-selection
-        # handler, so a folder click can never become the confirmable value
-        assert not hasattr(FilePickerScreen, "on_directory_tree_directory_selected")
         tree = screen.query_one(DirectoryTree)
-        # choose a file, then "navigate" into a directory, then confirm
+        # a directory selection alone leaves the confirmable value empty (file mode)
+        screen.post_message(DirectoryTree.DirectorySelected(tree.root, Path(str(sub1))))
+        await pilot.pause()
+        assert screen._selected == ""
+        # choose a file, then select another directory -> the file still wins
         screen.post_message(DirectoryTree.FileSelected(tree.root, Path(str(rules_yml))))
         await pilot.pause()
-        screen.post_message(DirectoryTree.DirectorySelected(tree.root, Path(str(subdir))))
+        screen.post_message(DirectoryTree.DirectorySelected(tree.root, Path(str(sub2))))
         await pilot.pause()
         await pilot.click("#ok")
         await pilot.pause()
-        # the earlier file survives; the directory never overrides it
         assert app.query_one("#rules-file-input", Input).value == str(rules_yml)
+
+
+@pytest.mark.anyio
+async def test_tui_picker_double_click_enters_folder(tmp_path):
+    """Double-clicking a folder navigates into it (re-roots the tree)."""
+    from sovabids.tui import FilePickerScreen
+    child = tmp_path / "child"
+    child.mkdir()
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        app.query_one("#rules-file-input", Input).value = str(tmp_path)
+        await pilot.pause()
+        await pilot.click("#browse-rules")
+        await pilot.pause()
+        screen = app.screen
+        tree = screen.query_one(DirectoryTree)
+        assert str(tree.path) == str(tmp_path)
+        # two quick selections of the same folder == a double-click -> enter it
+        msg = DirectoryTree.DirectorySelected(tree.root, Path(str(child)))
+        screen.on_directory_tree_directory_selected(msg)
+        screen.on_directory_tree_directory_selected(msg)
+        await pilot.pause()
+        assert str(tree.path) == str(child)
 
 
 @pytest.mark.anyio

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import threading
+import time
 from copy import deepcopy
 from typing import ClassVar
 
@@ -96,11 +97,14 @@ class FSPickerScreen(ModalScreen[str]):
     """
 
     _prompt: ClassVar[str] = "Select a path:"
+    _DOUBLE_CLICK_SECONDS: ClassVar[float] = 0.5
 
     def __init__(self, start: str = ".") -> None:
         super().__init__()
         self._selected = ""
         self._root = _tree_root(start)
+        self._last_dir = ""
+        self._last_dir_t = 0.0
 
     def compose(self) -> ComposeResult:
         with Vertical():
@@ -126,6 +130,25 @@ class FSPickerScreen(ModalScreen[str]):
         if event.input.id == "loc-input":
             self._reroot(event.value)
 
+    def on_directory_tree_directory_selected(
+        self, event: DirectoryTree.DirectorySelected
+    ) -> None:
+        # Double-click (same folder, quickly) navigates INTO the folder (re-roots).
+        # A single selection is delegated to the subclass hook — the directory
+        # picker marks it as the choice; the file picker deliberately ignores it,
+        # so a directory can never become a file result (#89).
+        path = str(event.path)
+        now = time.monotonic()
+        if path == self._last_dir and (now - self._last_dir_t) <= self._DOUBLE_CLICK_SECONDS:
+            self._last_dir = ""
+            self._reroot(path)
+            return
+        self._last_dir, self._last_dir_t = path, now
+        self._on_dir_selected(path)
+
+    def _on_dir_selected(self, path: str) -> None:
+        """Single-selection hook. Base does nothing (a file picker ignores directories)."""
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "cancel":
             self.dismiss("")
@@ -145,13 +168,11 @@ class FSPickerScreen(ModalScreen[str]):
 class DirPickerScreen(FSPickerScreen):
     """Modal that lets user browse and confirm a directory."""
 
-    _prompt = "Select a directory (click a folder, or use the path bar, then OK):"
+    _prompt = "Pick a directory: click to select, double-click to enter; OK confirms."
 
-    def on_directory_tree_directory_selected(
-        self, event: DirectoryTree.DirectorySelected
-    ) -> None:
-        self._selected = str(event.path)
-        self.query_one("#ok", Button).label = f"OK  [{os.path.basename(str(event.path))}]"
+    def _on_dir_selected(self, path: str) -> None:
+        self._selected = path
+        self.query_one("#ok", Button).label = f"OK  [{os.path.basename(path)}]"
 
     def _confirm(self) -> None:
         # Return the highlighted directory, or fall back to the folder currently
@@ -165,11 +186,12 @@ class FilePickerScreen(FSPickerScreen):
     Unlike :class:`DirPickerScreen`, only a *file* selection sets the confirmable
     value; clicking a folder just navigates the tree and never becomes the
     result. That is what keeps a stray navigation click before OK from returning
-    a directory — the exact failure in issue #89. (There is deliberately no
-    ``on_directory_tree_directory_selected`` here.)
+    a directory — the exact failure in issue #89. (It inherits the base
+    directory handler, which only *navigates* into folders and never sets the
+    confirmable value here.)
     """
 
-    _prompt = "Select a file (click a file, or use the path bar to navigate, then OK):"
+    _prompt = "Pick a file: double-click folders to enter, click a file, then OK."
 
     def on_directory_tree_file_selected(
         self, event: DirectoryTree.FileSelected

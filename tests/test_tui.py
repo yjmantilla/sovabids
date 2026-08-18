@@ -365,6 +365,37 @@ async def test_tui_picker_navigation(tmp_path):
 
 
 @pytest.mark.anyio
+async def test_tui_rules_shows_sample_paths(dummy_source):
+    """Opening the Rules tab lists a couple of real source paths so the user can
+    build the pattern from them; clearing the source hides them again."""
+    from textual.widgets import Select
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 50)) as pilot:
+        app.query_one("#source-input", Input).value = dummy_source
+        await pilot.pause()
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        app.query_one("#ext-select", Select).value = ".vhdr"
+
+        stat = app.query_one("#sample-paths", Static)
+        for _ in range(30):                       # wait for the threaded scan
+            await anyio.sleep(0.1)
+            await pilot.pause()
+            if stat.display:
+                break
+        assert stat.display is True
+        text = str(stat.render())
+        assert "build your pattern" in text.lower()
+        assert ".vhdr" in text                    # a real matched file is listed
+
+        # clearing the source hides the sample block
+        app.query_one("#source-input", Input).value = ""
+        app.query_one("RulesPane")._run_ext_count()
+        await pilot.pause()
+        assert app.query_one("#sample-paths", Static).display is False
+
+
+@pytest.mark.anyio
 async def test_tui_files_modal(dummy_source):
     app = SovabidsApp()
     async with app.run_test(size=(120, 40)) as pilot:
@@ -393,8 +424,11 @@ async def test_tui_files_modal(dummy_source):
         # Check if button is enabled
         btn = app.query_one("#show-files", Button)
         assert not btn.disabled
-        
-        # Click "Show all"
+
+        # Click "Show all" (scroll it into view first — the sample-paths block
+        # can push it below the fold in a small test viewport)
+        btn.scroll_visible()
+        await pilot.pause()
         await pilot.click("#show-files")
         await pilot.pause()
         

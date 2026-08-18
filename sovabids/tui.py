@@ -480,6 +480,13 @@ class RulesPane(Static):
         border-left: solid $primary;
     }
     RulesPane #ext-count { color: $text-muted; height: 1; margin-bottom: 1; }
+    RulesPane #sample-paths {
+        display: none;
+        height: auto;
+        margin-bottom: 1;
+        padding: 0 2;
+        border-left: solid $success;
+    }
     RulesPane #preview-row { height: auto; margin-top: 1; }
     RulesPane #preview-label {
         padding: 1;
@@ -511,6 +518,8 @@ class RulesPane(Static):
     """
 
     _preview_lock: ClassVar = threading.Lock()
+    _SAMPLE_SHOW: ClassVar[int] = 2       # how many example paths to display
+    _SAMPLE_COLLECT_CAP: ClassVar[int] = 200  # bound work on huge trees
 
     def __init__(self) -> None:
         super().__init__()
@@ -547,6 +556,8 @@ class RulesPane(Static):
             ),
             id="io-example-row",
         )
+
+        yield Static("", id="sample-paths")
 
         yield Vertical(
             Label("[b]Path pattern[/b]", id="pattern-label"),
@@ -723,16 +734,26 @@ class RulesPane(Static):
         ext = str(self.query_one("#ext-select", Select).value)
         if not source or not os.path.isdir(source):
             self.query_one("#ext-count", Static).update("")
+            self._update_samples([], source)
             return
         self._ext_count_worker(source, ext)
 
     @work(thread=True)
     def _ext_count_worker(self, source: str, ext: str) -> None:
-        count = sum(1 for _, _, files in os.walk(source) for f in files if f.endswith(ext))
+        count = 0
+        samples: list[str] = []
+        for root, _, files in os.walk(source):
+            for f in sorted(files):
+                if f.endswith(ext):
+                    count += 1
+                    if len(samples) < self._SAMPLE_COLLECT_CAP:
+                        samples.append(os.path.join(root, f))
+        samples.sort()
         self.app.call_from_thread(
             self.query_one("#ext-count", Static).update,
             f"{count} file(s) with [cyan]{ext}[/cyan] in source directory",
         )
+        self.app.call_from_thread(self._update_samples, samples[: self._SAMPLE_SHOW], source)
 
     @work(thread=True)
     def _psd_worker(self, filepath: str) -> None:
@@ -876,6 +897,24 @@ class RulesPane(Static):
         label.remove_class("muted", "error")
         if css_class:
             label.add_class(css_class)
+
+    def _update_samples(self, samples: list, source: str) -> None:
+        """Show a couple of real source-file paths so the user can read off the
+        structure and build the pattern from it. Hidden when nothing is found."""
+        stat = self.query_one("#sample-paths", Static)
+        if not samples:
+            stat.update("")
+            stat.display = False
+            return
+        lines = ["[dim]Example source files — build your pattern from these:[/dim]"]
+        for p in samples:
+            try:
+                rel = os.path.relpath(p, source)
+            except Exception:
+                rel = p
+            lines.append(f"  [cyan]…/{rel}[/cyan]")
+        stat.update("\n".join(lines))
+        stat.display = True
 
     def _get_source(self) -> str:
         try:
@@ -1151,6 +1190,17 @@ class SovabidsApp(App):
         if path and self._pending_input_id:
             try:
                 self.query_one(f"#{self._pending_input_id}", Input).value = path
+            except Exception:
+                pass
+
+    def on_tabbed_content_tab_activated(
+        self, event: TabbedContent.TabActivated
+    ) -> None:
+        # Opening the Rules tab (re)scans the source so the file count and the
+        # example paths reflect whatever was set in Setup.
+        if getattr(event.pane, "id", None) == "tab-rules":
+            try:
+                self.query_one(RulesPane)._schedule_ext_count()
             except Exception:
                 pass
 

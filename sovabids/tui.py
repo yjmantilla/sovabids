@@ -35,6 +35,27 @@ from sovabids.settings import SUPPORTED_EXTENSIONS
 
 # ── Directory picker modal ────────────────────────────────────────────────────
 
+def _tree_root(start: str) -> str:
+    """Return a valid *directory* to root a ``DirectoryTree`` at.
+
+    A ``DirectoryTree`` root must be a directory, so normalize the seed value:
+    a file opens at its parent directory (fixes reopening a picker whose input
+    already holds a file path), and an empty / nonexistent path falls back to
+    the nearest existing ancestor, then the home directory.
+    """
+    if not start:
+        return os.path.expanduser("~")
+    path = os.path.abspath(os.path.expanduser(start))
+    if os.path.isdir(path):
+        return path
+    if os.path.isfile(path):
+        return os.path.dirname(path)
+    parent = os.path.dirname(path)
+    while parent and not os.path.isdir(parent):
+        parent = os.path.dirname(parent)
+    return parent or os.path.expanduser("~")
+
+
 class DirPickerScreen(ModalScreen[str]):
     """Modal that lets user browse and confirm a directory."""
 
@@ -67,7 +88,8 @@ class DirPickerScreen(ModalScreen[str]):
 
     def __init__(self, start: str = ".") -> None:
         super().__init__()
-        self._start = os.path.abspath(start) if start else os.path.expanduser("~")
+        self._selected = ""
+        self._start = _tree_root(start)
 
     def compose(self) -> ComposeResult:
         with Vertical():
@@ -89,6 +111,77 @@ class DirPickerScreen(ModalScreen[str]):
         elif event.button.id == "ok":
             path = getattr(self, "_selected", "")
             self.dismiss(path)
+
+
+class FilePickerScreen(ModalScreen[str]):
+    """Modal that lets user browse and confirm a *file* (e.g. a rules YAML).
+
+    Unlike :class:`DirPickerScreen`, only a *file* selection sets the confirmable
+    value; clicking a folder just navigates the tree and never becomes the
+    result. That is what keeps a stray navigation click before OK from returning
+    a directory — the exact failure in issue #89.
+    """
+
+    DEFAULT_CSS = """
+    FilePickerScreen {
+        align: center middle;
+    }
+    FilePickerScreen > Vertical {
+        width: 80%;
+        height: 80%;
+        border: thick $primary;
+        background: $surface;
+        padding: 1;
+    }
+    FilePickerScreen DirectoryTree {
+        height: 1fr;
+    }
+    FilePickerScreen Label {
+        height: 1;
+        margin-bottom: 1;
+    }
+    FilePickerScreen Horizontal {
+        height: 3;
+        align: right middle;
+    }
+    FilePickerScreen Button {
+        margin-left: 1;
+    }
+    """
+
+    def __init__(self, start: str = ".") -> None:
+        super().__init__()
+        self._selected = ""
+        self._start = _tree_root(start)
+
+    def compose(self) -> ComposeResult:
+        with Vertical():
+            yield Label("Select a file (click a file, then press OK):")
+            yield DirectoryTree(self._start, id="file-tree")
+            with Horizontal():
+                yield Button("Cancel", id="cancel", variant="default")
+                yield Button("OK", id="ok", variant="primary")
+
+    def on_directory_tree_file_selected(
+        self, event: DirectoryTree.FileSelected
+    ) -> None:
+        # Only a file click sets the confirmable value; directory navigation
+        # deliberately does not (no DirectorySelected handler), so OK can never
+        # return a folder.
+        self._selected = str(event.path)
+        self.query_one("#ok", Button).label = f"OK  [{os.path.basename(self._selected)}]"
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "cancel":
+            self.dismiss("")
+        elif event.button.id == "ok":
+            # Confirm only when a real file is chosen; otherwise OK is a no-op.
+            if os.path.isfile(self._selected):
+                self.dismiss(self._selected)
+
+    def on_key(self, event) -> None:  # noqa: ANN001
+        if event.key == "escape":
+            self.dismiss("")
 
 
 # ── Setup tab ─────────────────────────────────────────────────────────────────
@@ -129,10 +222,8 @@ class SetupPane(Static):
             target_id, is_dir = mapping[event.button.id]
             self.app._pending_input_id = target_id
             start = self.query_one(f"#{target_id}", Input).value or "."
-            if is_dir:
-                self.app.push_screen(DirPickerScreen(start), self.app._on_dir_picked)
-            else:
-                self.app.push_screen(DirPickerScreen(start), self.app._on_dir_picked)
+            screen = DirPickerScreen(start) if is_dir else FilePickerScreen(start)
+            self.app.push_screen(screen, self.app._on_path_picked)
 
     def get_values(self) -> dict:
         return {
@@ -805,9 +896,22 @@ class MappingsPane(Static):
             self._set_status("Set source and BIDS directories in Setup tab.", error=True)
             return
 
-        if rules_file and os.path.isfile(rules_file):
-            with open(rules_file) as f:
-                rules = yaml.safe_load(f)
+        if rules_file:
+            # A rules file was given: it must be a readable file, and it must
+            # parse. Don't silently fall back to the Rules tab (that hides a bad
+            # path — e.g. the directory a broken picker used to return, #89) and
+            # don't let a parse error crash the app.
+            if not os.path.isfile(rules_file):
+                self._set_status(
+                    f"Rules file not found (or it is a directory): {rules_file}", error=True
+                )
+                return
+            try:
+                from sovabids.rules import load_rules
+                rules = load_rules(rules_file)
+            except Exception as exc:
+                self._set_status(f"Could not read rules file: {exc}", error=True)
+                return
         else:
             rules = self.app.query_one(RulesPane).get_rules()
 
@@ -957,7 +1061,7 @@ class SovabidsApp(App):
                 yield ConvertPane()
         yield Footer()
 
-    def _on_dir_picked(self, path: str) -> None:
+    def _on_path_picked(self, path: str) -> None:
         if path and self._pending_input_id:
             try:
                 self.query_one(f"#{self._pending_input_id}", Input).value = path

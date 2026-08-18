@@ -1,9 +1,10 @@
 import os
+import types
 import pytest
 import anyio
 from sovabids.tui import SovabidsApp
 from sovabids.datasets import make_dummy_dataset, save_dummy_vhdr
-from textual.widgets import Input, Label, DataTable, Button
+from textual.widgets import Input, Label, DataTable, Button, Static, DirectoryTree
 
 @pytest.fixture
 def dummy_source(tmp_path):
@@ -107,6 +108,83 @@ async def test_tui_dir_picker(dummy_source):
         await pilot.click("#cancel")
         await pilot.pause()
         assert not isinstance(app.screen, DirPickerScreen)
+
+@pytest.mark.anyio
+async def test_tui_rules_picker_returns_file(tmp_path):
+    """#89: the rules-file browser must return the file you pick, not a directory."""
+    from sovabids.tui import FilePickerScreen
+    rules_yml = tmp_path / "rules.yml"
+    rules_yml.write_text("non-bids:\n  eeg_extension: .vhdr\n")
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.click("#browse-rules")
+        await pilot.pause()
+        # browse-rules opens the FILE picker, not the directory picker
+        assert isinstance(app.screen, FilePickerScreen)
+        # a file selection sets the confirmable value; OK returns it
+        app.screen.on_directory_tree_file_selected(
+            types.SimpleNamespace(path=str(rules_yml))
+        )
+        await pilot.click("#ok")
+        await pilot.pause()
+        assert not isinstance(app.screen, FilePickerScreen)
+        assert app.query_one("#rules-file-input", Input).value == str(rules_yml)
+
+
+@pytest.mark.anyio
+async def test_tui_rules_picker_ok_requires_file(tmp_path):
+    """OK with only directory navigation (no file chosen) must not return a directory."""
+    from sovabids.tui import FilePickerScreen
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.click("#browse-rules")
+        await pilot.pause()
+        assert isinstance(app.screen, FilePickerScreen)
+        # nothing (no file) selected -> OK is a no-op, modal stays open
+        await pilot.click("#ok")
+        await pilot.pause()
+        assert isinstance(app.screen, FilePickerScreen)
+        await pilot.click("#cancel")
+        await pilot.pause()
+        assert app.query_one("#rules-file-input", Input).value == ""
+
+
+@pytest.mark.anyio
+async def test_tui_rules_picker_reopen_from_file(tmp_path):
+    """Reopening the picker when the input holds a file must root the tree at its directory."""
+    from sovabids.tui import FilePickerScreen
+    rules_yml = tmp_path / "rules.yml"
+    rules_yml.write_text("a: 1\n")
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        app.query_one("#rules-file-input", Input).value = str(rules_yml)
+        await pilot.pause()
+        await pilot.click("#browse-rules")
+        await pilot.pause()
+        assert isinstance(app.screen, FilePickerScreen)
+        tree = app.screen.query_one(DirectoryTree)
+        # tree root is the file's parent directory, not the file itself
+        assert str(tree.path) == str(tmp_path)
+
+
+@pytest.mark.anyio
+async def test_tui_generate_rejects_nonfile_rules(dummy_source, tmp_path):
+    """A rules-file box holding a non-file (the #89 directory) must error, not silently fall back."""
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        app.query_one("#source-input", Input).value = dummy_source
+        app.query_one("#bids-input", Input).value = str(tmp_path / "bids")
+        # point the rules-file box at a DIRECTORY (what the old broken picker returned)
+        app.query_one("#rules-file-input", Input).value = str(tmp_path)
+        await pilot.pause()
+        mp = app.query_one("MappingsPane")
+        mp._generate()
+        await pilot.pause()
+        # must surface an error and NOT build mappings from the Rules tab
+        assert getattr(app, "_mapping_data", None) is None
+        status = str(app.query_one("#mappings-status", Static).render()).lower()
+        assert "not found" in status
+
 
 @pytest.mark.anyio
 async def test_tui_files_modal(dummy_source):

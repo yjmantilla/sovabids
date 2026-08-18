@@ -52,18 +52,21 @@ def test_sovatui_entry_point_wired_to_wrapper():
 
     Guards the one line the whole fix hinges on: reverting
     ``[project.scripts] sovatui`` back to ``sovabids.tui:main`` would restore the raw
-    crash on a base install while every runtime test above still passes. We read the
-    source ``pyproject.toml`` (not installed metadata, which can be stale) so the check
-    tracks the packaging contract as written.
+    crash on a base install while every runtime test above still passes. We scan the
+    source ``pyproject.toml`` directly (not installed metadata, which can be stale, and
+    not ``tomllib`` — it is 3.11+ only and CI runs 3.9/3.10) so the check tracks the
+    packaging contract as written on every supported Python.
     """
-    import tomllib  # Python 3.11+
+    import re
     from pathlib import Path
 
     pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
     if not pyproject.is_file():
         pytest.skip("pyproject.toml not available (installed package, not a source checkout)")
-    data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
-    assert data["project"]["scripts"]["sovatui"] == "sovabids.sovatui:main"
+    text = pyproject.read_text(encoding="utf-8")
+    m = re.search(r'^\s*sovatui\s*=\s*"([^"]+)"', text, re.MULTILINE)
+    assert m is not None, "sovatui console script not declared in pyproject.toml"
+    assert m.group(1) == "sovabids.sovatui:main"
 
 
 def test_sovatui_delegates_when_textual_present(monkeypatch):

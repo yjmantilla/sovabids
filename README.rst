@@ -122,7 +122,7 @@ Basic Usage
 Terminal User Interface (sovatui)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The easiest way to use sovabids is through its terminal user interface (TUI) called sovatui. This will allow you to do the conversion without having to write any command line code, and also to have a more visual experience of the conversion process. The TUI guides you through the full conversion workflow in four tabs: Setup, Rules, Mappings, and Convert.
+sovabids ships an **experimental** terminal user interface (TUI) called sovatui. It lets you run a conversion without writing any command line code, guiding you through the full workflow in four tabs: Setup, Rules, Mappings, and Convert. It is optional (install it with the ``[tui]`` extra shown below); the CLI and Python API are the primary, fully supported interfaces.
 
 
 Installation for TUI usage

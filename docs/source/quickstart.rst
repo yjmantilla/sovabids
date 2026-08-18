@@ -12,17 +12,17 @@ The four steps are always the same regardless of which interface you use:
 Step 1 — Install
 ----------------
 
-For the recommended terminal interface (TUI):
-
-.. code-block:: bash
-
-   pip install "sovabids[tui]"
-
-For CLI-only usage:
+Install sovabids (this gives you the command-line tools and the Python API):
 
 .. code-block:: bash
 
    pip install sovabids
+
+The terminal user interface (TUI) is an optional, experimental extra:
+
+.. code-block:: bash
+
+   pip install "sovabids[tui]"
 
 .. tip::
    sovabids can read any EEG format supported by MNE's ``read_raw``. For native EDF or EEGLAB output,
@@ -64,16 +64,6 @@ source directory. It encodes the per-file source → target conversion plan.
 
 See the full :doc:`mappings_schema` to understand the output format.
 
-**Using the TUI** (recommended):
-
-.. code-block:: bash
-
-   sovatui
-
-Open the *Mappings* tab and click **Generate Mappings**. Inspect the
-source → target pairs, then click **Save Mappings YAML** if you want to keep
-a copy.
-
 **Using the CLI**:
 
 .. code-block:: bash
@@ -93,14 +83,20 @@ This writes the mappings file to:
    from sovabids.rules import apply_rules
    mappings = apply_rules(source_path, bids_path, rules="rules.yml")
 
+**Using the TUI** (experimental):
+
+.. code-block:: bash
+
+   sovatui
+
+Open the *Mappings* tab and click **Generate Mappings**. Inspect the
+source → target pairs, then click **Save Mappings YAML** if you want to keep
+a copy.
+
 Step 4 — Convert
 -----------------
 
 Apply the mappings to produce the BIDS dataset.
-
-**Using the TUI**:
-
-Open the *Convert* tab and click **Convert**. Logs stream in real time.
 
 **Using the CLI**:
 
@@ -117,6 +113,10 @@ Open the *Convert* tab and click **Convert**. Logs stream in real time.
    print(result["succeeded"])  # newly converted source paths
    print(result["skipped"])    # paths skipped because BIDS output already existed
    print(result["failed"])     # paths that raised an error
+
+**Using the TUI** (experimental):
+
+Open the *Convert* tab and click **Convert**. Logs stream in real time.
 
 The converted dataset will be at ``bids_path``. The CLI exits with a non-zero
 status code if any files failed, making it suitable for use in scripts and CI pipelines.

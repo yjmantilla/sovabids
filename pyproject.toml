@@ -47,7 +47,7 @@ Source = "https://github.com/yjmantilla/sovabids"
 [project.scripts]
 sovapply = "sovabids.rules:sovapply"
 sovaconvert = "sovabids.convert:sovaconvert"
-sovatui = "sovabids.tui:main"
+sovatui = "sovabids.sovatui:main"
 
 [project.optional-dependencies]
 gui = [

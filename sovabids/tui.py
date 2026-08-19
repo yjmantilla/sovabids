@@ -481,19 +481,30 @@ def _flatten_dict(d: dict, prefix: str = "") -> dict:
     return out
 
 
+def _plf_problem(value: str) -> str:
+    """Return why ``value`` is not a usable power-line frequency, or "" if fine.
+    Blank is fine (optional); otherwise it must parse and be a positive, finite
+    number (rejects nan/inf/negative, which float() would otherwise accept)."""
+    import math
+
+    if not value.strip():
+        return ""
+    try:
+        num = float(value)
+    except ValueError:
+        return f"Power line frequency must be a number in Hz, got: {value}"
+    if not math.isfinite(num) or num <= 0:
+        return f"Power line frequency must be a positive number in Hz, got: {value}"
+    return ""
+
+
 class _OptionalNumber(Validator):
-    """Blank is allowed (the field is optional); a non-blank value must parse as a
-    number. Used so an unparseable power-line frequency is flagged instead of
-    silently dropped."""
+    """Blank is allowed (the field is optional); a non-blank value must be a positive,
+    finite number. Flags an unusable power-line frequency instead of dropping it."""
 
     def validate(self, value: str) -> ValidationResult:
-        if not value.strip():
-            return self.success()
-        try:
-            float(value)
-        except ValueError:
-            return self.failure("Enter a number in Hz, e.g. 50")
-        return self.success()
+        problem = _plf_problem(value)
+        return self.failure(problem) if problem else self.success()
 
 
 # ── Rules tab ─────────────────────────────────────────────────────────────────
@@ -709,15 +720,10 @@ class RulesPane(Static):
         return self.query_one("#rules-file-input", Input).value.strip()
 
     def plf_error(self) -> str:
-        """Return an error message if the power-line frequency is set but not a
-        number, else "". Lets an action block instead of silently dropping it (#102)."""
-        val = self.query_one("#plf-input", Input).value.strip()
-        if val:
-            try:
-                float(val)
-            except ValueError:
-                return f"Power line frequency must be a number in Hz, got: {val}"
-        return ""
+        """Return an error message if the power-line frequency is set but not a usable
+        (positive, finite) number, else "". Lets an action block instead of silently
+        dropping it (#102)."""
+        return _plf_problem(self.query_one("#plf-input", Input).value.strip())
 
     def on_select_changed(self, event: Select.Changed) -> None:
         if event.select.id == "ext-select":

@@ -570,6 +570,9 @@ async def test_tui_plf_field_validates_number(tmp_path):
         assert plf.validate("50").is_valid
         assert plf.validate("50.5").is_valid
         assert not plf.validate("50hz").is_valid   # flagged, not silently dropped
+        assert not plf.validate("nan").is_valid    # non-finite rejected
+        assert not plf.validate("inf").is_valid
+        assert not plf.validate("-5").is_valid     # must be positive
         from sovabids.tui import MappingsPane
         assert not hasattr(MappingsPane, "_mappings")
 

@@ -1239,30 +1239,21 @@ class MappingsPane(Static):
 
     @work(thread=True)
     def _gen_worker(self, source: str, bids: str, rules: dict, token: int) -> None:
-        import tempfile
-
         from sovabids.rules import apply_rules
 
-        # Compute-only: write the mappings YAML to a private throwaway file, NOT
-        # bids/code/sovabids/mappings.yml. Otherwise a superseded generation (or a
-        # concurrent one) overwrites/corrupts that file even though its in-memory
-        # result is dropped by the token. Persisting is the explicit Save action's job
-        # (#98 re-review).
-        fd, tmp_map = tempfile.mkstemp(prefix="sovabids_gen_", suffix=".yml")
-        os.close(fd)
         try:
+            # Compute-only: persist=False makes apply_rules touch NOTHING under the bids
+            # tree (no mappings.yml, no code/sovabids logs, no dataset_description.json).
+            # Otherwise Generate would rewrite an existing dataset_description, and a
+            # superseded/concurrent generation would corrupt the mappings file even though
+            # its in-memory result is dropped by the token. Persisting is Save's job (#98).
             mapping_data = apply_rules(
-                source_path=source, bids_path=bids, rules=rules, mapping_path=tmp_map
+                source_path=source, bids_path=bids, rules=rules, persist=False
             )
             # store shared state + repaint on the UI thread, not the worker (#100)
             self.app.call_from_thread(self._apply_mappings, mapping_data, token)
         except Exception as exc:
             self.app.call_from_thread(self._gen_error, f"Error generating mappings: {exc}", token)
-        finally:
-            try:
-                os.remove(tmp_map)
-            except OSError:
-                pass
 
     def _apply_mappings(self, mapping_data: dict, token: int) -> None:
         if token != self.app._gen_token:
@@ -1421,11 +1412,14 @@ class SovabidsApp(App):
     def on_tabbed_content_tab_activated(
         self, event: TabbedContent.TabActivated
     ) -> None:
-        # Opening the Rules tab (re)scans the source so the file count and the
-        # example paths reflect whatever was set in Setup.
+        # Opening the Rules tab (re)scans the source so the file count, the example
+        # paths, AND the pattern preview (matched files -> PSD/Channels/Show-all)
+        # reflect whatever source was set in Setup (#98 re-review).
         if getattr(event.pane, "id", None) == "tab-rules":
             try:
-                self.query_one(RulesPane)._schedule_ext_count()
+                rp = self.query_one(RulesPane)
+                rp._schedule_ext_count()
+                rp._schedule_preview()
             except Exception:
                 pass
 
@@ -1444,8 +1438,14 @@ class SovabidsApp(App):
 
     def _invalidate_mappings_if_edit(self, control) -> None:
         try:
-            if any(isinstance(a, (SetupPane, RulesPane)) for a in control.ancestors):
+            ancestors = list(control.ancestors)
+            if any(isinstance(a, (SetupPane, RulesPane)) for a in ancestors):
                 self._set_mappings_valid(False)
+            # a Setup source/BIDS edit doesn't reach RulesPane's own handlers, so
+            # (re)schedule the preview here — the prior source's matched files/actions
+            # must not stay live against a changed source (#98 re-review)
+            if any(isinstance(a, SetupPane) for a in ancestors):
+                self.query_one(RulesPane)._schedule_preview()
         except Exception:
             pass
 

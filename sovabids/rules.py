@@ -166,7 +166,7 @@ def load_rules(rules):
     else:
         raise ValueError(f'Expected str or dict as rules, got {type(rules)} instead.')
 
-def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
+def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,persist=True):
     """Apply rules to a single file.
 
     Parameters
@@ -331,7 +331,9 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
         # Or maybe we should add the functionality directly to mne-bids
 
         # Update the dataset description wrote by mne-bids with the input from the rules
-        update_dataset_description(rules_copy.get('dataset_description',{}),bids_path.root,do_not_create=write)
+        # persist=False -> compute-only (TUI Generate): don't touch dataset_description.json
+        if persist:
+            update_dataset_description(rules_copy.get('dataset_description',{}),bids_path.root,do_not_create=write)
 
         if write or preview:
             # sidecar json
@@ -439,7 +441,7 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False):
 
     return mapping,preview
 
-def apply_rules(source_path,bids_path,rules,mapping_path=''):
+def apply_rules(source_path,bids_path,rules,mapping_path='',persist=True):
     """Apply rules to a set of files.
 
     Parameters
@@ -483,14 +485,16 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
             outputname = 'mappings.yml'
         if outputfolder == '':
             outputfolder = os.path.join(bids_path,'code','sovabids')
-        os.makedirs(outputfolder,exist_ok=True)
+        if persist:
+            os.makedirs(outputfolder,exist_ok=True)
         full_mapping_path = os.path.join(outputfolder,outputname)
     else:
         raise ValueError(f'Expected mapping_path as an str but got {type(mapping_path)} instead')
 
-    # Setup the logging
+    # Setup the logging (persist=False -> compute-only, don't create the bids log tree)
     log_file = os.path.join(bids_path,'code','sovabids','sovabids.log')
-    setup_logging(log_file)
+    if persist:
+        setup_logging(log_file)
     LOGGER.info('')
     LOGGER.info(SECTION_STRING + ' START APPLY_RULES ' + SECTION_STRING)
     LOGGER.info(f"source_path={source_path} bids_path={bids_path} mapping={str(full_mapping_path)} ")
@@ -516,7 +520,7 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
     for i,f in enumerate(filepaths):
         try:
             LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {f}")
-            map,_ = apply_rules_to_single_file(f,rules_copy,bids_path,write=False,preview=False) #TODO There should be a way to control how verbose this is
+            map,_ = apply_rules_to_single_file(f,rules_copy,bids_path,write=False,preview=False,persist=persist) #TODO There should be a way to control how verbose this is
             all_mappings.append(map)
         except Exception:
             LOGGER.exception(f'Error mapping {f}')
@@ -536,14 +540,14 @@ def apply_rules(source_path,bids_path,rules,mapping_path=''):
     mapping_data = {'General':rules_copy,'Individual':all_mappings}
     LOGGER.info(f"General Mapping Done!")
 
-    LOGGER.info(f"Saving Mapping File at {full_mapping_path}")
-
-    try:
-        with open(full_mapping_path, 'w') as outfile:
-            yaml.dump(mapping_data, outfile, default_flow_style=False)
-        LOGGER.info(f"Mapping file written to:{full_mapping_path}")
-    except Exception:
-        LOGGER.warning(f'Couldn\'t write mapping file to:{full_mapping_path}', exc_info=True)
+    if persist:
+        LOGGER.info(f"Saving Mapping File at {full_mapping_path}")
+        try:
+            with open(full_mapping_path, 'w') as outfile:
+                yaml.dump(mapping_data, outfile, default_flow_style=False)
+            LOGGER.info(f"Mapping file written to:{full_mapping_path}")
+        except Exception:
+            LOGGER.warning(f'Couldn\'t write mapping file to:{full_mapping_path}', exc_info=True)
 
     LOGGER.info(SECTION_STRING + ' END APPLY_RULES ' + SECTION_STRING)
 

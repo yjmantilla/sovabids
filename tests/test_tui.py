@@ -343,7 +343,7 @@ async def test_tui_generate_uses_loaded_rules_file(dummy_source, tmp_path, monke
     captured = {}
     monkeypatch.setattr(sr, "load_rules", lambda p: sentinel)          # the file's rules
 
-    def fake_apply(source_path, bids_path, rules, mapping_path=""):
+    def fake_apply(source_path, bids_path, rules, mapping_path="", persist=True):
         captured["rules"] = rules
         return {"Individual": []}
     monkeypatch.setattr(sr, "apply_rules", fake_apply)
@@ -371,14 +371,13 @@ async def test_tui_generate_uses_loaded_rules_file(dummy_source, tmp_path, monke
 
 @pytest.mark.anyio
 async def test_tui_generate_is_compute_only(tmp_path, monkeypatch):
-    """Generate must NOT persist bids/code/sovabids/mappings.yml (that's the Save
-    action's job); it hands apply_rules a throwaway mapping_path so a superseded or
-    concurrent generation can't overwrite/corrupt the real file (#98 re-review)."""
+    """Generate must call apply_rules in compute-only mode (persist=False) so it touches
+    nothing under the bids tree — that's the Save action's job (#98 re-review)."""
     import sovabids.rules as sr
     captured = {}
 
-    def fake_apply(source_path, bids_path, rules, mapping_path=""):
-        captured["mapping_path"] = mapping_path
+    def fake_apply(source_path, bids_path, rules, mapping_path="", persist=True):
+        captured["persist"] = persist
         return {"Individual": []}
 
     monkeypatch.setattr(sr, "apply_rules", fake_apply)
@@ -392,12 +391,24 @@ async def test_tui_generate_is_compute_only(tmp_path, monkeypatch):
         for _ in range(30):
             await anyio.sleep(0.1)
             await pilot.pause()
-            if "mapping_path" in captured:
+            if "persist" in captured:
                 break
-        mp = captured["mapping_path"]
-        assert mp                                                     # a real (temp) path was passed
-        assert os.path.dirname(mp) != os.path.join(str(bids), "code", "sovabids")
+        assert captured["persist"] is False
         assert not (bids / "code" / "sovabids" / "mappings.yml").exists()
+
+
+def test_apply_rules_persist_false_writes_nothing_under_bids(tmp_path):
+    """persist=False (real apply_rules) must not create anything under the bids tree —
+    no mappings.yml, no code/sovabids logs, no dataset_description.json (#98 re-review)."""
+    from sovabids.rules import apply_rules
+    src = tmp_path / "src"
+    src.mkdir()                        # empty -> zero matched files
+    bids = tmp_path / "bids"
+    bids.mkdir()
+    rules = {"non-bids": {"eeg_extension": ".vhdr", "path_analysis": {"pattern": "%subject%.vhdr"}}}
+    md = apply_rules(source_path=str(src), bids_path=str(bids), rules=rules, persist=False)
+    assert md["Individual"] == []
+    assert list(bids.iterdir()) == []   # bids tree completely untouched
 
 
 @pytest.mark.anyio
@@ -663,6 +674,23 @@ async def test_tui_editing_invalidates_mappings(tmp_path):
         mp._generate()                         # no source/bids set -> errors, but invalidates first
         await pilot.pause()
         assert app._mapping_data is None
+
+
+@pytest.mark.anyio
+async def test_tui_source_change_clears_preview(tmp_path):
+    """Changing the Setup source clears the Rules-tab preview matches/actions, which
+    were bound to the old source (#98 re-review)."""
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        rp = app.query_one("RulesPane")
+        rp._update_show_files_btn(["/oldsrc/a.vhdr"])   # pretend a scan against source A
+        assert rp._matched_files
+        # editing the Setup source must reach the preview (it doesn't go through RulesPane)
+        app.query_one("#source-input", Input).value = "/newsrc"
+        await pilot.pause()
+        assert rp._matched_files == []
 
 
 @pytest.mark.anyio

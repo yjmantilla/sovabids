@@ -311,9 +311,13 @@ class SetupPane(Static):
             self.app.push_screen(screen, self.app._on_path_picked)
 
     def get_values(self) -> dict:
+        # Expand ~ and $VARS so the TUI's own path use (Save Rules/Mappings building
+        # <bids>/code/..., the Generate scan) matches a typed "~/bids" instead of
+        # creating a literal "~"/"$VAR" directory (#94 re-review).
+        exp = lambda v: os.path.expanduser(os.path.expandvars(v))
         return {
-            "source": self.query_one("#source-input", Input).value.strip(),
-            "bids": self.query_one("#bids-input", Input).value.strip(),
+            "source": exp(self.query_one("#source-input", Input).value.strip()),
+            "bids": exp(self.query_one("#bids-input", Input).value.strip()),
         }
 
 
@@ -760,7 +764,10 @@ class RulesPane(Static):
             pass
 
     def get_rules_file(self) -> str:
-        return self.query_one("#rules-file-input", Input).value.strip()
+        # expand ~/$VARS so os.path.isfile / load_rules see the real path (#94 re-review)
+        return os.path.expanduser(os.path.expandvars(
+            self.query_one("#rules-file-input", Input).value.strip()
+        ))
 
     def plf_error(self) -> str:
         """Return an error message if the power-line frequency is set but not a usable

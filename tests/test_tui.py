@@ -908,6 +908,28 @@ async def test_tui_psd_single_flight(monkeypatch, tmp_path):
 
 
 @pytest.mark.anyio
+async def test_tui_setup_paths_expand_vars(tmp_path, monkeypatch):
+    """The TUI expands ~/$VARS in the Setup paths and rules-file so Save/Generate build
+    real paths, not a literal '$VAR' directory (#94 re-review)."""
+    from sovabids.tui import SetupPane, RulesPane
+    monkeypatch.setenv("SOVA_TUI_BIDS", str(tmp_path / "b"))
+    monkeypatch.setenv("SOVA_TUI_SRC", str(tmp_path / "s"))
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        app.query_one("#source-input", Input).value = "$SOVA_TUI_SRC"
+        app.query_one("#bids-input", Input).value = "$SOVA_TUI_BIDS/out"
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        app.query_one("#rules-file-input", Input).value = "$SOVA_TUI_BIDS/r.yml"
+        await pilot.pause()
+        vals = app.query_one(SetupPane).get_values()
+        assert vals["source"] == str(tmp_path / "s")
+        assert vals["bids"] == str(tmp_path / "b" / "out")
+        rf = app.query_one(RulesPane).get_rules_file()
+        assert "$" not in rf and rf == str(tmp_path / "b" / "r.yml")
+
+
+@pytest.mark.anyio
 async def test_tui_files_modal(dummy_source):
     app = SovabidsApp()
     # tall viewport so the Rules-tab content (ext + sample paths + pattern +

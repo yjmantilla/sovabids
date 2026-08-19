@@ -573,6 +573,17 @@ async def test_tui_plf_field_validates_number(tmp_path):
         from sovabids.tui import MappingsPane
         assert not hasattr(MappingsPane, "_mappings")
 
+        # and an invalid PLF must BLOCK Generate (not be silently dropped by get_rules)
+        app.query_one("#source-input", Input).value = "/some/source"
+        app.query_one("#bids-input", Input).value = "/some/bids"
+        plf.value = "50hz"
+        await pilot.pause()
+        app.query_one(MappingsPane)._generate()
+        await pilot.pause()
+        status = str(app.query_one("#mappings-status", Static).render()).lower()
+        assert "power line frequency" in status
+        assert getattr(app, "_mapping_data", None) is None   # no generation started
+
 
 @pytest.mark.anyio
 async def test_tui_files_modal(dummy_source):

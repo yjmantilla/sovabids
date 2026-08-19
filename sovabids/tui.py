@@ -708,6 +708,17 @@ class RulesPane(Static):
     def get_rules_file(self) -> str:
         return self.query_one("#rules-file-input", Input).value.strip()
 
+    def plf_error(self) -> str:
+        """Return an error message if the power-line frequency is set but not a
+        number, else "". Lets an action block instead of silently dropping it (#102)."""
+        val = self.query_one("#plf-input", Input).value.strip()
+        if val:
+            try:
+                float(val)
+            except ValueError:
+                return f"Power line frequency must be a number in Hz, got: {val}"
+        return ""
+
     def on_select_changed(self, event: Select.Changed) -> None:
         if event.select.id == "ext-select":
             self._schedule_ext_count()
@@ -1101,7 +1112,12 @@ class MappingsPane(Static):
                 self._set_status(f"Could not read rules file: {exc}", error=True)
                 return
         else:
-            rules = self.app.query_one(RulesPane).get_rules()
+            rules_pane = self.app.query_one(RulesPane)
+            plf_err = rules_pane.plf_error()
+            if plf_err:
+                self._set_status(plf_err, error=True)
+                return
+            rules = rules_pane.get_rules()
 
         self._set_status("Generating mappings…")
         self._gen_worker(source, bids, rules)
@@ -1283,6 +1299,10 @@ class SovabidsApp(App):
                 "A rules file is loaded — clear it in the Rules tab to save builder rules.",
                 severity="warning",
             )
+            return
+        plf_err = rules_pane.plf_error()
+        if plf_err:
+            self.notify(plf_err, severity="warning")
             return
         rules = rules_pane.get_rules()
         out = os.path.join(bids, "code", "sovabids", "rules.yml")

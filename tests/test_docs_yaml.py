@@ -53,9 +53,14 @@ def test_operation_example_fixture_loads_through_real_loader():
     "pattern: %a%_%b%_%entities.task%.set",            # rules_schema operation example (unquoted)
 ])
 def test_unquoted_percent_leading_pattern_is_invalid_yaml(snippet, tmp_path):
-    """The production loader must reject an unquoted ``%``-leading pattern."""
-    with pytest.raises(OSError, match="Couldnt read .* file as a rule file"):
+    """The production loader must reject an unquoted ``%``-leading pattern, and now
+    surface (and chain) the real YAML cause instead of hiding it (#95)."""
+    import yaml as _yaml
+    with pytest.raises(OSError, match="Couldnt read .* file as a rule file") as excinfo:
         _load_snippet_through_rules(tmp_path, snippet)
+    # the underlying YAML parse error is chained and included in the message (#95)
+    assert isinstance(excinfo.value.__cause__, _yaml.YAMLError)
+    assert str(excinfo.value.__cause__) in str(excinfo.value)
 
 
 @pytest.mark.parametrize("snippet,expected", [

@@ -159,8 +159,11 @@ def load_rules(rules):
         try:
             with open(rules,encoding="utf-8") as f:
                 return yaml.load(f,yaml.FullLoader)
-        except:
-            raise IOError(f"Couldnt read {rules} file as a rule file.")
+        except Exception as exc:
+            # Keep the historical message/prefix, but surface (and chain) the real
+            # cause instead of swallowing it — e.g. the YAML ScannerError that says
+            # a pattern can't start with an unquoted '%'. (#95)
+            raise IOError(f"Couldnt read {rules} file as a rule file: {exc}") from exc
     elif isinstance(rules,dict):
         return deepcopy(rules)
     else:

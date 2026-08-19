@@ -967,6 +967,11 @@ class RulesPane(Static):
         self.query_one("#show-psd", Button).disabled = self._psd_in_flight or not bool(self._matched_files)
 
     def _schedule_preview(self) -> None:
+        # Invalidate immediately on the edit (not only when the debounced scan fires):
+        # supersede any in-flight worker and clear the now-stale matches/buttons, then
+        # debounce merely *starting* the replacement scan (#99).
+        self._preview_gen += 1
+        self._update_show_files_btn([])
         if self._preview_timer is not None:
             self._preview_timer.stop()
         self._preview_timer = self.set_timer(0.6, self._run_preview)

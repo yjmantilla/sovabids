@@ -598,10 +598,11 @@ async def test_tui_preview_error_clears_stale_buttons(monkeypatch, tmp_path):
         app.query_one("TabbedContent").active = "tab-rules"
         await pilot.pause()
         rp = app.query_one("RulesPane")
+        await anyio.sleep(0.7)   # let any mount-time scheduled preview settle (it clears matches)
+        await pilot.pause()
 
         # simulate a prior successful scan -> action buttons enabled
         rp._update_show_files_btn(["/a/x.vhdr", "/a/y.vhdr"])
-        await pilot.pause()
         assert rp._matched_files
         assert not app.query_one("#show-files", Button).disabled
 
@@ -636,6 +637,27 @@ async def test_tui_preview_stale_result_dropped(tmp_path):
         # a current-generation result applies
         rp._apply_preview(5, "2 file(s) matched", "", ["/new/a.vhdr", "/new/b.vhdr"])
         assert rp._matched_files == ["/new/a.vhdr", "/new/b.vhdr"]
+
+
+@pytest.mark.anyio
+async def test_tui_preview_edit_supersedes_in_flight(tmp_path):
+    """Editing (which schedules a preview) immediately bumps the generation and clears
+    stale matches, so a worker in flight from before the edit is dropped (#99)."""
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        rp = app.query_one("RulesPane")
+        rp._update_show_files_btn(["/a/x.vhdr"])
+        gen_before = rp._preview_gen        # what an in-flight worker would have captured
+
+        rp._schedule_preview()              # user edits -> schedule
+        assert rp._preview_gen > gen_before # token bumped on the edit itself, not at debounce
+        assert rp._matched_files == []      # stale matches cleared immediately
+
+        # the pre-edit worker now lands -> its result is dropped
+        rp._apply_preview(gen_before, "STALE 5 matched", "", ["/a/x.vhdr"])
+        assert rp._matched_files == []
 
 
 @pytest.mark.anyio

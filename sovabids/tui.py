@@ -1182,7 +1182,7 @@ class MappingsPane(Static):
     def compose(self) -> ComposeResult:
         with Horizontal():
             yield Button("Generate Mappings", id="gen-mappings", variant="primary")
-            yield Button("Save Mappings YAML…", id="save-mappings", variant="default")
+            yield Button("Save Mappings YAML…", id="save-mappings", variant="default", disabled=True)
         yield Static("Press Generate to scan files and build mappings.", id="mappings-status")
         yield DataTable(id="mappings-table", zebra_stripes=True)
 
@@ -1197,6 +1197,9 @@ class MappingsPane(Static):
             self._save_mappings_yaml()
 
     def _generate(self) -> None:
+        # A (re)generation attempt invalidates the previous plan up front, so a
+        # generate that then errors out can't leave a stale plan usable (#98).
+        self.app._set_mappings_valid(False)
         vals = self.app.query_one(SetupPane).get_values()
         source, bids = vals["source"], vals["bids"]
         rules_file = self.app.query_one(RulesPane).get_rules_file()
@@ -1248,6 +1251,7 @@ class MappingsPane(Static):
     def _apply_mappings(self, mapping_data: dict) -> None:
         self.app._mapping_data = mapping_data
         self._populate_table(mapping_data["Individual"])
+        self.app._set_mappings_valid(True)   # plan is current -> allow Save/Convert
 
     def _populate_table(self, individuals: list) -> None:
         table = self.query_one("#mappings-table", DataTable)
@@ -1292,7 +1296,7 @@ class ConvertPane(Static):
 
     def compose(self) -> ComposeResult:
         with Horizontal():
-            yield Button("Convert", id="convert-btn", variant="success")
+            yield Button("Convert", id="convert-btn", variant="success", disabled=True)
             yield Button("Clear log", id="clear-log", variant="default")
         yield RichLog(id="convert-log", highlight=True, markup=True, wrap=True)
 
@@ -1398,6 +1402,35 @@ class SovabidsApp(App):
         if getattr(event.pane, "id", None) == "tab-rules":
             try:
                 self.query_one(RulesPane)._schedule_ext_count()
+            except Exception:
+                pass
+
+    # ── keep the mappings plan honest (#98) ──────────────────────────────────
+    # Editing anything in Setup/Rules makes a previously generated plan stale (it
+    # bakes in the old source/BIDS/rules), so invalidate it and disable Save/Convert
+    # until the user regenerates. The plan is set only on a *successful* generation.
+    def on_input_changed(self, event: Input.Changed) -> None:
+        self._invalidate_mappings_if_edit(event.control)
+
+    def on_select_changed(self, event: Select.Changed) -> None:
+        self._invalidate_mappings_if_edit(event.control)
+
+    def on_radio_set_changed(self, event: RadioSet.Changed) -> None:
+        self._invalidate_mappings_if_edit(event.control)
+
+    def _invalidate_mappings_if_edit(self, control) -> None:
+        try:
+            if any(isinstance(a, (SetupPane, RulesPane)) for a in control.ancestors):
+                self._set_mappings_valid(False)
+        except Exception:
+            pass
+
+    def _set_mappings_valid(self, valid: bool) -> None:
+        if not valid:
+            self._mapping_data = None
+        for bid in ("#save-mappings", "#convert-btn"):
+            try:
+                self.query_one(bid, Button).disabled = not valid
             except Exception:
                 pass
 

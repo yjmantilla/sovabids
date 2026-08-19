@@ -487,6 +487,8 @@ async def test_tui_save_mappings_requires_bids(tmp_path, monkeypatch):
         bids = tmp_path / "bids"
         app.query_one("#bids-input", Input).value = str(bids)
         await pilot.pause()
+        # editing BIDS invalidates the plan (#98); re-set it as a fresh generation would
+        app._mapping_data = {"Individual": [{"IO": {"source": "a", "target": "b"}}]}
         mp._save_mappings_yaml()
         await pilot.pause()
         assert (bids / "code" / "sovabids" / "mappings.yml").exists()
@@ -586,6 +588,50 @@ async def test_tui_plf_field_validates_number(tmp_path):
         status = str(app.query_one("#mappings-status", Static).render()).lower()
         assert "power line frequency" in status
         assert getattr(app, "_mapping_data", None) is None   # no generation started
+
+
+@pytest.mark.anyio
+async def test_tui_editing_invalidates_mappings(tmp_path):
+    """A generated mappings plan is invalidated (Save/Convert disabled, _mapping_data
+    cleared) when a Setup or Rules input changes or a regeneration is attempted, so
+    nothing runs against a stale plan (#98)."""
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        mp = app.query_one("MappingsPane")
+        save = app.query_one("#save-mappings", Button)
+        conv = app.query_one("#convert-btn", Button)
+
+        # nothing generated yet -> Save/Convert disabled
+        assert save.disabled and conv.disabled
+        assert app._mapping_data is None
+
+        # a successful generation enables them
+        mp._apply_mappings({"Individual": [{"IO": {"source": "a", "target": "b"}}]})
+        await pilot.pause()
+        assert not save.disabled and not conv.disabled
+        assert app._mapping_data is not None
+
+        # editing a Setup path invalidates the plan
+        app.query_one("#source-input", Input).value = "/new/source"
+        await pilot.pause()
+        assert save.disabled and conv.disabled
+        assert app._mapping_data is None
+
+        # regenerate, then editing a Rules field invalidates too
+        mp._apply_mappings({"Individual": []})
+        await pilot.pause()
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        app.query_one("#pattern-input", Input).value = "%subject%.vhdr"
+        await pilot.pause()
+        assert app._mapping_data is None
+        assert app.query_one("#convert-btn", Button).disabled
+
+        # a generate that errors out must still invalidate up front (no stale plan)
+        app._mapping_data = {"Individual": []}
+        mp._generate()                         # no source/bids set -> errors, but invalidates first
+        await pilot.pause()
+        assert app._mapping_data is None
 
 
 @pytest.mark.anyio

@@ -589,6 +589,38 @@ async def test_tui_plf_field_validates_number(tmp_path):
 
 
 @pytest.mark.anyio
+async def test_tui_preview_error_clears_stale_buttons(monkeypatch, tmp_path):
+    """A failed rescan clears the matched-file list and disables the action buttons,
+    so they can't keep operating on the previous (now-invalid) scan's files."""
+    import sovabids.rules as sr
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        rp = app.query_one("RulesPane")
+
+        # simulate a prior successful scan -> action buttons enabled
+        rp._update_show_files_btn(["/a/x.vhdr", "/a/y.vhdr"])
+        await pilot.pause()
+        assert rp._matched_files
+        assert not app.query_one("#show-files", Button).disabled
+
+        # a rescan whose get_files fails must clear the stale list + disable actions
+        def boom(*a, **k):
+            raise RuntimeError("bad source")
+        monkeypatch.setattr(sr, "get_files", boom)
+        rp._preview_worker(str(tmp_path), "%subject%.vhdr", ".vhdr", "placeholder", [])
+        for _ in range(30):
+            await anyio.sleep(0.1)
+            await pilot.pause()
+            if not rp._matched_files:
+                break
+        assert rp._matched_files == []
+        assert app.query_one("#show-files", Button).disabled
+        assert app.query_one("#show-psd", Button).disabled
+
+
+@pytest.mark.anyio
 async def test_tui_psd_temp_reuse_and_cleanup(tmp_path):
     """The PSD preview reuses one temp PNG (no per-click leak) and removes it on exit."""
     from sovabids.tui import RulesPane

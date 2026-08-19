@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import os
-import threading
 import time
 from copy import deepcopy
 from typing import ClassVar
@@ -614,7 +613,6 @@ class RulesPane(Static):
     RulesPane .inspect-row Button { margin-right: 1; }
     """
 
-    _preview_lock: ClassVar = threading.Lock()
     _SAMPLE_SHOW: ClassVar[int] = 2       # how many example paths to display
     _SAMPLE_COLLECT_CAP: ClassVar[int] = 200  # bound work on huge trees
 
@@ -997,7 +995,7 @@ class RulesPane(Static):
         self._set_preview("Scanning…", "muted")
         self._preview_worker(source, pattern, str(ext), mode, fields)
 
-    @work(thread=True)
+    @work(thread=True, exclusive=True, group="preview")
     def _preview_worker(self, source: str, pattern: str, ext: str, mode: str, fields: list[str], io_src: str = "", io_tgt: str = "") -> None:
         from sovabids.parsers import parse_from_placeholder, parse_from_regex
         from sovabids.rules import get_files
@@ -1016,6 +1014,7 @@ class RulesPane(Static):
                 files = get_files(source, scan_rules)
             except Exception as exc:
                 self.app.call_from_thread(self._set_preview, f"Error: {exc}", "error")
+                self.app.call_from_thread(self._update_show_files_btn, [])
                 return
             matched = []
             for f in files:
@@ -1040,6 +1039,7 @@ class RulesPane(Static):
             files = get_files(source, rules)
         except Exception as exc:
             self.app.call_from_thread(self._set_preview, f"Error: {exc}", "error")
+            self.app.call_from_thread(self._update_show_files_btn, [])
             return
 
         matched = []

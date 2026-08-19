@@ -558,6 +558,23 @@ async def test_tui_rules_shows_sample_paths(dummy_source):
 
 
 @pytest.mark.anyio
+async def test_tui_plf_field_validates_number(tmp_path):
+    """A non-numeric power-line frequency is flagged (not silently dropped); blank and
+    numbers are accepted. Also guards that the dead `_mappings` reactive stays removed."""
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        plf = app.query_one("#plf-input", Input)
+        assert plf.validate("").is_valid          # blank ok (optional field)
+        assert plf.validate("50").is_valid
+        assert plf.validate("50.5").is_valid
+        assert not plf.validate("50hz").is_valid   # flagged, not silently dropped
+        from sovabids.tui import MappingsPane
+        assert not hasattr(MappingsPane, "_mappings")
+
+
+@pytest.mark.anyio
 async def test_tui_files_modal(dummy_source):
     app = SovabidsApp()
     # tall viewport so the Rules-tab content (ext + sample paths + pattern +

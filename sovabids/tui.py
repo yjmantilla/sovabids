@@ -11,8 +11,8 @@ import yaml
 from textual import work
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, ScrollableContainer, Vertical
-from textual.reactive import reactive
 from textual.screen import ModalScreen
+from textual.validation import ValidationResult, Validator
 from textual.widgets import (
     Button,
     DataTable,
@@ -481,6 +481,21 @@ def _flatten_dict(d: dict, prefix: str = "") -> dict:
     return out
 
 
+class _OptionalNumber(Validator):
+    """Blank is allowed (the field is optional); a non-blank value must parse as a
+    number. Used so an unparseable power-line frequency is flagged instead of
+    silently dropped."""
+
+    def validate(self, value: str) -> ValidationResult:
+        if not value.strip():
+            return self.success()
+        try:
+            float(value)
+        except ValueError:
+            return self.failure("Enter a number in Hz, e.g. 50")
+        return self.success()
+
+
 # ── Rules tab ─────────────────────────────────────────────────────────────────
 
 class RulesPane(Static):
@@ -663,7 +678,7 @@ class RulesPane(Static):
             yield Button("Power Spectrum", id="show-psd", variant="default", disabled=True)
             yield Button("Channel Names", id="show-channels", variant="default", disabled=True)
         yield Label("Power line frequency (Hz)")
-        yield Input(placeholder="50", id="plf-input")
+        yield Input(placeholder="50", id="plf-input", validators=[_OptionalNumber()])
         yield Label("EEG reference")
         yield Input(placeholder="FCz", id="ref-input")
 
@@ -1042,8 +1057,6 @@ class MappingsPane(Static):
     MappingsPane Horizontal { height: 3; margin-bottom: 1; }
     MappingsPane Button { margin-right: 1; }
     """
-
-    _mappings: reactive[list] = reactive([])
 
     def compose(self) -> ComposeResult:
         with Horizontal():

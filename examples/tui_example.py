@@ -8,6 +8,8 @@ This example illustrates the use of ``sovabids`` on the `LEMON dataset <http://f
 using the terminal user interface (TUI).
 
 A full video walkthrough is available at https://youtu.be/dOWiMTuGvAA
+(the layout changed a little since the video: the *load existing rules file* option now lives
+at the top of the Rules tab instead of on Setup).
 
 Install sovabids in TUI mode
 -----------------------------
@@ -42,8 +44,8 @@ Tab 1 — Setup
 Fill in:
 
 * **Source directory** — path to the raw EEG files (browse with the *Browse…* button or type directly).
-* **BIDS output directory** — where the converted dataset will be written.
-* **Load existing rules file** (optional) — skip the Rules tab by pointing to an existing ``rules.yml``.
+* **BIDS output directory** — where the converted dataset will be written (the *Browse…* dialog can
+  create a new folder for it).
 
 For the LEMON example the source path is the ``lemon`` subfolder inside ``_data``
 and the BIDS path can be any empty directory you choose.
@@ -51,20 +53,23 @@ and the BIDS path can be any empty directory you choose.
 Tab 2 — Rules
 --------------
 
-Configure how files are matched and converted:
+This tab is where you define the conversion rules. You have two options:
 
-* **EEG file extension** — select ``.vhdr`` for LEMON.
-* **Pattern mode** — choose *Placeholder*, *Regex*, or *File example*.
-* **Path pattern** — e.g. ``%subject%_%task%.vhdr`` for placeholder mode.
-* **Sidecar fields** — set power line frequency, EEG reference, etc.
-* **Dataset description** — dataset name and authors.
+* **Load an existing rules file** (optional) — at the top of the tab, point the *Browse…* field at an
+  existing ``rules.yml`` (for LEMON, ``examples/lemon_example_rules.yml``). Loading a file locks the
+  builder below, since those rules come from the file; clear the field to build rules by hand again.
+* **Or build the rules yourself** with the fields below:
+
+  * **EEG file extension** — select ``.vhdr`` for LEMON. A couple of example source paths from your
+    source directory are listed to help you read off the pattern.
+  * **Pattern mode** — choose *Placeholder*, *Regex*, or *File example*.
+  * **Path pattern** — e.g. ``%subject%_%task%.vhdr`` for placeholder mode.
+  * **Sidecar fields** — set power line frequency, EEG reference, etc.
+  * **Dataset description** — dataset name and authors.
 
 The live preview shows how many files match the current pattern.
 Use *Show all* to inspect individual files and the fields extracted from each path.
 Use *Channel Names* or *Power Spectrum* to inspect the first matched file.
-
-You can also load the existing rules file at ``examples/lemon_example_rules.yml``
-via the *Load existing rules file* field in the Setup tab to skip this tab.
 
 Tab 3 — Mappings
 -----------------

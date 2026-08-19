@@ -605,61 +605,81 @@ async def test_tui_psd_temp_reuse_and_cleanup(tmp_path):
 
 
 def test_tui_open_in_viewer_is_cross_platform(monkeypatch):
-    """_open_path_in_viewer runs the OS opener AND checks its exit code, falling back to
-    the browser (with a valid file:// URI) when the opener fails."""
+    """_open_path_in_viewer launches the OS opener without killing an attached viewer,
+    detects an immediate non-zero exit, and falls back to the browser (valid URI)."""
     import subprocess
     import webbrowser
     from pathlib import Path
     import sovabids.tui as tui
 
-    class _R:
-        def __init__(self, rc):
-            self.returncode = rc
+    class _P:
+        def __init__(self, rc, hang=False):
+            self._rc, self._hang = rc, hang
+        def wait(self, timeout=None):
+            if self._hang:
+                raise subprocess.TimeoutExpired("opener", timeout)
+            return self._rc
 
     calls = {}
-    # opener succeeds (rc 0) -> no browser fallback
+    # opener exits 0 -> success, no fallback
     monkeypatch.setattr(
-        subprocess, "run",
-        lambda args, **k: (calls.setdefault("run", []).append(list(args)), _R(0))[1],
+        subprocess, "Popen",
+        lambda args, **k: (calls.setdefault("popen", []).append(list(args)), _P(0))[1],
     )
-    monkeypatch.setattr(webbrowser, "open", lambda url: calls.setdefault("web", []).append(url))
-    tui._open_path_in_viewer("/tmp/x.png")
-    assert calls.get("run") and calls["run"][0][0] in ("xdg-open", "open")
-    assert "web" not in calls                                     # rc 0 -> no fallback
+    monkeypatch.setattr(webbrowser, "open", lambda url: calls.setdefault("web", []).append(url) or True)
+    assert tui._open_path_in_viewer("/tmp/x.png") is True
+    assert calls["popen"][0][0] in ("xdg-open", "open")
+    assert "web" not in calls
 
-    # opener returns NON-zero (e.g. xdg-open with no handler) -> browser fallback,
-    # and the URI is a valid file:// (spaces escaped), not a bare f-string
+    # opener still running past the short wait -> treated as a hand-off, NOT killed, no fallback
     calls.clear()
-    monkeypatch.setattr(subprocess, "run", lambda args, **k: _R(3))
-    monkeypatch.setattr(webbrowser, "open", lambda url: calls.setdefault("web", []).append(url))
-    tui._open_path_in_viewer("/tmp/name with space.png")
+    monkeypatch.setattr(subprocess, "Popen", lambda args, **k: _P(0, hang=True))
+    assert tui._open_path_in_viewer("/tmp/x.png") is True
+    assert "web" not in calls
+
+    # opener exits non-zero -> browser fallback with a valid file:// URI (spaces escaped)
+    calls.clear()
+    monkeypatch.setattr(subprocess, "Popen", lambda args, **k: _P(3))
+    monkeypatch.setattr(webbrowser, "open", lambda url: calls.setdefault("web", []).append(url) or True)
+    assert tui._open_path_in_viewer("/tmp/name with space.png") is True
     assert calls["web"] == [Path("/tmp/name with space.png").resolve().as_uri()]
+
+    # both fail -> returns False so the caller can report it
+    monkeypatch.setattr(subprocess, "Popen", lambda args, **k: _P(3))
+    monkeypatch.setattr(webbrowser, "open", lambda url: False)
+    assert tui._open_path_in_viewer("/tmp/x.png") is False
 
 
 @pytest.mark.anyio
 async def test_tui_psd_single_flight(monkeypatch, tmp_path):
-    """Pressing Power Spectrum disables the button until the worker finishes, so a
-    double-click can't run two workers writing the same psd.png (#101)."""
+    """Power Spectrum stays locked for the worker's whole life; a concurrent preview
+    update must not re-enable it mid-compute (which would allow a second writer) (#101)."""
     app = SovabidsApp()
     async with app.run_test(size=(120, 80)) as pilot:
         app.query_one("TabbedContent").active = "tab-rules"
         await pilot.pause()
         rp = app.query_one("RulesPane")
-        rp._matched_files = ["/a/x.vhdr"]
+        rp._update_show_files_btn(["/a/x.vhdr"])       # a prior good scan -> PSD enabled
+        btn = app.query_one("#show-psd", Button)
+        assert not btn.disabled
         started = []
         monkeypatch.setattr(rp, "_psd_worker", lambda *a, **k: started.append(a))  # stub MNE work
-        btn = app.query_one("#show-psd", Button)
-        btn.disabled = False
 
         rp.on_button_pressed(Button.Pressed(btn))
         await pilot.pause()
-        assert started                          # worker launched
-        assert btn.disabled is True             # single-flight: button locked during compute
+        assert started
+        assert rp._psd_in_flight is True
+        assert btn.disabled is True                    # locked during compute
 
-        rp._reenable_psd_btn()                  # worker's finally re-enables (files still matched)
-        assert btn.disabled is False
+        # a preview result landing mid-compute must NOT re-enable it
+        rp._update_show_files_btn(["/a/x.vhdr", "/a/y.vhdr"])
+        assert btn.disabled is True
+
+        rp._psd_done()                                 # worker's finally releases the lock
+        assert rp._psd_in_flight is False
+        assert not btn.disabled
         rp._matched_files = []
-        rp._reenable_psd_btn()
+        rp._update_psd_btn()
         assert btn.disabled is True
 
 

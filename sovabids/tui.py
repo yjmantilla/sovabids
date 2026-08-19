@@ -498,12 +498,15 @@ def _plf_problem(value: str) -> str:
     return ""
 
 
-def _open_path_in_viewer(path: str) -> None:
-    """Open a file with the OS default handler, cross-platform (was hard-coded to
-    Linux ``xdg-open``). Waits for the opener and checks its exit code — e.g.
-    ``xdg-open`` with no usable handler exits non-zero — then falls back to the
-    browser with a *valid* ``file://`` URI (``as_uri`` handles Windows drives and
-    spaces, which a bare f-string does not)."""
+def _open_path_in_viewer(path: str) -> bool:
+    """Open a file with the OS default handler, cross-platform. Returns True if a
+    viewer/browser was launched.
+
+    Only waits *briefly* for the opener to detect an immediate failure (e.g.
+    ``xdg-open`` with no handler exits non-zero right away); a still-running opener
+    is treated as a successful hand-off and left alone — never killed — because some
+    openers stay attached to the viewer for its whole lifetime. Falls back to the
+    browser with a *valid* ``file://`` URI (``as_uri`` handles Windows drives/spaces)."""
     import subprocess
     import sys
     import webbrowser
@@ -512,17 +515,21 @@ def _open_path_in_viewer(path: str) -> None:
     try:
         if os.name == "nt":
             os.startfile(path)  # type: ignore[attr-defined]  # Windows-only; raises on failure
-            return
+            return True
         opener = "open" if sys.platform == "darwin" else "xdg-open"
-        if subprocess.run([opener, path], timeout=20).returncode == 0:
-            return
+        proc = subprocess.Popen([opener, path])
+        try:
+            if proc.wait(timeout=2) == 0:
+                return True                    # exited cleanly -> handed off
+        except subprocess.TimeoutExpired:
+            return True                        # still running -> attached to the viewer; leave it
     except Exception:
         pass
-    # opener missing, failed, or hung -> the browser can display a file:// image anywhere
+    # opener missing or exited non-zero -> the browser can show a file:// image anywhere
     try:
-        webbrowser.open(Path(path).resolve().as_uri())
+        return bool(webbrowser.open(Path(path).resolve().as_uri()))
     except Exception:
-        pass
+        return False
 
 
 class _OptionalNumber(Validator):
@@ -607,6 +614,7 @@ class RulesPane(Static):
         self._preview_timer = None
         self._ext_count_timer = None
         self._matched_files: list[str] = []
+        self._psd_in_flight = False   # a PSD worker is running; keep its button locked (#101)
 
     def compose(self) -> ComposeResult:
         # Either load an existing rules file, OR build the rules below. Loading a
@@ -821,13 +829,15 @@ class RulesPane(Static):
             if self._matched_files:
                 self.query_one("#io-src-input", Input).value = self._matched_files[0]
         elif event.button.id == "show-psd":
-            if self._matched_files and not event.button.disabled:
-                # single-flight: disable the button until the worker finishes so a
+            if self._matched_files and not self._psd_in_flight:
+                # single-flight: resolve the (reused) temp path first (may raise), THEN
+                # lock so a preview update can't re-enable the button mid-compute and a
                 # double-click can't run two workers writing the same psd.png (#101)
-                event.button.disabled = True
+                out_path = self._psd_png_path()
+                self._psd_in_flight = True
+                self._update_psd_btn()
                 self._set_preview("Computing PSD — window will open separately…", "muted")
-                # resolve the (reused) temp path on the UI thread, hand it to the worker
-                self._psd_worker(self._matched_files[0], self._psd_png_path())
+                self._psd_worker(self._matched_files[0], out_path)
         elif event.button.id == "show-channels":
             if self._matched_files:
                 self.app.push_screen(ChannelNamesScreen(self._matched_files[0]))
@@ -918,20 +928,30 @@ class RulesPane(Static):
                 fig = raw.plot_psd(fmax=fmax, show=False)
             fig.savefig(out_path, dpi=100, bbox_inches="tight")
             plt.close(fig)
-            _open_path_in_viewer(out_path)
-            self.app.call_from_thread(
-                self._set_preview,
-                f"PSD saved — opening image viewer ({os.path.basename(filepath)})",
-                "",
-            )
+            opened = _open_path_in_viewer(out_path)
+            base = os.path.basename(filepath)
+            if opened:
+                self.app.call_from_thread(
+                    self._set_preview, f"PSD saved — opening image viewer ({base})", ""
+                )
+            else:
+                self.app.call_from_thread(
+                    self._set_preview,
+                    f"PSD saved to {out_path}, but no viewer could be opened",
+                    "error",
+                )
         except Exception as exc:
             self.app.call_from_thread(self._set_preview, f"PSD error: {exc}", "error")
         finally:
-            self.app.call_from_thread(self._reenable_psd_btn)
+            self.app.call_from_thread(self._psd_done)
 
-    def _reenable_psd_btn(self) -> None:
-        # re-enable only while there are still matched files to inspect
-        self.query_one("#show-psd", Button).disabled = not bool(self._matched_files)
+    def _psd_done(self) -> None:
+        self._psd_in_flight = False
+        self._update_psd_btn()
+
+    def _update_psd_btn(self) -> None:
+        # locked while a worker runs; otherwise enabled iff there are files to inspect
+        self.query_one("#show-psd", Button).disabled = self._psd_in_flight or not bool(self._matched_files)
 
     def _schedule_preview(self) -> None:
         if self._preview_timer is not None:
@@ -1036,7 +1056,7 @@ class RulesPane(Static):
         btn = self.query_one("#show-files", Button)
         btn.label = f"Show all ({len(files)})"
         btn.disabled = not has
-        self.query_one("#show-psd", Button).disabled = not has
+        self._update_psd_btn()   # keep PSD locked if a worker is mid-flight (#101)
         self.query_one("#show-channels", Button).disabled = not has
         self.query_one("#io-pick-src", Button).disabled = not has
 

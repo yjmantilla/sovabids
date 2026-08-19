@@ -609,7 +609,7 @@ async def test_tui_preview_error_clears_stale_buttons(monkeypatch, tmp_path):
         def boom(*a, **k):
             raise RuntimeError("bad source")
         monkeypatch.setattr(sr, "get_files", boom)
-        rp._preview_worker(str(tmp_path), "%subject%.vhdr", ".vhdr", "placeholder", [])
+        rp._preview_worker(rp._preview_gen, str(tmp_path), "%subject%.vhdr", ".vhdr", "placeholder", [])
         for _ in range(30):
             await anyio.sleep(0.1)
             await pilot.pause()
@@ -618,6 +618,45 @@ async def test_tui_preview_error_clears_stale_buttons(monkeypatch, tmp_path):
         assert rp._matched_files == []
         assert app.query_one("#show-files", Button).disabled
         assert app.query_one("#show-psd", Button).disabled
+
+
+@pytest.mark.anyio
+async def test_tui_preview_stale_result_dropped(tmp_path):
+    """A scan whose generation was superseded by a newer one must not overwrite the
+    current file list (the exclusive-worker race codex flagged) (#99)."""
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        rp = app.query_one("RulesPane")
+        rp._preview_gen = 5
+        # an OLD worker (gen 4) finishing after a newer scan (gen 5) is ignored
+        rp._apply_preview(4, "STALE 3 file(s) matched", "", ["/old/a.vhdr"])
+        assert rp._matched_files == []
+        # a current-generation result applies
+        rp._apply_preview(5, "2 file(s) matched", "", ["/new/a.vhdr", "/new/b.vhdr"])
+        assert rp._matched_files == ["/new/a.vhdr", "/new/b.vhdr"]
+
+
+@pytest.mark.anyio
+async def test_tui_preview_early_return_clears_buttons(tmp_path):
+    """Clearing the pattern after a good scan clears the stale matched files/buttons via
+    _run_preview's early return, not just the worker error path (#99)."""
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        rp = app.query_one("RulesPane")
+        rp._update_show_files_btn(["/a/x.vhdr"])          # pretend a prior good scan
+        assert not app.query_one("#show-files", Button).disabled
+        # source set, pattern empty -> _run_preview early-returns and must clear
+        app.query_one("#source-input", Input).value = "/some/src"
+        app.query_one("#pattern-input", Input).value = ""
+        await pilot.pause()
+        rp._run_preview()
+        await pilot.pause()
+        assert rp._matched_files == []
+        assert app.query_one("#show-files", Button).disabled
 
 
 @pytest.mark.anyio

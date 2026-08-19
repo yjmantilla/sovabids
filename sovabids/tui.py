@@ -620,6 +620,7 @@ class RulesPane(Static):
         super().__init__()
         self._preview_timer = None
         self._ext_count_timer = None
+        self._preview_gen = 0   # bumped per scan; stale workers' results are dropped (#99)
         self._matched_files: list[str] = []
         self._psd_in_flight = False   # a PSD worker is running; keep its button locked (#101)
 
@@ -971,32 +972,38 @@ class RulesPane(Static):
         self._preview_timer = self.set_timer(0.6, self._run_preview)
 
     def _run_preview(self) -> None:
+        self._preview_gen += 1          # supersede any in-flight scan (#99)
+        gen = self._preview_gen
         source = self._get_source()
         ext = self.query_one("#ext-select", Select).value
         mode, fields = self._get_mode_and_fields()
         if not source:
             self._set_preview("Set source directory in Setup tab first.", "muted")
+            self._update_show_files_btn([])
             return
         if mode == "example":
             io_src, io_tgt = self._get_io_example()
             if not io_src or not io_tgt:
                 self._set_preview("File example mode: enter source and target paths above.", "muted")
+                self._update_show_files_btn([])
                 return
             self._set_preview("Deriving pattern from example…", "muted")
-            self._preview_worker(source, "", str(ext), mode, fields, io_src, io_tgt)
+            self._preview_worker(gen, source, "", str(ext), mode, fields, io_src, io_tgt)
             return
         pattern = self.query_one("#pattern-input", Input).value.strip()
         if not pattern:
             self._set_preview("Enter a pattern above.", "muted")
+            self._update_show_files_btn([])
             return
         if mode == "regex" and not fields:
             self._set_preview("Regex mode: enter fields above.", "muted")
+            self._update_show_files_btn([])
             return
         self._set_preview("Scanning…", "muted")
-        self._preview_worker(source, pattern, str(ext), mode, fields)
+        self._preview_worker(gen, source, pattern, str(ext), mode, fields)
 
     @work(thread=True, exclusive=True, group="preview")
-    def _preview_worker(self, source: str, pattern: str, ext: str, mode: str, fields: list[str], io_src: str = "", io_tgt: str = "") -> None:
+    def _preview_worker(self, gen: int, source: str, pattern: str, ext: str, mode: str, fields: list[str], io_src: str = "", io_tgt: str = "") -> None:
         from sovabids.parsers import parse_from_placeholder, parse_from_regex
         from sovabids.rules import get_files
 
@@ -1005,16 +1012,14 @@ class RulesPane(Static):
                 from sovabids.heuristics import from_io_example
                 derived_pattern = from_io_example(io_src, io_tgt).get("pattern", "")
             except Exception as exc:
-                self.app.call_from_thread(self._set_preview, f"Example error: {exc}", "error")
-                self.app.call_from_thread(self._update_show_files_btn, [])
+                self.app.call_from_thread(self._apply_preview, gen, f"Example error: {exc}", "error", [])
                 return
             # derived pattern already uses %entities.subject% notation
             scan_rules = {"non-bids": {"eeg_extension": ext, "path_analysis": {"pattern": derived_pattern}}}
             try:
                 files = get_files(source, scan_rules)
             except Exception as exc:
-                self.app.call_from_thread(self._set_preview, f"Error: {exc}", "error")
-                self.app.call_from_thread(self._update_show_files_btn, [])
+                self.app.call_from_thread(self._apply_preview, gen, f"Error: {exc}", "error", [])
                 return
             matched = []
             for f in files:
@@ -1023,23 +1028,22 @@ class RulesPane(Static):
                         matched.append(f)
                 except Exception:
                     pass
-            count = len(matched)
-            if count == 0:
-                msg = f"0 files matched with derived pattern: {derived_pattern}"
-                self.app.call_from_thread(self._set_preview, msg, "error")
+            if not matched:
+                msg, css = f"0 files matched with derived pattern: {derived_pattern}", "error"
             else:
                 example = os.path.relpath(matched[0], source)
-                msg = f"{count} file(s) matched.  Derived pattern: [cyan]{derived_pattern}[/cyan]  Example: …/{example}"
-                self.app.call_from_thread(self._set_preview, msg, "")
-            self.app.call_from_thread(self._update_show_files_btn, matched)
+                msg, css = (
+                    f"{len(matched)} file(s) matched.  Derived pattern: [cyan]{derived_pattern}[/cyan]  Example: …/{example}",
+                    "",
+                )
+            self.app.call_from_thread(self._apply_preview, gen, msg, css, matched)
             return
 
         rules = {"non-bids": {"eeg_extension": ext, "path_analysis": {"pattern": pattern}}}
         try:
             files = get_files(source, rules)
         except Exception as exc:
-            self.app.call_from_thread(self._set_preview, f"Error: {exc}", "error")
-            self.app.call_from_thread(self._update_show_files_btn, [])
+            self.app.call_from_thread(self._apply_preview, gen, f"Error: {exc}", "error", [])
             return
 
         matched = []
@@ -1054,15 +1058,20 @@ class RulesPane(Static):
             except Exception:
                 pass
 
-        count = len(matched)
-        if count == 0:
-            msg = "0 files matched — check your pattern and extension."
-            self.app.call_from_thread(self._set_preview, msg, "error")
+        if not matched:
+            msg, css = "0 files matched — check your pattern and extension.", "error"
         else:
             example = os.path.relpath(matched[0], source)
-            msg = f"{count} file(s) matched.  Example: …/{example}"
-            self.app.call_from_thread(self._set_preview, msg, "")
-        self.app.call_from_thread(self._update_show_files_btn, matched)
+            msg, css = f"{len(matched)} file(s) matched.  Example: …/{example}", ""
+        self.app.call_from_thread(self._apply_preview, gen, msg, css, matched)
+
+    def _apply_preview(self, gen: int, msg: str, css: str, matched: list) -> None:
+        # Drop results from a scan that a newer one has already superseded, so a
+        # slow stale worker can't overwrite the current count/file list (#99).
+        if gen != self._preview_gen:
+            return
+        self._set_preview(msg, css)
+        self._update_show_files_btn(matched)
 
     def _update_show_files_btn(self, files: list[str]) -> None:
         self._matched_files = files

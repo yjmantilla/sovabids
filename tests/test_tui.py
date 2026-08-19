@@ -589,6 +589,44 @@ async def test_tui_plf_field_validates_number(tmp_path):
 
 
 @pytest.mark.anyio
+async def test_tui_psd_temp_reuse_and_cleanup(tmp_path):
+    """The PSD preview reuses one temp PNG (no per-click leak) and removes it on exit."""
+    from sovabids.tui import RulesPane
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        rp = app.query_one(RulesPane)
+        p1 = rp._psd_png_path()
+        p2 = rp._psd_png_path()
+        assert p1 == p2                                   # reused, not a fresh temp per call
+        assert os.path.basename(p1) == "psd.png"
+        assert os.path.isdir(os.path.dirname(p1))
+        d = rp._psd_dir
+    assert not os.path.exists(d)                          # cleaned up on unmount
+
+
+def test_tui_open_in_viewer_is_cross_platform(monkeypatch):
+    """_open_path_in_viewer dispatches to the OS opener and falls back to the browser."""
+    import subprocess
+    import webbrowser
+    import sovabids.tui as tui
+    calls = {}
+    monkeypatch.setattr(
+        subprocess, "Popen",
+        lambda args, *a, **k: calls.setdefault("popen", []).append(list(args)),
+    )
+    monkeypatch.setattr(webbrowser, "open", lambda url: calls.setdefault("web", []).append(url))
+    tui._open_path_in_viewer("/tmp/x.png")
+    assert calls.get("popen"), "should invoke an OS opener"        # (xdg-open on Linux CI)
+
+    # if the opener is unavailable, fall back to the browser instead of raising
+    def boom(*a, **k):
+        raise FileNotFoundError("no opener")
+    monkeypatch.setattr(subprocess, "Popen", boom)
+    tui._open_path_in_viewer("/tmp/y.png")
+    assert calls.get("web") == ["file:///tmp/y.png"]
+
+
+@pytest.mark.anyio
 async def test_tui_files_modal(dummy_source):
     app = SovabidsApp()
     # tall viewport so the Rules-tab content (ext + sample paths + pattern +

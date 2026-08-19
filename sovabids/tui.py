@@ -498,6 +498,25 @@ def _plf_problem(value: str) -> str:
     return ""
 
 
+def _open_path_in_viewer(path: str) -> None:
+    """Open a file with the OS default handler, cross-platform (was hard-coded to
+    Linux ``xdg-open``). Falls back to the browser, which can display a file:// image
+    anywhere."""
+    import subprocess
+    import sys
+    import webbrowser
+
+    try:
+        if sys.platform == "darwin":
+            subprocess.Popen(["open", path])
+        elif os.name == "nt":
+            os.startfile(path)  # type: ignore[attr-defined]  # Windows-only
+        else:
+            subprocess.Popen(["xdg-open", path])
+    except Exception:
+        webbrowser.open(f"file://{os.path.abspath(path)}")
+
+
 class _OptionalNumber(Validator):
     """Blank is allowed (the field is optional); a non-blank value must be a positive,
     finite number. Flags an unusable power-line frequency instead of dropping it."""
@@ -796,7 +815,8 @@ class RulesPane(Static):
         elif event.button.id == "show-psd":
             if self._matched_files:
                 self._set_preview("Computing PSD — window will open separately…", "muted")
-                self._psd_worker(self._matched_files[0])
+                # resolve the (reused) temp path on the UI thread, hand it to the worker
+                self._psd_worker(self._matched_files[0], self._psd_png_path())
         elif event.button.id == "show-channels":
             if self._matched_files:
                 self.app.push_screen(ChannelNamesScreen(self._matched_files[0]))
@@ -853,11 +873,27 @@ class RulesPane(Static):
         )
         self.app.call_from_thread(self._update_samples, samples[: self._SAMPLE_SHOW], source)
 
-    @work(thread=True)
-    def _psd_worker(self, filepath: str) -> None:
-        import subprocess
+    def _psd_png_path(self) -> str:
+        """A single, reused temp file for the PSD preview so repeated clicks
+        overwrite one PNG instead of leaking a new one each time. The directory is
+        removed in ``on_unmount``."""
         import tempfile
 
+        d = getattr(self, "_psd_dir", None)
+        if not d or not os.path.isdir(d):
+            d = tempfile.mkdtemp(prefix="sovabids_psd_")
+            self._psd_dir = d
+        return os.path.join(d, "psd.png")
+
+    def on_unmount(self) -> None:
+        d = getattr(self, "_psd_dir", None)
+        if d:
+            import shutil
+
+            shutil.rmtree(d, ignore_errors=True)
+
+    @work(thread=True)
+    def _psd_worker(self, filepath: str, out_path: str) -> None:
         try:
             import matplotlib
             import matplotlib.pyplot as plt
@@ -869,11 +905,9 @@ class RulesPane(Static):
                 fig = raw.compute_psd(fmax=fmax).plot(show=False)
             except AttributeError:
                 fig = raw.plot_psd(fmax=fmax, show=False)
-            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
-                tmp = f.name
-            fig.savefig(tmp, dpi=100, bbox_inches="tight")
+            fig.savefig(out_path, dpi=100, bbox_inches="tight")
             plt.close(fig)
-            subprocess.Popen(["xdg-open", tmp])
+            _open_path_in_viewer(out_path)
             self.app.call_from_thread(
                 self._set_preview,
                 f"PSD saved — opening image viewer ({os.path.basename(filepath)})",

@@ -45,3 +45,31 @@ def test_convert_them_expands_paths(tmp_path, monkeypatch):
     convert_them(mappings)
     assert (out / "code" / "sovabids").is_dir()       # log tree at the EXPANDED path
     assert not (cwd / "$SOVA_TEST_OUT").exists()      # not a literal "$VAR" directory
+
+
+def test_convert_them_expands_per_file_io(tmp_path, monkeypatch):
+    """Each mapping's IO.source/target are expanded before use — not just the General
+    paths — so removing that expansion would fail here (empty-Individual can't) (#94)."""
+    import sovabids.convert as sc
+
+    out = tmp_path / "bids"
+    out.mkdir()
+    src = tmp_path / "src"
+    src.mkdir()
+    monkeypatch.setenv("SOVA_OUT", str(out))
+    monkeypatch.setenv("SOVA_SRC", str(src))
+    captured = {}
+
+    def fake_single(input_file, mapping, bids_path, write=False):
+        captured["input"] = input_file
+        captured["bids"] = bids_path
+
+    monkeypatch.setattr(sc, "apply_rules_to_single_file", fake_single)
+    mappings = {
+        "General": {"IO": {"target": "$SOVA_OUT", "source": "$SOVA_SRC"}},
+        "Individual": [{"IO": {"source": "$SOVA_SRC/a.vhdr", "target": "$SOVA_OUT/x/a.vhdr"}}],
+    }
+    sc.convert_them(mappings)
+    assert "$" not in captured["input"]                       # per-file IO.source expanded
+    assert captured["input"] == str(src / "a.vhdr")
+    assert captured["bids"] == str(out)                       # General target expanded

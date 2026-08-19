@@ -560,7 +560,9 @@ async def test_tui_rules_shows_sample_paths(dummy_source):
 @pytest.mark.anyio
 async def test_tui_files_modal(dummy_source):
     app = SovabidsApp()
-    async with app.run_test(size=(120, 40)) as pilot:
+    # tall viewport so the Rules-tab content (ext + sample paths + pattern +
+    # preview row) all fits and #show-files isn't pushed below the fold on CI
+    async with app.run_test(size=(120, 100)) as pilot:
         # Setup source
         app.query_one("TabbedContent").active = "tab-setup"
         await pilot.pause()
@@ -587,9 +589,10 @@ async def test_tui_files_modal(dummy_source):
         btn = app.query_one("#show-files", Button)
         assert not btn.disabled
 
-        # Click "Show all" (scroll it into view first — the sample-paths block
-        # can push it below the fold in a small test viewport)
-        btn.scroll_visible()
+        # Click "Show all" — scroll it into view first (non-animated so it
+        # settles synchronously; the animated scroll raced on CI and the button
+        # landed off-screen -> pilot.click OutOfBounds)
+        btn.scroll_visible(animate=False)
         await pilot.pause()
         await pilot.click("#show-files")
         await pilot.pause()

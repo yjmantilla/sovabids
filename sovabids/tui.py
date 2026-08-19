@@ -509,6 +509,7 @@ def _open_path_in_viewer(path: str) -> bool:
     browser with a *valid* ``file://`` URI (``as_uri`` handles Windows drives/spaces)."""
     import subprocess
     import sys
+    import threading
     import webbrowser
     from pathlib import Path
 
@@ -522,7 +523,15 @@ def _open_path_in_viewer(path: str) -> bool:
             if proc.wait(timeout=2) == 0:
                 return True                    # exited cleanly -> handed off
         except subprocess.TimeoutExpired:
-            return True                        # still running -> attached to the viewer; leave it
+            # still running -> attached to the viewer; leave it, but reap it when it
+            # eventually exits (a daemon wait) so it doesn't linger as a zombie
+            def _reap(p=proc):
+                try:
+                    p.wait()
+                except Exception:
+                    pass
+            threading.Thread(target=_reap, daemon=True).start()
+            return True
     except Exception:
         pass
     # opener missing or exited non-zero -> the browser can show a file:// image anywhere
@@ -830,10 +839,15 @@ class RulesPane(Static):
                 self.query_one("#io-src-input", Input).value = self._matched_files[0]
         elif event.button.id == "show-psd":
             if self._matched_files and not self._psd_in_flight:
-                # single-flight: resolve the (reused) temp path first (may raise), THEN
-                # lock so a preview update can't re-enable the button mid-compute and a
-                # double-click can't run two workers writing the same psd.png (#101)
-                out_path = self._psd_png_path()
+                # single-flight: resolve the (reused) temp path first — guard it, since
+                # mkdtemp can raise here in the UI handler (not the worker); leave the
+                # lock false on failure. THEN lock so a preview update can't re-enable
+                # the button mid-compute and a double-click can't run two writers (#101).
+                try:
+                    out_path = self._psd_png_path()
+                except Exception as exc:
+                    self._set_preview(f"PSD error: {exc}", "error")
+                    return
                 self._psd_in_flight = True
                 self._update_psd_btn()
                 self._set_preview("Computing PSD — window will open separately…", "muted")

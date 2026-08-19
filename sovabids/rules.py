@@ -90,6 +90,15 @@ def get_info_from_path(path,rules):
     rules_copy = deep_merge_N([rules_copy,patterns_extracted])
     return rules_copy
 
+def _expand_path(p):
+    """Expand a leading ``~`` and ``$VAR``/``${VAR}`` in a filesystem path string, so
+    a source/BIDS path taken from the rules or mappings YAML isn't used literally
+    (which silently creates a directory named e.g. ``$HOME`` or ``~``). Non-strings
+    pass through unchanged."""
+    if isinstance(p, str):
+        return os.path.expanduser(os.path.expandvars(p))
+    return p
+
 def get_files(source_path,rules):
     """Recursively scan the directory for valid files, returning a list with the full-paths to each.
     
@@ -111,7 +120,7 @@ def get_files(source_path,rules):
     """
     rules_copy = load_rules(rules)
     if not isinstance(source_path, list):
-        source_path = os.fspath(source_path)
+        source_path = _expand_path(os.fspath(source_path))
 
     if isinstance(source_path,str):
         # Generate all files
@@ -196,8 +205,8 @@ def apply_rules_to_single_file(file,rules,bids_path,write=False,preview=False,pe
     preview : bool|dict
         If preview = False, then False. If True, then the preview dictionary.
     """
-    file = os.fspath(file)
-    bids_path = os.fspath(bids_path)
+    file = _expand_path(os.fspath(file))
+    bids_path = _expand_path(os.fspath(bids_path))
     f = file
 
     rules_copy = load_rules(rules)
@@ -471,12 +480,12 @@ def apply_rules(source_path,bids_path,rules,mapping_path='',persist=True):
                                 }
     """
     
-    bids_path = os.fspath(bids_path)
-    mapping_path = os.fspath(mapping_path)
+    bids_path = _expand_path(os.fspath(bids_path))
+    mapping_path = _expand_path(os.fspath(mapping_path))
     if isinstance(source_path, list):
-        source_path = [os.fspath(p) for p in source_path]
+        source_path = [_expand_path(os.fspath(p)) for p in source_path]
     else:
-        source_path = os.fspath(source_path)
+        source_path = _expand_path(os.fspath(source_path))
 
     # Safe Copy/Load Rules
     rules_copy = load_rules(rules)

@@ -6,7 +6,7 @@ import sys
 
 import logging
 from sovabids.dicts import deep_get
-from sovabids.rules import load_rules,apply_rules_to_single_file
+from sovabids.rules import load_rules,apply_rules_to_single_file,_expand_path
 from sovabids.bids import update_dataset_description
 from sovabids.loggers import setup_logging
 from sovabids.settings import SECTION_STRING
@@ -43,9 +43,10 @@ def convert_them(mappings_input):
     assert 'Individual' in mappings,f'`Individual` does not exist in the mapping dictionary'
     assert 'General' in mappings,f'`General` does not exist in the mapping dictionary'
     
-    # Getting input,output and log path
-    bids_path = mappings['General']['IO']['target']
-    source_path = mappings['General']['IO']['source']
+    # Getting input,output and log path (expand ~ / $VARS so a path from the
+    # mappings YAML isn't used literally, e.g. creating a "$HOME" directory) (#94)
+    bids_path = _expand_path(mappings['General']['IO']['target'])
+    source_path = _expand_path(mappings['General']['IO']['source'])
     log_file = os.path.join(bids_path,'code','sovabids','sovabids.log')
 
     # Setup the logging
@@ -60,8 +61,8 @@ def convert_them(mappings_input):
     skipped = []
     failed = []
     for i,mapping in enumerate(mappings['Individual']):
-        input_file=deep_get(mapping,'IO.source',None)
-        output_file=deep_get(mapping,'IO.target',None)
+        input_file=_expand_path(deep_get(mapping,'IO.source',None))
+        output_file=_expand_path(deep_get(mapping,'IO.target',None))
         try:
             LOGGER.info(f"File {i+1} of {num_files} ({(i+1)*100/num_files}%) : {input_file}")
             if not os.path.isfile(output_file):

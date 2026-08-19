@@ -1239,14 +1239,30 @@ class MappingsPane(Static):
 
     @work(thread=True)
     def _gen_worker(self, source: str, bids: str, rules: dict, token: int) -> None:
+        import tempfile
+
         from sovabids.rules import apply_rules
 
+        # Compute-only: write the mappings YAML to a private throwaway file, NOT
+        # bids/code/sovabids/mappings.yml. Otherwise a superseded generation (or a
+        # concurrent one) overwrites/corrupts that file even though its in-memory
+        # result is dropped by the token. Persisting is the explicit Save action's job
+        # (#98 re-review).
+        fd, tmp_map = tempfile.mkstemp(prefix="sovabids_gen_", suffix=".yml")
+        os.close(fd)
         try:
-            mapping_data = apply_rules(source_path=source, bids_path=bids, rules=rules)
+            mapping_data = apply_rules(
+                source_path=source, bids_path=bids, rules=rules, mapping_path=tmp_map
+            )
             # store shared state + repaint on the UI thread, not the worker (#100)
             self.app.call_from_thread(self._apply_mappings, mapping_data, token)
         except Exception as exc:
             self.app.call_from_thread(self._gen_error, f"Error generating mappings: {exc}", token)
+        finally:
+            try:
+                os.remove(tmp_map)
+            except OSError:
+                pass
 
     def _apply_mappings(self, mapping_data: dict, token: int) -> None:
         if token != self.app._gen_token:

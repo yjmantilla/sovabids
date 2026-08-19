@@ -343,7 +343,7 @@ async def test_tui_generate_uses_loaded_rules_file(dummy_source, tmp_path, monke
     captured = {}
     monkeypatch.setattr(sr, "load_rules", lambda p: sentinel)          # the file's rules
 
-    def fake_apply(source_path, bids_path, rules):
+    def fake_apply(source_path, bids_path, rules, mapping_path=""):
         captured["rules"] = rules
         return {"Individual": []}
     monkeypatch.setattr(sr, "apply_rules", fake_apply)
@@ -367,6 +367,37 @@ async def test_tui_generate_uses_loaded_rules_file(dummy_source, tmp_path, monke
                 break
         assert captured["rules"] is sentinel          # the loaded file drove apply_rules
         assert app._mapping_data == {"Individual": []}
+
+
+@pytest.mark.anyio
+async def test_tui_generate_is_compute_only(tmp_path, monkeypatch):
+    """Generate must NOT persist bids/code/sovabids/mappings.yml (that's the Save
+    action's job); it hands apply_rules a throwaway mapping_path so a superseded or
+    concurrent generation can't overwrite/corrupt the real file (#98 re-review)."""
+    import sovabids.rules as sr
+    captured = {}
+
+    def fake_apply(source_path, bids_path, rules, mapping_path=""):
+        captured["mapping_path"] = mapping_path
+        return {"Individual": []}
+
+    monkeypatch.setattr(sr, "apply_rules", fake_apply)
+    bids = tmp_path / "bids"
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        app.query_one("#source-input", Input).value = str(tmp_path)   # any non-empty source
+        app.query_one("#bids-input", Input).value = str(bids)
+        await pilot.pause()
+        app.query_one("MappingsPane")._generate()
+        for _ in range(30):
+            await anyio.sleep(0.1)
+            await pilot.pause()
+            if "mapping_path" in captured:
+                break
+        mp = captured["mapping_path"]
+        assert mp                                                     # a real (temp) path was passed
+        assert os.path.dirname(mp) != os.path.join(str(bids), "code", "sovabids")
+        assert not (bids / "code" / "sovabids" / "mappings.yml").exists()
 
 
 @pytest.mark.anyio

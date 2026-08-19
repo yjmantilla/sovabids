@@ -1233,25 +1233,32 @@ class MappingsPane(Static):
             rules = rules_pane.get_rules()
 
         self._set_status("Generating mappings…")
-        self._gen_worker(source, bids, rules)
+        # capture the token AFTER the up-front invalidate bumped it; a later edit or
+        # a newer generation bumps it again, so this worker's result is then dropped
+        self._gen_worker(source, bids, rules, self.app._gen_token)
 
     @work(thread=True)
-    def _gen_worker(self, source: str, bids: str, rules: dict) -> None:
+    def _gen_worker(self, source: str, bids: str, rules: dict, token: int) -> None:
         from sovabids.rules import apply_rules
 
         try:
             mapping_data = apply_rules(source_path=source, bids_path=bids, rules=rules)
             # store shared state + repaint on the UI thread, not the worker (#100)
-            self.app.call_from_thread(self._apply_mappings, mapping_data)
+            self.app.call_from_thread(self._apply_mappings, mapping_data, token)
         except Exception as exc:
-            self.app.call_from_thread(
-                self._set_status, f"Error generating mappings: {exc}", True
-            )
+            self.app.call_from_thread(self._gen_error, f"Error generating mappings: {exc}", token)
 
-    def _apply_mappings(self, mapping_data: dict) -> None:
+    def _apply_mappings(self, mapping_data: dict, token: int) -> None:
+        if token != self.app._gen_token:
+            return   # an edit or a newer generation superseded this one (#98)
         self.app._mapping_data = mapping_data
         self._populate_table(mapping_data["Individual"])
         self.app._set_mappings_valid(True)   # plan is current -> allow Save/Convert
+
+    def _gen_error(self, msg: str, token: int) -> None:
+        if token != self.app._gen_token:
+            return   # don't clobber a newer generation's status with a stale error
+        self._set_status(msg, error=True)
 
     def _populate_table(self, individuals: list) -> None:
         table = self.query_one("#mappings-table", DataTable)
@@ -1373,6 +1380,7 @@ class SovabidsApp(App):
 
     _mapping_data: dict | None = None
     _pending_input_id: str = ""
+    _gen_token: int = 0   # bumped on every invalidation; a generation whose token is stale is dropped (#98)
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -1428,6 +1436,7 @@ class SovabidsApp(App):
     def _set_mappings_valid(self, valid: bool) -> None:
         if not valid:
             self._mapping_data = None
+            self._gen_token += 1   # supersede any in-flight generation (#98)
         for bid in ("#save-mappings", "#convert-btn"):
             try:
                 self.query_one(bid, Button).disabled = not valid

@@ -606,7 +606,7 @@ async def test_tui_editing_invalidates_mappings(tmp_path):
         assert app._mapping_data is None
 
         # a successful generation enables them
-        mp._apply_mappings({"Individual": [{"IO": {"source": "a", "target": "b"}}]})
+        mp._apply_mappings({"Individual": [{"IO": {"source": "a", "target": "b"}}]}, app._gen_token)
         await pilot.pause()
         assert not save.disabled and not conv.disabled
         assert app._mapping_data is not None
@@ -618,7 +618,7 @@ async def test_tui_editing_invalidates_mappings(tmp_path):
         assert app._mapping_data is None
 
         # regenerate, then editing a Rules field invalidates too
-        mp._apply_mappings({"Individual": []})
+        mp._apply_mappings({"Individual": []}, app._gen_token)
         await pilot.pause()
         app.query_one("TabbedContent").active = "tab-rules"
         await pilot.pause()
@@ -632,6 +632,32 @@ async def test_tui_editing_invalidates_mappings(tmp_path):
         mp._generate()                         # no source/bids set -> errors, but invalidates first
         await pilot.pause()
         assert app._mapping_data is None
+
+
+@pytest.mark.anyio
+async def test_tui_stale_generation_dropped(tmp_path):
+    """An in-flight generation whose token was superseded (by an edit, or a newer
+    generation) must NOT resurrect a stale plan or re-enable Save/Convert (#98)."""
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        mp = app.query_one("MappingsPane")
+        conv = app.query_one("#convert-btn", Button)
+
+        stale = app._gen_token                       # token an in-flight worker captured
+        app._set_mappings_valid(False)               # an edit happens -> token bumped, plan invalid
+        assert app._gen_token != stale
+
+        # the OLD worker now finishes -> its result is dropped (stale token)
+        mp._apply_mappings({"Individual": [{"IO": {"source": "a", "target": "b"}}]}, stale)
+        await pilot.pause()
+        assert app._mapping_data is None
+        assert conv.disabled
+
+        # a current-token result does apply and re-enables
+        mp._apply_mappings({"Individual": []}, app._gen_token)
+        await pilot.pause()
+        assert app._mapping_data == {"Individual": []}
+        assert not conv.disabled
 
 
 @pytest.mark.anyio

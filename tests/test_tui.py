@@ -605,25 +605,62 @@ async def test_tui_psd_temp_reuse_and_cleanup(tmp_path):
 
 
 def test_tui_open_in_viewer_is_cross_platform(monkeypatch):
-    """_open_path_in_viewer dispatches to the OS opener and falls back to the browser."""
+    """_open_path_in_viewer runs the OS opener AND checks its exit code, falling back to
+    the browser (with a valid file:// URI) when the opener fails."""
     import subprocess
     import webbrowser
+    from pathlib import Path
     import sovabids.tui as tui
+
+    class _R:
+        def __init__(self, rc):
+            self.returncode = rc
+
     calls = {}
+    # opener succeeds (rc 0) -> no browser fallback
     monkeypatch.setattr(
-        subprocess, "Popen",
-        lambda args, *a, **k: calls.setdefault("popen", []).append(list(args)),
+        subprocess, "run",
+        lambda args, **k: (calls.setdefault("run", []).append(list(args)), _R(0))[1],
     )
     monkeypatch.setattr(webbrowser, "open", lambda url: calls.setdefault("web", []).append(url))
     tui._open_path_in_viewer("/tmp/x.png")
-    assert calls.get("popen"), "should invoke an OS opener"        # (xdg-open on Linux CI)
+    assert calls.get("run") and calls["run"][0][0] in ("xdg-open", "open")
+    assert "web" not in calls                                     # rc 0 -> no fallback
 
-    # if the opener is unavailable, fall back to the browser instead of raising
-    def boom(*a, **k):
-        raise FileNotFoundError("no opener")
-    monkeypatch.setattr(subprocess, "Popen", boom)
-    tui._open_path_in_viewer("/tmp/y.png")
-    assert calls.get("web") == ["file:///tmp/y.png"]
+    # opener returns NON-zero (e.g. xdg-open with no handler) -> browser fallback,
+    # and the URI is a valid file:// (spaces escaped), not a bare f-string
+    calls.clear()
+    monkeypatch.setattr(subprocess, "run", lambda args, **k: _R(3))
+    monkeypatch.setattr(webbrowser, "open", lambda url: calls.setdefault("web", []).append(url))
+    tui._open_path_in_viewer("/tmp/name with space.png")
+    assert calls["web"] == [Path("/tmp/name with space.png").resolve().as_uri()]
+
+
+@pytest.mark.anyio
+async def test_tui_psd_single_flight(monkeypatch, tmp_path):
+    """Pressing Power Spectrum disables the button until the worker finishes, so a
+    double-click can't run two workers writing the same psd.png (#101)."""
+    app = SovabidsApp()
+    async with app.run_test(size=(120, 80)) as pilot:
+        app.query_one("TabbedContent").active = "tab-rules"
+        await pilot.pause()
+        rp = app.query_one("RulesPane")
+        rp._matched_files = ["/a/x.vhdr"]
+        started = []
+        monkeypatch.setattr(rp, "_psd_worker", lambda *a, **k: started.append(a))  # stub MNE work
+        btn = app.query_one("#show-psd", Button)
+        btn.disabled = False
+
+        rp.on_button_pressed(Button.Pressed(btn))
+        await pilot.pause()
+        assert started                          # worker launched
+        assert btn.disabled is True             # single-flight: button locked during compute
+
+        rp._reenable_psd_btn()                  # worker's finally re-enables (files still matched)
+        assert btn.disabled is False
+        rp._matched_files = []
+        rp._reenable_psd_btn()
+        assert btn.disabled is True
 
 
 @pytest.mark.anyio

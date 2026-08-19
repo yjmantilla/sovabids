@@ -500,21 +500,29 @@ def _plf_problem(value: str) -> str:
 
 def _open_path_in_viewer(path: str) -> None:
     """Open a file with the OS default handler, cross-platform (was hard-coded to
-    Linux ``xdg-open``). Falls back to the browser, which can display a file:// image
-    anywhere."""
+    Linux ``xdg-open``). Waits for the opener and checks its exit code — e.g.
+    ``xdg-open`` with no usable handler exits non-zero — then falls back to the
+    browser with a *valid* ``file://`` URI (``as_uri`` handles Windows drives and
+    spaces, which a bare f-string does not)."""
     import subprocess
     import sys
     import webbrowser
+    from pathlib import Path
 
     try:
-        if sys.platform == "darwin":
-            subprocess.Popen(["open", path])
-        elif os.name == "nt":
-            os.startfile(path)  # type: ignore[attr-defined]  # Windows-only
-        else:
-            subprocess.Popen(["xdg-open", path])
+        if os.name == "nt":
+            os.startfile(path)  # type: ignore[attr-defined]  # Windows-only; raises on failure
+            return
+        opener = "open" if sys.platform == "darwin" else "xdg-open"
+        if subprocess.run([opener, path], timeout=20).returncode == 0:
+            return
     except Exception:
-        webbrowser.open(f"file://{os.path.abspath(path)}")
+        pass
+    # opener missing, failed, or hung -> the browser can display a file:// image anywhere
+    try:
+        webbrowser.open(Path(path).resolve().as_uri())
+    except Exception:
+        pass
 
 
 class _OptionalNumber(Validator):
@@ -813,7 +821,10 @@ class RulesPane(Static):
             if self._matched_files:
                 self.query_one("#io-src-input", Input).value = self._matched_files[0]
         elif event.button.id == "show-psd":
-            if self._matched_files:
+            if self._matched_files and not event.button.disabled:
+                # single-flight: disable the button until the worker finishes so a
+                # double-click can't run two workers writing the same psd.png (#101)
+                event.button.disabled = True
                 self._set_preview("Computing PSD — window will open separately…", "muted")
                 # resolve the (reused) temp path on the UI thread, hand it to the worker
                 self._psd_worker(self._matched_files[0], self._psd_png_path())
@@ -915,6 +926,12 @@ class RulesPane(Static):
             )
         except Exception as exc:
             self.app.call_from_thread(self._set_preview, f"PSD error: {exc}", "error")
+        finally:
+            self.app.call_from_thread(self._reenable_psd_btn)
+
+    def _reenable_psd_btn(self) -> None:
+        # re-enable only while there are still matched files to inspect
+        self.query_one("#show-psd", Button).disabled = not bool(self._matched_files)
 
     def _schedule_preview(self) -> None:
         if self._preview_timer is not None:

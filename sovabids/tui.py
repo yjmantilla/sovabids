@@ -446,10 +446,10 @@ class ChannelNamesScreen(ModalScreen):
             ch_types = raw.get_channel_types()
             self.app.call_from_thread(self._populate, ch_names, ch_types)
         except Exception as exc:
-            self.app.call_from_thread(
-                self.query_one("#ch-label", Label).update,
-                f"[red]Error loading file: {exc}[/red]",
-            )
+            self.app.call_from_thread(self._set_ch_error, f"[red]Error loading file: {exc}[/red]")
+
+    def _set_ch_error(self, msg: str) -> None:
+        self.query_one("#ch-label", Label).update(msg)
 
     def _populate(self, ch_names: list, ch_types: list) -> None:
         self.query_one("#ch-label", Label).update(
@@ -901,11 +901,16 @@ class RulesPane(Static):
                     if len(samples) < self._SAMPLE_COLLECT_CAP:
                         samples.append(os.path.join(root, f))
         samples.sort()
+        # marshal the widget updates to the UI thread — resolve the widget THERE,
+        # not here on the worker thread (#100)
         self.app.call_from_thread(
-            self.query_one("#ext-count", Static).update,
+            self._set_ext_count,
             f"{count} file(s) with [cyan]{ext}[/cyan] in source directory",
         )
         self.app.call_from_thread(self._update_samples, samples[: self._SAMPLE_SHOW], source)
+
+    def _set_ext_count(self, text: str) -> None:
+        self.query_one("#ext-count", Static).update(text)
 
     def _psd_png_path(self) -> str:
         """A single, reused temp file for the PSD preview so repeated clicks
@@ -1233,12 +1238,16 @@ class MappingsPane(Static):
 
         try:
             mapping_data = apply_rules(source_path=source, bids_path=bids, rules=rules)
-            self.app._mapping_data = mapping_data
-            self.app.call_from_thread(self._populate_table, mapping_data["Individual"])
+            # store shared state + repaint on the UI thread, not the worker (#100)
+            self.app.call_from_thread(self._apply_mappings, mapping_data)
         except Exception as exc:
             self.app.call_from_thread(
                 self._set_status, f"Error generating mappings: {exc}", True
             )
+
+    def _apply_mappings(self, mapping_data: dict) -> None:
+        self.app._mapping_data = mapping_data
+        self._populate_table(mapping_data["Individual"])
 
     def _populate_table(self, individuals: list) -> None:
         table = self.query_one("#mappings-table", DataTable)
@@ -1299,15 +1308,14 @@ class ConvertPane(Static):
             self._log("[red]Generate mappings first (Mappings tab).[/red]")
             return
         self._log("[bold]Starting conversion…[/bold]")
-        self._convert_worker(data)
+        # resolve the log widget here (UI thread) and hand it to the worker (#100)
+        self._convert_worker(data, self.query_one("#convert-log", RichLog))
 
     @work(thread=True)
-    def _convert_worker(self, mapping_data: dict) -> None:
+    def _convert_worker(self, mapping_data: dict, log: RichLog) -> None:
         import logging
 
         from sovabids.convert import convert_them
-
-        log = self.query_one("#convert-log", RichLog)
 
         class TuiHandler(logging.Handler):
             def __init__(self, richlog: RichLog, call_fn) -> None:

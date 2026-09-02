@@ -21,7 +21,7 @@ authors:
   - name: Aswin Narayanan
     orcid: 0000-0002-4473-7886
     equal-contrib: false
-    affiliation: 2
+    affiliation: "2, 10"
   - name: David White
     orcid: 0000-0001-8694-1474
     equal-contrib: false
@@ -53,6 +53,8 @@ affiliations:
     index: 8
   - name: Semillero de Investigación Machine Learning and Robotics, Facultad de Ingeniería, Universidad de Antioquia, Medellín, Colombia
     index: 9
+  - name: Australian National Imaging Facility, The University of Queensland, Brisbane, Australia
+    index: 10
 
 
 date: 31 August 2026

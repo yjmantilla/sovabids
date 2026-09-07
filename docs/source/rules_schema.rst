@@ -147,7 +147,7 @@ In essence the *entities* object holds information that triangulates the file in
 
 Apart from *subject*, *session* and *task*, we can have *acquisition* and *run*; refer to the `entities documentation <entitiesdoc_>`_ to know more about these two; they are setup in the same way as the previous ones.
 
-Now, remember this file is supposed to configure general information, so one wouldn't tipically setup the *subject* in such a static way. In the *path_analysis* section of the *non-bids* object it will be explained how to infer varying properties like the *subject* directly from the path of the file.
+Now, remember this file is supposed to configure general information, so one wouldn't typically setup the *subject* in such a static way. In the *path_analysis* section of the *non-bids* object it will be explained how to infer varying properties like the *subject* directly from the path of the file.
 
 .. warning::
     In general, you should use each of these *Rules File* objects to configure properties that apply to the dataset as a whole. The only part (for now) of the *Rules File* that allows customization in a per-file basis is the *path_analysis* functionality of the *non-bids* object.
@@ -280,7 +280,7 @@ Here we give the channel "heo" the type "HEOG" and the channel "veo" the type "V
             heo : HEOG
             veo : VEOG
 
-Renaming and Typing simultaniously:
+Renaming and Typing simultaneously:
 
 It is possible that we need to change the name and the type of a channel. In that case only to refer to such channel as the *OldName* in the *name* part of the *channels* object. In the other parts use the *NewName*.
 
@@ -413,7 +413,7 @@ So your *path_analysis* object is wrote in the *Rules File* as:
     regex patterns, placeholder patterns and paired example.
 
 .. warning::
-    If the value extracted from a field includes hyphens or underscores (-,_) they will be deleted from the value so as to accomodate automatically to the bids standard.
+    If the value extracted from a field includes hyphens or underscores (-,_) they will be deleted from the value so as to accommodate automatically to the bids standard.
     The only way to bypass this is if the field is "ignore" (without the quotations).
 
 placeholder pattern
@@ -520,7 +520,7 @@ What we need to write in the *Rules File* is then:
 
 .. warning::
 
-    It is advisable to include the folder just before the one that is of interest to you. This is so that the sofware is able to discriminate what is of interest in the first field. In this example we started from ``_data`` although in reality we are interested is in the next folder (``lemon``). If we do ``%dataset_description.Name%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr`` (this is the same pattern but without the ``_data`` folder), the software will have trouble distinguishing what is of interest at the start of the string. This warning applies both to regex and placeholder patterns.
+    It is advisable to include the folder just before the one that is of interest to you. This is so that the software is able to discriminate what is of interest in the first field. In this example we started from ``_data`` although in reality we are interested is in the next folder (``lemon``). If we do ``%dataset_description.Name%/ses-%entities.session%/%entities.task%/sub-%entities.subject%.vhdr`` (this is the same pattern but without the ``_data`` folder), the software will have trouble distinguishing what is of interest at the start of the string. This warning applies both to regex and placeholder patterns.
 
 
 paired example (EXPERIMENTAL)

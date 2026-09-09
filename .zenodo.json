@@ -1,0 +1,16 @@
+{
+  "upload_type": "software",
+  "title": "SOVABIDS: EEG-to-BIDS conversion software focused on automation, reproducibility and interoperability",
+  "description": "SOVABIDS is an open-source tool for converting EEG data into the Brain Imaging Data Structure (BIDS) using human-readable YAML configuration files.",
+  "license": "BSD-3-Clause",
+  "access_right": "open",
+  "creators": [
+    {"name": "Mantilla-Ramos, Yorguin-José", "orcid": "0000-0003-4473-0876", "affiliation": "Universidad de Antioquia"},
+    {"name": "Hoyos-Madera, Brayan-Andrés", "affiliation": "Universidad de Antioquia"},
+    {"name": "Bollmann, Steffen", "orcid": "0000-0002-2909-0906", "affiliation": "The University of Queensland"},
+    {"name": "Narayanan, Aswin", "orcid": "0000-0002-4473-7886", "affiliation": "Australian National Imaging Facility, The University of Queensland"},
+    {"name": "White, David", "orcid": "0000-0001-8694-1474", "affiliation": "Swinburne University of Technology"},
+    {"name": "Civier, Oren", "orcid": "0000-0003-0090-271X", "affiliation": "Australian National Imaging Facility"},
+    {"name": "Johnstone, Tom", "orcid": "0000-0001-8635-8158", "affiliation": "Australian National Imaging Facility"}
+  ]
+}

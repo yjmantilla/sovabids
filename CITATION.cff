@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "SOVABIDS: EEG-to-BIDS conversion software focused on automation, reproducibility and interoperability"
+type: software
+license: BSD-3-Clause
+repository-code: "https://github.com/yjmantilla/sovabids"
+url: "https://sovabids.readthedocs.io"
+authors:
+  - family-names: Mantilla-Ramos
+    given-names: Yorguin-José
+    orcid: "https://orcid.org/0000-0003-4473-0876"
+    affiliation: Universidad de Antioquia
+  - family-names: Hoyos-Madera
+    given-names: Brayan-Andrés
+    affiliation: Universidad de Antioquia
+  - family-names: Bollmann
+    given-names: Steffen
+    orcid: "https://orcid.org/0000-0002-2909-0906"
+    affiliation: The University of Queensland
+  - family-names: Narayanan
+    given-names: Aswin
+    orcid: "https://orcid.org/0000-0002-4473-7886"
+    affiliation: Australian National Imaging Facility, The University of Queensland
+  - family-names: White
+    given-names: David
+    orcid: "https://orcid.org/0000-0001-8694-1474"
+    affiliation: Swinburne University of Technology
+  - family-names: Civier
+    given-names: Oren
+    orcid: "https://orcid.org/0000-0003-0090-271X"
+    affiliation: Australian National Imaging Facility
+  - family-names: Johnstone
+    given-names: Tom
+    orcid: "https://orcid.org/0000-0001-8635-8158"
+    affiliation: Australian National Imaging Facility

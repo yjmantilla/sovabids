@@ -104,7 +104,7 @@ EEG experiments typically record each participant in the same way, but in practi
 - The [Rules File](https://sovabids.readthedocs.io/en/latest/rules_schema.html), which encodes general conversion rules for the full dataset.
 - The [Mappings File](https://sovabids.readthedocs.io/en/latest/mappings_schema.html), populated from the Rules File, which holds specific conversion parameters for every individual file.
 
-![From a Rules File, a mapping for each file in the dataset can be generated and saved in the Mappings File. The colors illustrate how the information in both files is related.\label{fig:cfg}](rules-mappings.png)
+![A Rules File (left) generates one mapping per file in the dataset, saved in the Mappings File (right); colors show how values in the two files correspond.\label{fig:cfg}](rules-mappings.png)
 
 This two-tier approach is inspired by tools such as Bidscoin [@bidscoin] and HeuDiConv [@heudi] (both focused on MRI). It generates a separate mapping for each file, which users can review and edit when a participant's data does not follow the general structure. Users can also start from an existing Rules File shared within a lab or community, and can connect an external GUI via SOVABIDS' API for supervised adjustment of edge cases where full automation is not possible.
 

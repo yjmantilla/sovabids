@@ -112,7 +112,7 @@ SOVABIDS infers subject, session, task, and other BIDS entities from file paths 
 
 ## 3. Reproducible conversion
 
-Reproducibility requires that a conversion be specified by its saved configuration, so that repeating it does not depend on undocumented manual steps. The rules and per-file mappings are saved in the configuration files, and each run is logged. This allows users to audit, correct, and re-run conversions when a BIDS validator flags structural issues or when downstream analysis reveals incorrect metadata.
+Reproducibility requires that a conversion be specified by its saved configuration, not by undocumented manual steps. The rules and per-file mappings are saved and each run is logged, so users can audit, correct, and re-run conversions when a BIDS validator flags issues or downstream analysis reveals incorrect metadata.
 
 ## 4. Accessible interfaces and interoperability
 

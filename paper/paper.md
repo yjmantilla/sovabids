@@ -85,7 +85,9 @@ SOVABIDS instead introduces an explicit two-tier separation between dataset-leve
 
 # Software Design
 
-SOVABIDS' central design tension is between expressiveness and accessibility: more expressive conversion logic typically requires programming skill, while simpler interfaces tend to sacrifice flexibility. The five design principles below describe the resulting trade-offs.
+SOVABIDS' central design tension is between expressiveness and accessibility: more expressive conversion logic typically requires programming skill, while simpler interfaces tend to sacrifice flexibility. The five design principles below describe these trade-offs, and \autoref{fig:arch} summarizes the resulting architecture.
+
+![SOVABIDS architecture. The Rules Module applies a user-created Rules File across the dataset to produce a Mappings File, which the Conversion Module uses to convert EEG files to BIDS via MNE and MNE-BIDS. An RPC API lets external tools and GUIs inspect or adjust the configuration.\label{fig:arch}](arch.png)
 
 ## 1. Accessibility for non-technical users
 
@@ -117,13 +119,6 @@ The second is an RPC-based API that lets external applications drive SOVABIDS' c
 ## 5. Format support through MNE delegation
 
 Rather than supporting every EEG hardware format itself, SOVABIDS delegates file reading to MNE-Python [@mne] and BIDS-compliant saving to MNE-BIDS [@mnebids], so its input coverage is bounded by MNE's broad and actively maintained format support. SOVABIDS is tested with BrainVision (.vhdr), EDF (.edf), EEGLAB (.set), and FIF (.fif) inputs, with BrainVision output by default (FIF for MEG). Other MNE-readable formats (Neuroscan .cnt and BDF) are handled through the same delegation but are untested in continuous integration. Basic MEG datatype routing is implemented, but MEG-specific BIDS requirements (empty-room recordings, manufacturer calibration files, and digitization coordinate systems) are not exposed through the rule system.
-
-## Architecture Overview
-
-The five design principles above are reflected directly in SOVABIDS' two-module architecture, illustrated in \autoref{fig:arch}. The Rules Module takes the user-defined Rules File and applies it across all EEG files in the dataset, extracting conversion parameters and compiling them into a Mappings File. This separation means that general conversion logic and participant-specific details are handled in distinct artifacts rather than embedded in code. The Conversion Module then reads the Mappings File and performs the actual transformation to BIDS-compliant output, delegating file reading to MNE and BIDS-compliant saving to MNE-BIDS. Users can interact with both modules through the CLI, the Python API, or the experimental TUI. At either stage, the RPC API additionally allows external tools and GUIs to inspect or modify the configuration, supporting the supervised adjustment workflows described above.
-
-![The architecture of SOVABIDS. The conversion process starts with a user-defined Rules File, which encodes general conversion rules (represented in blue inside the Rules File). The Rules Module processes these rules to generate a Mappings File, which contains specific configurations for all EEG files (each red line in the Mappings File represents the configuration of a different file). The Conversion Module then applies these configurations to produce a BIDS-compliant dataset. Interoperability is enabled via an RPC API, allowing integration with external tools, including graphical user interfaces for optional user-supervised adjustments.\label{fig:arch}](arch.png)
-
 
 # Research Impact Statement
 

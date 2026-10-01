@@ -83,7 +83,7 @@ FieldTrip [@fieldtrip] and EEGLAB [@eeglab] provide conversion utilities integra
 
 EEG2BIDS [@eeg2bids] offers a more guided workflow but relies on detailed user input at the file level, which becomes impractical for large heterogeneous datasets.
 
-Bidsme [@bidsme] is a general-purpose converter that assumes datasets are already organized in a structured hierarchy prior to conversion. While effective when data are consistently arranged, many EEG datasets are stored using vendor-specific naming schemes or lab-driven folder structures that do not conform to any standard hierarchy. In such cases, substantial manual reorganization is required before conversion can begin.
+Bidsme [@bidsme] is a general-purpose, YAML-configured converter whose preparation step derives subject and session labels from folder names or file metadata; other naming conventions require user-written Python plugins.
 
 A natural question is whether SOVABIDS' goals could have been achieved by contributing to an existing tool, particularly MNE-BIDS. We argue they could not. MNE-BIDS is designed around a scripting paradigm where conversion logic is expressed in Python code. Adding rule-based, configuration-driven automation as a non-breaking extension would require architectural changes that diverge from MNE-BIDS’ current scripting-oriented design philosophy and typical usage patterns. The same barrier applies to FieldTrip and EEGLAB, where conversion is tightly coupled to their respective analysis environments.
 
@@ -108,7 +108,7 @@ EEG experiments typically produce multiple identically-organised datasets, one p
 
 This two-tier approach is inspired by tools such as Bidscoin [@bidscoin] and HeuDiConv [@heudi] (both focused on MRI). It generates a separate mapping for each file, which users can review and edit when a participant's data does not follow the general structure. Users can also start from an existing Rules File shared within a lab or community, and can connect an external GUI via SOVABIDS' API for supervised adjustment of edge cases where full automation is not possible.
 
-To support flexible metadata extraction, SOVABIDS provides a semi-automatic API for inferring subject, session, task, and other BIDS-relevant properties from arbitrary file paths. Rather than requiring data to be pre-organized into a standard folder hierarchy before conversion can begin, as both Bidscoin and Bidsme do, SOVABIDS extracts these properties through pattern matching that is defined once at the dataset level and applied automatically across all files. This is supported through three approaches of increasing technicality: paired source-target examples, placeholder-based templates, and full regular expressions.
+To support flexible metadata extraction, SOVABIDS provides a semi-automatic API for inferring subject, session, task, and other BIDS-relevant properties from arbitrary file paths. Rather than requiring data to be pre-organized into a standard folder hierarchy before conversion can begin, as Bidscoin does, SOVABIDS extracts these properties through pattern matching that is defined once at the dataset level and applied automatically across all files. This is supported through three approaches of increasing technicality: paired source-target examples, placeholder-based templates, and full regular expressions.
 
 ## 3. Reproducible conversion
 

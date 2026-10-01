@@ -116,7 +116,7 @@ Reproducibility requires that a conversion be specified by its saved configurati
 
 ## 4. Accessible interfaces and interoperability
 
-SOVABIDS provides two interactive access paths beyond the CLI and Python API, targeting different user needs and deployment environments.
+SOVABIDS provides two further access paths beyond the CLI and Python API, targeting different user needs and deployment environments.
 
 The first is an experimental, optional terminal user interface (TUI), launched via the `sovatui` command (installed with the `sovabids[tui]` extra), which guides users through the full conversion workflow in four steps (Setup, Rules, Mappings, and Convert) without requiring any code. A TUI was chosen over web-based and native GUI alternatives for its portability, small dependency footprint, and lower maintenance burden. It runs wherever a terminal is available, including over SSH on HPC clusters and remote servers where large-scale EEG processing often takes place. It adds a single pure-Python dependency, the `textual` library, rather than the large binary dependencies of native toolkits such as Qt. Finally, it avoids the packaging pipelines, frontend toolchains, and platform-specific bugs that web and native GUIs accumulate. A walkthrough is available at [https://youtu.be/dOWiMTuGvAA](https://youtu.be/dOWiMTuGvAA).
 

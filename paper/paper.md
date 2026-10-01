@@ -106,7 +106,7 @@ EEG experiments typically record each participant in the same way, but in practi
 
 ![A Rules File (left) generates one mapping per file in the dataset, saved in the Mappings File (right); colors show how values in the two files correspond.\label{fig:cfg}](rules-mappings.png)
 
-This two-tier approach is inspired by tools such as Bidscoin [@bidscoin] and HeuDiConv [@heudi] (both focused on MRI). It generates a separate mapping for each file, which users can review and edit when a participant's data does not follow the general structure. Users can also start from an existing Rules File shared within a lab or community, and can connect an external GUI via SOVABIDS' API for supervised adjustment of edge cases where full automation is not possible.
+This two-tier approach is inspired by MRI tools such as Bidscoin [@bidscoin] and HeuDiConv [@heudi]. It generates a separate mapping for each file, which users can review and edit, directly or through an external GUI connected via SOVABIDS' API, when a participant's data does not follow the general structure. Users can also start from an existing Rules File shared within a lab or community.
 
 To support flexible metadata extraction, SOVABIDS provides a semi-automatic API for inferring subject, session, task, and other BIDS-relevant properties from arbitrary file paths. Rather than requiring data to be pre-organized into a standard folder hierarchy before conversion can begin, as Bidscoin does, SOVABIDS extracts these properties through pattern matching that is defined once at the dataset level and applied automatically across all files. This is supported through three approaches of increasing technicality: paired source-target examples, placeholder-based templates, and full regular expressions.
 

@@ -95,7 +95,7 @@ SOVABIDS' central design tension is between expressiveness and accessibility: mo
 
 ## 1. Accessibility for non-technical users
 
-A scripting-based interface, as used by tools like MNE-BIDS, offers maximum expressiveness but requires users to write and maintain dataset-specific code. We traded this expressiveness for accessibility by using human-readable YAML configuration files instead. This approach was inspired by Bidscoin [@bidscoin], a BIDS converter for MRI data. While YAML introduces its own learning requirement for users unfamiliar with the format, it offers a declarative configuration that is reusable across similar datasets and auditable without programming knowledge. The trade-off is that highly unusual conversion scenarios may require more verbose configuration, but for many EEG datasets the YAML-based approach is sufficient and more approachable than writing a custom script. To further lower the barrier to adoption, step-by-step guides and usage examples are provided in the documentation.
+A scripting-based interface, as used by tools like MNE-BIDS, offers greater expressiveness but requires users to write and maintain dataset-specific code. SOVABIDS trades this expressiveness for accessibility by using YAML configuration files, an approach inspired by the MRI converter Bidscoin [@bidscoin]. YAML configurations are reusable across similar datasets and auditable without programming knowledge. Highly unusual conversion scenarios may require more verbose configuration, but for many EEG datasets the YAML-based approach is sufficient and more approachable than writing a custom script.
 
 ## 2. Automation that can accommodate outliers
 

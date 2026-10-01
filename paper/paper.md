@@ -91,7 +91,7 @@ SOVABIDS instead introduces an explicit two-tier separation between dataset-leve
 
 # Software Design
 
-The central design tension in SOVABIDS is between expressiveness and accessibility: more expressive conversion logic typically requires programming skill, while simpler interfaces tend to sacrifice flexibility. The following five design principles reflect the trade-offs made to resolve this tension.
+SOVABIDS' central design tension is between expressiveness and accessibility: more expressive conversion logic typically requires programming skill, while simpler interfaces tend to sacrifice flexibility. The five design principles below describe the resulting trade-offs.
 
 ## 1. Accessibility for non-technical users
 

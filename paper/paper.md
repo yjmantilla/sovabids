@@ -135,7 +135,7 @@ The five design principles above are reflected directly in SOVABIDS' two-module 
 
 # Research Impact Statement
 
-SOVABIDS is listed in the [official BIDS converter registry under the EEG/MEEG/iEEG category](https://bids.neuroimaging.io/tools/converters.html). It is also available on the Neurodesk platform [www.neurodesk.org](www.neurodesk.org) [@neurodesk; @Dao2025], a community-maintained open neuroimaging environment, which broadens its accessibility beyond the development team.
+SOVABIDS is listed in the [official BIDS converter registry under the EEG/MEEG/iEEG category](https://bids.neuroimaging.io/tools/converters.html). It is also available on the Neurodesk platform [www.neurodesk.org](https://www.neurodesk.org) [@neurodesk; @Dao2025], a community-maintained open neuroimaging environment, which broadens its accessibility beyond the development team.
 
 Its use has been documented in peer-reviewed and academic work: a Master's thesis on EEG-based Alzheimer's risk classification [@vero], a Bachelor's thesis on web-based EEG processing tools [@luisa], and a peer-reviewed study on harmonizing EEG features across multiple recording sites [@alberto].
 

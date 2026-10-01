@@ -12,27 +12,21 @@ authors:
     affiliation: "1, 5, 6, 7, 8, 9"
     corresponding: true
   - name: Brayan-Andrés Hoyos-Madera
-    equal-contrib: false
     affiliation: "1, 5"
   - name: Steffen Bollmann
     orcid: 0000-0002-2909-0906
-    equal-contrib: false
     affiliation: 2
   - name: Aswin Narayanan
     orcid: 0000-0002-4473-7886
-    equal-contrib: false
     affiliation: "2, 10"
   - name: David White
     orcid: 0000-0001-8694-1474
-    equal-contrib: false
     affiliation: 4
   - name: Oren Civier
     orcid: 0000-0003-0090-271X
-    equal-contrib: false
     affiliation: "3, 4"
   - name: Tom Johnstone
     orcid: 0000-0001-8635-8158
-    equal-contrib: false
     affiliation: "3, 4"
 affiliations:
   - name: Grupo Neuropsicología y Conducta (GRUNECO), Universidad de Antioquia, Medellín, Colombia

@@ -75,13 +75,13 @@ Despite these advantages, converting EEG datasets to BIDS remains challenging. E
 
 # State of the Field
 
-Several tools support EEG conversion to BIDS, including MNE-BIDS [@mnebids], data2bids in FieldTrip [@fieldtrip], EEG-BIDS in EEGLAB [@eeglab], and EEG2BIDS [@eeg2bids]. More general-purpose converters such as Bidsme [@bidsme] also support EEG alongside other modalities.
+Several tools support EEG conversion to BIDS, including MNE-BIDS [@mnebids], data2bids in FieldTrip [@fieldtrip], EEG-BIDS in EEGLAB [@eeglab], EEG2BIDS [@eeg2bids], and general-purpose, multi-modality converters such as Bidsme [@bidsme].
 
-MNE-BIDS [@mnebids] provides a programmatic interface within the MNE ecosystem and offers fine-grained control over metadata specification. However, it typically requires dataset-specific scripting, which limits accessibility for users without programming experience.
+MNE-BIDS provides a programmatic interface within the MNE ecosystem with fine-grained control over metadata, but typically requires dataset-specific scripting, which limits accessibility for users without programming experience.
 
-FieldTrip [@fieldtrip] and EEGLAB [@eeglab] provide conversion utilities integrated within their respective analysis environments. While convenient for users already embedded in those ecosystems, conversion workflows often require manual interaction or scripting for each dataset.
+FieldTrip and EEGLAB integrate conversion into their analysis environments, convenient for existing users, but these workflows often still require manual interaction or scripting for each dataset.
 
-EEG2BIDS [@eeg2bids] offers a more guided workflow but relies on detailed user input at the file level, which becomes impractical for large heterogeneous datasets.
+EEG2BIDS offers a more guided workflow but relies on detailed file-level user input, which becomes impractical for large heterogeneous datasets.
 
 Bidsme [@bidsme] is a general-purpose, YAML-configured converter whose preparation step derives subject and session labels from folder names or file metadata; other naming conventions require user-written Python plugins.
 

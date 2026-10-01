@@ -99,7 +99,7 @@ A scripting-based interface, as used by tools like MNE-BIDS, offers greater expr
 
 ## 2. Automation that can accommodate outliers
 
-EEG experiments typically produce multiple identically-organised datasets, one per participant. In practice, however, data organisation often varies slightly between participants due to technical issues, partial recordings, or repeated segments. A fully automated system that assumes identical structure across participants would silently fail in these cases, while a fully manual system would not scale. SOVABIDS resolves this by separating conversion logic into two configuration files (illustrated in \autoref{fig:cfg}):
+EEG experiments typically record each participant in the same way, but in practice data organization often varies slightly between participants (technical issues, partial recordings, or repeated segments). A fully automated system that assumes identical structure can fail silently in these cases, while a fully manual one would not scale. SOVABIDS therefore separates conversion logic into two configuration files (\autoref{fig:cfg}):
 
 - The [Rules File](https://sovabids.readthedocs.io/en/latest/rules_schema.html), which encodes general conversion rules for the full dataset.
 - The [Mappings File](https://sovabids.readthedocs.io/en/latest/mappings_schema.html), populated from the Rules File, which holds specific conversion parameters for every individual file.

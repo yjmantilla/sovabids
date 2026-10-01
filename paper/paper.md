@@ -147,10 +147,8 @@ The authors acknowledge the support from the 2021 Google Summer of Code program 
 
 The primary architecture and core functionality of this software were completed prior to December 2023. Generative AI tools were not used in the conceptual design, methodological decisions, or scientific development of the project.
 
-After March 2025, limited use of generative AI tools was made for maintenance and supporting tasks. The tools used were ChatGPT Codex (o4-mini) and ChatGPT (GPT-4.1) and Claude (Sonnet 4.6).
+Since March 2025, generative AI tools, mainly OpenAI Codex and Claude Code (with models from GPT-4.1 and Claude 4.6 onward), were used for maintenance and supporting work: the experimental TUI and its tests, continuous-integration workflows, documentation, a utility for generating random 1/f signals, fixes during the JOSS review, and editing of this paper.
 
-AI assistance was used for updating and improving GitHub Actions continuous integration workflows, enhancing and clarifying documentation, assisting in the implementation of a utility function for generating random 1/f signals, minor code refactoring and formatting improvements, and minor improvements on the paper.
-
-All AI-assisted outputs were carefully reviewed, edited, tested, and validated by the authors. All core design decisions and scientific judgments were made by the human authors.
+All AI-assisted outputs were reviewed, tested, and validated by the authors, who made all design decisions and scientific judgments.
 
 # References

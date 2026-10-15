@@ -126,7 +126,7 @@ SOVABIDS is listed in the [official BIDS converter registry](https://bids.neuroi
 
 # Acknowledgements
 
-The authors acknowledge the support from the 2021 Google Summer of Code program under the International Neuroinformatics Coordinating Facility (INCF) organization, and the funding provided by the Australian Research Data Commons (ARDC) to support the Australian Electrophysiology Data Analytics Platform (AEDAPT). The authors also acknowledge the facilities and the scientific and technical assistance of the National Imaging Facility, a National Collaborative Research Infrastructure Strategy (NCRIS) capability, at Swinburne Neuroimaging, Swinburne University of Technology, and at the Centre for Advanced Imaging, The University of Queensland.
+The authors acknowledge support from the 2021 Google Summer of Code program under the International Neuroinformatics Coordinating Facility (INCF), and funding from the Australian Research Data Commons (ARDC) for the Australian Electrophysiology Data Analytics Platform (AEDAPT). The authors also acknowledge the facilities and the scientific and technical assistance of the National Imaging Facility, a National Collaborative Research Infrastructure Strategy (NCRIS) capability, at Swinburne Neuroimaging, Swinburne University of Technology, and at the Centre for Advanced Imaging, The University of Queensland.
 
 # AI Usage Disclosure
 

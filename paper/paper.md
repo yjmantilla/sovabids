@@ -112,7 +112,7 @@ Reproducibility requires that a conversion be specified by its saved configurati
 
 ## 4. Accessible interfaces and interoperability
 
-Beyond the CLI and Python API, SOVABIDS provides two further access paths. The first is an experimental, optional terminal user interface (TUI), installed via the `sovabids[tui]` extra and launched with `sovatui`. It guides users through four steps (Setup, Rules, Mappings, and Convert) without requiring any code. A TUI was chosen over web-based and native GUIs for its portability, small dependency footprint, and lower maintenance burden. A [walkthrough](https://youtu.be/dOWiMTuGvAA) is available.
+Beyond the CLI and Python API, SOVABIDS provides two further access paths. The first is an experimental, optional terminal user interface (TUI). It guides users through four steps (Setup, Rules, Mappings, and Convert) without requiring any code. A TUI was chosen over web-based and native GUIs for its portability, small dependency footprint, and lower maintenance burden. A [walkthrough](https://youtu.be/dOWiMTuGvAA) is available.
 
 The second is an RPC-based API that lets external applications drive SOVABIDS' conversion logic. RPC was chosen over REST because its action-oriented calls map naturally onto the procedural steps of a conversion. An [experimental reference web GUI in Flask](https://sovabids.readthedocs.io/en/latest/auto_examples/gui_example.html) ([demo](https://www.youtube.com/watch?v=PW84cy6uUJs)) illustrates how platforms could embed SOVABIDS in a richer desktop or web frontend.
 

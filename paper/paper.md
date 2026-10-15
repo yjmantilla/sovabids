@@ -130,10 +130,8 @@ The authors acknowledge support from the 2021 Google Summer of Code program unde
 
 # AI Usage Disclosure
 
-The primary architecture and core functionality of this software were completed prior to December 2023. Generative AI tools were not used in the conceptual design, methodological decisions, or scientific development of the project.
+The core architecture and functionality were completed before December 2023. Generative AI was not used in the project's conceptual design, methodological decisions, or scientific development.
 
-Since March 2025, generative AI tools, mainly OpenAI Codex and Claude Code (with models from GPT-4.1 and Claude 4.6 onward), were used for maintenance and supporting work: the experimental TUI and its tests, continuous-integration workflows, documentation, a utility for generating random 1/f signals, fixes during the JOSS review, and editing of this paper.
-
-All AI-assisted outputs were reviewed, tested, and validated by the authors, who made all design decisions and scientific judgments.
+Since March 2025, generative AI tools, mainly OpenAI Codex and Claude Code (models from GPT-4.1 and Claude 4.6 onward), were used for maintenance and supporting work: the experimental TUI and its tests, continuous-integration workflows, documentation, small utilities, fixes during the JOSS review, and editing of this paper. The authors reviewed, tested, and validated all AI-assisted outputs and made all design decisions and scientific judgments.
 
 # References

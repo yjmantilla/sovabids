@@ -77,7 +77,7 @@ FieldTrip and EEGLAB integrate conversion into their analysis environments, conv
 
 EEG2BIDS offers a more guided workflow but relies on detailed file-level user input, which becomes impractical for large heterogeneous datasets.
 
-Bidsme [@bidsme] is a general-purpose, YAML-configured converter whose preparation step derives subject and session labels from folder names or file metadata; other naming conventions require user-written Python plugins.
+Bidsme is a general-purpose, YAML-configured converter whose preparation step derives subject and session labels from folder names or file metadata; other naming conventions require user-written Python plugins.
 
 A natural question is whether SOVABIDS' goals could have been achieved by contributing to an existing tool, particularly MNE-BIDS. We argue this was impractical. In MNE-BIDS, conversion logic is written in Python, and adding rule-based, configuration-driven automation as a non-breaking extension would require architectural changes that diverge from its scripting-oriented design. FieldTrip and EEGLAB face the same barrier, as conversion is tightly coupled to their analysis environments.
 

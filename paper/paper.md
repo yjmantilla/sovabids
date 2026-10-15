@@ -63,7 +63,7 @@ Electroencephalography (EEG) recordings are stored in many vendor-specific forma
 
 # Statement of need
 
-EEG is a widely used neuroimaging technique, with applications in cognitive neuroscience, clinical diagnostics, brain-computer interfaces, and neuroengineering. As EEG datasets grow in volume and complexity, reproducibility, standardization, and interoperability have become priorities. The EEG extension of BIDS (EEG-BIDS) [@eegbids] provides a consistent framework for organizing EEG datasets, facilitating data sharing [@openneuro], cross-study comparison, and FAIR data practices [@fairdata].
+EEG is a widely used neuroimaging technique, with applications in cognitive neuroscience, clinical diagnostics, brain-computer interfaces, and neuroengineering. The EEG extension of BIDS (EEG-BIDS) [@eegbids] standardizes the organization of EEG datasets, facilitating data sharing [@openneuro], cross-study comparison, and FAIR data practices [@fairdata].
 
 Despite these advantages, converting EEG datasets to BIDS remains challenging. EEG formats vary across hardware vendors, and datasets are often organized by lab-specific or acquisition-driven conventions rather than a consistent structure. For researchers without strong programming backgrounds, particularly at less well-resourced institutions, conversion typically requires substantial manual effort or dataset-specific scripts, both error-prone and difficult to reproduce or scale to large multi-participant studies. SOVABIDS addresses this gap with a rule-based, semi-automated workflow that is accessible to users with limited programming experience yet flexible enough for the heterogeneity of real-world EEG datasets.
 

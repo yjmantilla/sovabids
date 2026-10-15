@@ -81,7 +81,7 @@ Bidsme is a general-purpose, YAML-configured converter whose preparation step de
 
 A natural question is whether SOVABIDS' goals could have been achieved by contributing to an existing tool, particularly MNE-BIDS. We argue this was impractical. In MNE-BIDS, conversion logic is written in Python, and adding rule-based, configuration-driven automation as a non-breaking extension would require architectural changes that diverge from its scripting-oriented design. FieldTrip and EEGLAB face the same barrier, as conversion is tightly coupled to their analysis environments.
 
-SOVABIDS instead introduces an explicit two-tier separation between dataset-level rules and file-level mappings, encoded in human-readable YAML configuration files. Like other tools, it requires dataset-specific configuration, but this is defined once at the dataset level and expanded into file-level mappings, removing the need for per-file scripting. Combined with a semi-automatic API for extracting BIDS entities from file paths, this lets SOVABIDS handle the heterogeneous directory structures and vendor-specific naming conventions of real-world EEG datasets.
+SOVABIDS instead introduces an explicit two-tier separation between dataset-level rules and file-level mappings, encoded in human-readable YAML configuration files. Like other tools, it requires dataset-specific configuration, but this is defined once and expanded into file-level mappings, removing the need for per-file scripting. Combined with a semi-automatic API for extracting BIDS entities from file paths, this lets SOVABIDS handle the heterogeneous directory structures and vendor-specific naming conventions of real-world EEG datasets.
 
 # Software Design
 

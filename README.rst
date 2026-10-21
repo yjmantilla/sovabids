@@ -13,6 +13,10 @@
 .. image:: https://img.shields.io/badge/Preprint-Zenodo-orange
   :target: https://doi.org/10.5281/zenodo.10292410
 
+.. image:: https://joss.theoj.org/papers/10.21105/joss.10146/status.svg
+   :target: https://doi.org/10.21105/joss.10146
+   :alt: JOSS DOI
+
 sovabids
 ========
 
